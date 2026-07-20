@@ -1,9 +1,9 @@
 #include "lexer.hpp"
 #include <cctype>
 #include <cstring>
+#include <iostream>
 
-namespace guardian {
-namespace compiler {
+namespace guardian::compiler {
 
 const std::unordered_map<std::string, TokenType> Lexer::keywords = {
     {"let", TokenType::KEYWORD},
@@ -67,12 +67,12 @@ Token Lexer::read_number() {
 }
 
 Token Lexer::read_string() {
-    advance(); // Skip the opening quote
+    advance(); // Skip opening quote
     std::string result;
     while (peek() != '"' && peek() != '\0') {
         result += advance();
     }
-    advance(); // Skip the closing quote
+    advance(); // Skip closing quote
     return Token(TokenType::STRING, result, line, column);
 }
 
@@ -80,18 +80,42 @@ Token Lexer::read_operator() {
     char c = advance();
     std::string op(1, c);
     
-    // Check for multi-character operators
-    if (c == '=' && peek() == '=') {
-        op += advance();
-    } else if (c == '!' && peek() == '=') {
-        op += advance();
-    } else if (c == '&' && peek() == '&') {
-        op += advance();
-    } else if (c == '|' && peek() == '|') {
-        op += advance();
-    }
+    // Multi-character operators
+    if (c == '=' && peek() == '=') { op += advance(); return Token(TokenType::OPERATOR, op); }
+    if (c == '!' && peek() == '=') { op += advance(); return Token(TokenType::OPERATOR, op); }
+    if (c == '<' && peek() == '=') { op += advance(); return Token(TokenType::OPERATOR, op); }
+    if (c == '>' && peek() == '=') { op += advance(); return Token(TokenType::OPERATOR, op); }
+    if (c == '+' && peek() == '=') { op += advance(); return Token(TokenType::OPERATOR, op); }
+    if (c == '&' && peek() == '&') { op += advance(); return Token(TokenType::OPERATOR, op); }
+    if (c == '|' && peek() == '|') { op += advance(); return Token(TokenType::OPERATOR, op); }
     
-    return Token(TokenType::OPERATOR, op, line, column);
+    // Single-character operators
+    switch (c) {
+        case '+': return Token(TokenType::OPERATOR, op);
+        case '-': return Token(TokenType::OPERATOR, op);
+        case '*': return Token(TokenType::OPERATOR, op);
+        case '/': return Token(TokenType::OPERATOR, op);
+        case '=': return Token(TokenType::OPERATOR, op);
+        case '<': return Token(TokenType::OPERATOR, op);
+        case '>': return Token(TokenType::OPERATOR, op);
+        case '!': return Token(TokenType::OPERATOR, op);
+        default:  return Token(TokenType::UNKNOWN, op);
+    }
+}
+
+Token Lexer::read_punctuator() {
+    char c = advance();
+    std::string p(1, c);
+    
+    switch (c) {
+        case '(': return Token(TokenType::PUNCTUATOR, p);
+        case ')': return Token(TokenType::PUNCTUATOR, p);
+        case '{': return Token(TokenType::PUNCTUATOR, p);
+        case '}': return Token(TokenType::PUNCTUATOR, p);
+        case ';': return Token(TokenType::PUNCTUATOR, p);
+        case ',': return Token(TokenType::PUNCTUATOR, p);
+        default:  return Token(TokenType::UNKNOWN, p);
+    }
 }
 
 std::vector<Token> Lexer::tokenize() {
@@ -127,14 +151,16 @@ Token Lexer::next_token() {
         return read_string();
     }
     
-    if (strchr("+-*/=<>!&|(){}[];,", c)) {
+    if (strchr("+-*/=<>!&|", c)) {
         return read_operator();
     }
     
-    // Unknown character
+    if (strchr("(){};,", c)) {
+        return read_punctuator();
+    }
+    
     advance();
     return Token(TokenType::UNKNOWN, std::string(1, c), line, column);
 }
 
-} // namespace compiler
-} // namespace guardian
+} // namespace guardian::compiler

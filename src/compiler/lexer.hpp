@@ -45,6 +45,7 @@ private:
     int column = 1;
     
     static const std::unordered_map<std::string, TokenType> keywords;
+    Token read_punctuator();
     
     char peek() const;
     char advance();

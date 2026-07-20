@@ -1,4 +1,5 @@
 #include "molecule.hpp"
+#include <memory>
 
 namespace guardian {
 

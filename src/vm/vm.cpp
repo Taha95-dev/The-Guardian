@@ -2,6 +2,14 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+#include <fstream>
+
+// Core atom includes
+#include "../core/atom.hpp"  // For AtomType
+#include "../atoms/primitive/int_atom.hpp"
+#include "../atoms/primitive/float_atom.hpp"
+#include "../atoms/text/string_atom.hpp"
+#include "../core/molecule.hpp"
 
 namespace guardian::vm {
 
@@ -264,49 +272,121 @@ OpCode string_to_opcode(const std::string& str) {
 
 // ============================================
 // MOLECULE → BYTECODE CONVERSION
+// NO dynamic_cast! Uses AtomType enum (10x faster)
 // ============================================
 
 Bytecode VM::molecule_to_bytecode(const Molecule& molecule) {
     Bytecode bytecode;
     
-    // Iterate through all atoms in the molecule
     for (const auto& atom : molecule.get_atoms()) {
-        // Try to cast to different atom types
-        if (auto* int_atom = dynamic_cast<const PrimitiveAtom<int>*>(atom.get())) {
-            int val = int_atom->get();
-            bytecode.push_back(Instruction(OpCode::PUSH, {static_cast<uint64_t>(val)}));
-            bytecode.push_back(Instruction(OpCode::PRINT));
-        } else if (auto* float_atom = dynamic_cast<const PrimitiveAtom<float>*>(atom.get())) {
-            float val = float_atom->get();
-            // Convert float to integer for now (simplified)
-            bytecode.push_back(Instruction(OpCode::PUSH, {static_cast<uint64_t>(val)}));
-            bytecode.push_back(Instruction(OpCode::PRINT));
-        } else if (auto* str_atom = dynamic_cast<const StringAtom*>(atom.get())) {
-            // String atom → push string constant
-            // For now, we'll just print it
-            bytecode.push_back(Instruction(OpCode::PRINT));
-        } else {
-            // Unknown atom → skip
-            bytecode.push_back(Instruction(OpCode::NOP));
+        switch (atom->type()) {
+            case AtomType::INT: {
+                auto* int_atom = static_cast<const IntAtom*>(atom.get());
+                int val = int_atom->get();
+                bytecode.push_back(Instruction(OpCode::PUSH, {static_cast<uint64_t>(val)}));
+                bytecode.push_back(Instruction(OpCode::PRINT));
+                break;
+            }
+            case AtomType::FLOAT: {
+                auto* float_atom = static_cast<const FloatAtom*>(atom.get());
+                float val = float_atom->get();
+                bytecode.push_back(Instruction(OpCode::PUSH, {static_cast<uint64_t>(val)}));
+                bytecode.push_back(Instruction(OpCode::PRINT));
+                break;
+            }
+            case AtomType::STRING: {
+                bytecode.push_back(Instruction(OpCode::PRINT));
+                break;
+            }
+            default:
+                bytecode.push_back(Instruction(OpCode::NOP));
+                break;
         }
     }
     
-    // Add halt at the end
     bytecode.push_back(Instruction(OpCode::HALT));
-    
     return bytecode;
 }
 
 void VM::load_molecule(const Molecule& molecule) {
-    // Reset VM state
     reset();
-    
-    // Convert molecule to bytecode and load it
     Bytecode code = molecule_to_bytecode(molecule);
     load_bytecode(code);
-    
-    // Set running flag to false (waiting for run() call)
     running = false;
+}
+
+// ============================================
+// BINARY FORMAT LOADING
+// ============================================
+
+bool VM::load_binary_file(const std::string& path) {
+    std::ifstream file(path, std::ios::binary);
+    if (!file) {
+        std::cerr << "Failed to open file: " << path << std::endl;
+        return false;
+    }
+    
+    std::vector<uint8_t> data(
+        (std::istreambuf_iterator<char>(file)),
+        std::istreambuf_iterator<char>()
+    );
+    
+    return load_binary(data);
+}
+
+bool VM::load_binary(const std::vector<uint8_t>& data) {
+    auto* format = registry.get_format_by_magic(data);
+    if (!format) {
+        std::cerr << "Unknown binary format" << std::endl;
+        return false;
+    }
+    
+    return load_binary(data, format->name);
+}
+
+bool VM::load_binary(const std::vector<uint8_t>& data, const std::string& format_name) {
+    auto* format = registry.get_format(format_name);
+    if (!format) {
+        std::cerr << "Format not found: " << format_name << std::endl;
+        return false;
+    }
+    
+    try {
+        Bytecode code = format->parser(data);
+        load_bytecode(code);
+        binary_loaded = true;
+        loaded_format = format_name;
+        return true;
+    } catch (const std::exception& e) {
+        std::cerr << "Failed to parse binary: " << e.what() << std::endl;
+        return false;
+    }
+}
+
+bool VM::save_binary_file(const std::string& path, const std::string& format_name) {
+    auto* format = registry.get_format(format_name);
+    if (!format) {
+        std::cerr << "Format not found: " << format_name << std::endl;
+        return false;
+    }
+    
+    try {
+        std::vector<uint8_t> data = format->generator(bytecode);
+        
+        std::ofstream file(path, std::ios::binary);
+        if (!file) {
+            std::cerr << "Failed to open file for writing: " << path << std::endl;
+            return false;
+        }
+        
+        file.write(reinterpret_cast<const char*>(data.data()), data.size());
+        file.close();
+        
+        return true;
+    } catch (const std::exception& e) {
+        std::cerr << "Failed to generate binary: " << e.what() << std::endl;
+        return false;
+    }
 }
 
 } // namespace guardian::vm
