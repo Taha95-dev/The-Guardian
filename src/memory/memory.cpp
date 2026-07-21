@@ -106,18 +106,14 @@ bool Molecule::isValidPointer(void* ptr) const {
 std::vector<uint8_t> Molecule::serialize() const {
     std::vector<uint8_t> data;
     
-    // Serialize atom count
     uint32_t count = static_cast<uint32_t>(atoms.size());
     uint8_t* count_ptr = reinterpret_cast<uint8_t*>(&count);
     data.insert(data.end(), count_ptr, count_ptr + 4);
     
-    // Serialize each atom
     for (const auto& entry : atoms) {
-        // Type
         uint8_t type = static_cast<uint8_t>(entry.atom->getType());
         data.push_back(type);
         
-        // Value as string
         std::string value = entry.atom->toString();
         uint32_t len = static_cast<uint32_t>(value.length());
         uint8_t* len_ptr = reinterpret_cast<uint8_t*>(&len);
@@ -131,10 +127,7 @@ std::vector<uint8_t> Molecule::serialize() const {
 std::shared_ptr<Molecule> Molecule::deserialize(const std::vector<uint8_t>& data) {
     auto molecule = std::make_shared<Molecule>();
     
-    if (data.size() < 4) {
-        std::cerr << "Error: Data too small for deserialization\n";
-        return molecule;
-    }
+    if (data.size() < 4) return molecule;
     
     size_t pos = 0;
     uint32_t count;
@@ -142,25 +135,16 @@ std::shared_ptr<Molecule> Molecule::deserialize(const std::vector<uint8_t>& data
     pos += 4;
     
     for (uint32_t i = 0; i < count && pos < data.size(); i++) {
-        if (pos >= data.size()) {
-            std::cerr << "Error: Unexpected end of data\n";
-            break;
-        }
+        if (pos >= data.size()) break;
         
         uint8_t type_byte = data[pos++];
-        if (pos + 4 > data.size()) {
-            std::cerr << "Error: Missing length field\n";
-            break;
-        }
+        if (pos + 4 > data.size()) break;
         
         uint32_t len;
         std::memcpy(&len, data.data() + pos, 4);
         pos += 4;
         
-        if (pos + len > data.size()) {
-            std::cerr << "Error: String length exceeds data\n";
-            break;
-        }
+        if (pos + len > data.size()) break;
         
         std::string value(data.begin() + pos, data.begin() + pos + len);
         pos += len;
@@ -193,7 +177,7 @@ std::shared_ptr<Molecule> Molecule::deserialize(const std::vector<uint8_t>& data
 }
 
 // ============================================
-// FREE LIST ALLOCATOR Implementation
+// FIXED FREE LIST ALLOCATOR Implementation
 // ============================================
 FreeListAllocator::FreeListAllocator(size_t size) 
     : total_size(size), total_used(0) {
@@ -214,7 +198,7 @@ void FreeListAllocator::initialize() {
 void* FreeListAllocator::allocate(size_t size) {
     if (size == 0) return nullptr;
     
-    // Align size to 8 bytes
+    // Align to 8 bytes
     size = (size + 7) & ~7;
     size_t total_needed = size + sizeof(FreeBlock);
     
@@ -225,7 +209,7 @@ void* FreeListAllocator::allocate(size_t size) {
         if (current->size >= total_needed) {
             // Found a block
             if (current->size > total_needed + sizeof(FreeBlock)) {
-                // Split the block
+                // Split
                 FreeBlock* new_block = reinterpret_cast<FreeBlock*>(
                     reinterpret_cast<uint8_t*>(current) + total_needed
                 );
@@ -248,6 +232,13 @@ void* FreeListAllocator::allocate(size_t size) {
                 }
             }
             
+            // Store size in the block header
+            FreeBlock* header = reinterpret_cast<FreeBlock*>(
+                reinterpret_cast<uint8_t*>(current)
+            );
+            header->size = size;
+            header->next = nullptr;
+            
             total_used += size;
             return reinterpret_cast<uint8_t*>(current) + sizeof(FreeBlock);
         }
@@ -263,12 +254,12 @@ void* FreeListAllocator::allocate(size_t size) {
 void FreeListAllocator::free(void* ptr) {
     if (!ptr) return;
     
-    uint8_t* block_ptr = reinterpret_cast<uint8_t*>(ptr) - sizeof(FreeBlock);
-    FreeBlock* block = reinterpret_cast<FreeBlock*>(block_ptr);
+    // Get the header
+    FreeBlock* block = reinterpret_cast<FreeBlock*>(
+        reinterpret_cast<uint8_t*>(ptr) - sizeof(FreeBlock)
+    );
     
-    // We don't know the original size, but we can store it
-    // For simplicity, we'll just add it to the free list
-    // Note: This is a simplification - in practice we'd store the size
+    // Add back to free list
     block->next = free_list;
     free_list = block;
     
@@ -298,7 +289,7 @@ void FreeListAllocator::reset() {
 }
 
 // ============================================
-// STACK ALLOCATOR Implementation
+// STACK ALLOCATOR
 // ============================================
 StackAllocator::StackAllocator(size_t size) : stack_size(size) {
     stack_base = new uint8_t[size];
@@ -321,7 +312,7 @@ void* StackAllocator::push(size_t size) {
 
 void StackAllocator::pop(size_t size) {
     if (stack_ptr - size < stack_base) {
-        std::cerr << "Error: Stack underflow! Trying to pop " << size << " bytes\n";
+        std::cerr << "Error: Stack underflow!\n";
         return;
     }
     stack_ptr -= size;
@@ -338,7 +329,7 @@ void StackAllocator::reset() {
 }
 
 // ============================================
-// MEMORY MANAGER Implementation
+// MEMORY MANAGER
 // ============================================
 MemoryManager::MemoryManager(size_t stack_size, size_t heap_size)
     : stack(stack_size), heap(heap_size) {}
