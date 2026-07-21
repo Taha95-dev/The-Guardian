@@ -35,7 +35,6 @@ public:
     std::string toString() const;
     bool isNull() const { return type == Type::NULL_TYPE; }
     
-    // Value accessors
     int asInt() const;
     float asFloat() const;
     bool asBool() const;
@@ -61,24 +60,16 @@ public:
     Molecule();
     ~Molecule() = default;
     
-    // Add atoms
     void addAtom(std::shared_ptr<Atom> atom);
     void addAtom(const std::string& name, std::shared_ptr<Atom> atom);
-    
-    // Get atoms
     std::shared_ptr<Atom> getAtom(size_t index) const;
     std::shared_ptr<Atom> getAtom(const std::string& name) const;
     size_t getAtomCount() const { return atoms.size(); }
     
-    // Pointer tracking (LUT)
     bool registerPointer(void* ptr, const std::string& name = "");
     bool unregisterPointer(void* ptr);
     bool isValidPointer(void* ptr) const;
-    const std::unordered_map<void*, std::string>& getPointerTable() const {
-        return pointer_table;
-    }
     
-    // Serialization
     std::vector<uint8_t> serialize() const;
     static std::shared_ptr<Molecule> deserialize(const std::vector<uint8_t>& data);
     
@@ -91,11 +82,62 @@ private:
     std::vector<AtomEntry> atoms;
     std::unordered_map<std::string, size_t> name_map;
     std::unordered_map<void*, std::string> pointer_table;
-    std::vector<uint8_t> raw_data;
 };
 
 // ============================================
-// MEMORY MANAGER — Stack + Heap with LUT
+// FREE LIST ALLOCATOR — Simple and reliable
+// ============================================
+struct FreeBlock {
+    size_t size;
+    FreeBlock* next;
+};
+
+class FreeListAllocator {
+public:
+    FreeListAllocator(size_t size);
+    ~FreeListAllocator();
+    
+    void* allocate(size_t size);
+    void free(void* ptr);
+    size_t used() const { return total_used; }
+    size_t total() const { return total_size; }
+    size_t freeCount() const;
+    void printStats() const;
+    void reset();
+    
+private:
+    uint8_t* memory;
+    size_t total_size;
+    size_t total_used;
+    FreeBlock* free_list;
+    
+    void initialize();
+};
+
+// ============================================
+// STACK ALLOCATOR — Fast bump pointer
+// ============================================
+class StackAllocator {
+public:
+    StackAllocator(size_t size);
+    ~StackAllocator();
+    
+    void* push(size_t size);
+    void pop(size_t size);
+    void* top() const { return stack_ptr; }
+    size_t used() const { return stack_ptr - stack_base; }
+    size_t total() const { return stack_size; }
+    void printStats() const;
+    void reset();
+    
+private:
+    uint8_t* stack_base;
+    uint8_t* stack_ptr;
+    size_t stack_size;
+};
+
+// ============================================
+// MEMORY MANAGER — Unified memory system
 // ============================================
 class MemoryManager {
 public:
@@ -105,14 +147,10 @@ public:
     // Stack operations
     void* stackPush(size_t size);
     void stackPop(size_t size);
-    void* stackTop() const { return stack_ptr; }
-    size_t stackUsed() const { return stack_ptr - stack_base; }
     
     // Heap operations
     void* heapAllocate(size_t size);
     void heapFree(void* ptr);
-    size_t heapUsed() const;
-    size_t heapTotal() const { return heap_size; }
     
     // Pointer validation (LUT)
     bool registerPointer(void* ptr, size_t size, const std::string& name = "");
@@ -127,41 +165,16 @@ public:
         size_t heap_used;
         size_t heap_total;
         size_t pointer_count;
-        size_t total_atoms;
-        size_t total_molecules;
     };
     Stats getStats() const;
     void printStats() const;
-    
-    // Reset
     void reset();
     
 private:
-    // Stack
-    uint8_t* stack_base;
-    uint8_t* stack_ptr;
-    size_t stack_size;
-    
-    // Heap
-    struct HeapBlock {
-        size_t size;
-        bool free;
-        void* ptr;
-    };
-    std::vector<uint8_t> heap_memory;
-    size_t heap_size;
-    std::vector<HeapBlock> heap_blocks;
-    
-    // Pointer Lookup Table (LUT)
-    struct PointerEntry {
-        size_t size;
-        std::string name;
-    };
-    std::unordered_map<void*, PointerEntry> lut;
-    
-    // Stats
-    size_t total_atoms;
-    size_t total_molecules;
+    StackAllocator stack;
+    FreeListAllocator heap;
+    std::unordered_map<void*, size_t> lut;  // Pointer -> size
+    std::unordered_map<void*, std::string> lut_names;  // Pointer -> name
 };
 
 } // namespace guardian::memory
