@@ -1,5 +1,6 @@
 #include "parser.hpp"
 #include "ast.hpp"
+#include "lexer.hpp"
 #include <iostream>
 #include <memory>
 
@@ -370,6 +371,7 @@ int Parser::getPrecedence(TokenType type) {
         case TokenType::MINUS: return 5;
         case TokenType::STAR:
         case TokenType::SLASH: return 6;
+        case TokenType::MOD: return 6;
         default: return 0;
     }
 }
@@ -392,6 +394,14 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
     }
     
     if (token.type == TokenType::STRING) {
+    
+    if (token.type == TokenType::CHAR) {
+        advance();
+        auto literal = std::make_unique<LiteralNode>();
+        literal->literal_type = LiteralNode::CHAR;
+        literal->value = token.value;
+        return literal;
+    }
         advance();
         auto literal = std::make_unique<LiteralNode>();
         literal->literal_type = LiteralNode::STRING;

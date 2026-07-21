@@ -144,7 +144,7 @@ struct IdentifierNode : ASTNode {
 
 // Literal
 struct LiteralNode : ASTNode {
-    enum Type { STRING, NUMBER, BOOLEAN, NULL_TOKEN };
+    enum Type { STRING, NUMBER, BOOLEAN, NULL_TOKEN, CHAR, };
     Type literal_type;
     std::string value;
     LiteralNode() { type = NodeType::LITERAL; }

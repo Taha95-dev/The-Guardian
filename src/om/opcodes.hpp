@@ -4,18 +4,18 @@
 
 namespace om {
 
-// Opcodes for Om bytecode
 enum class Opcode : uint8_t {
     HALT = 0x00,
     NOP = 0x01,
     
     // Stack operations
     PUSH_INT = 0x10,
-    PUSH_STRING = 0x11,
+    PUSH_FLOAT = 0x11,
     PUSH_BOOL = 0x12,
-    PUSH_NULL = 0x13,
-    POP = 0x14,
-    DUP = 0x15,
+    PUSH_STRING = 0x13,
+    PUSH_NULL = 0x14,
+    POP = 0x15,
+    DUP = 0x16,
     
     // Arithmetic
     ADD = 0x20,

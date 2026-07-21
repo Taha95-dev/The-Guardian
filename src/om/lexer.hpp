@@ -10,11 +10,11 @@ enum class TokenType {
     // Keywords
     FN, LET, CONST, IF, ELSE, FOR, WHILE, RETURN, STRUCT,
     TRUE, FALSE, NULL_TOKEN,
-    SHORTCUT, // For Omarchy integration
+    SHORTCUT,
     
     // Symbols
-    IDENTIFIER, NUMBER, STRING,
-    PLUS, MINUS, STAR, SLASH, ASSIGN, EQUAL, NOT_EQUAL,
+    IDENTIFIER, NUMBER, STRING, CHAR,
+    PLUS, MINUS, STAR, SLASH, MOD, ASSIGN, EQUAL, NOT_EQUAL,
     LESS, GREATER, LESS_EQUAL, GREATER_EQUAL,
     AND, OR, NOT,
     LPAREN, RPAREN, LBRACE, RBRACE, LBRACKET, RBRACKET,
@@ -47,6 +47,7 @@ private:
     size_t pos;
     int line;
     int column;
+    int error_count = 0;
     
     char peek() const;
     char advance();
@@ -56,6 +57,7 @@ private:
     Token readIdentifier();
     Token readNumber();
     Token readString();
+    Token readChar();
     Token readSymbol();
     
     std::unordered_map<std::string, TokenType> keywords = {

@@ -40,7 +40,7 @@ void Lexer::skipComment() {
 
 void Lexer::skipMultilineComment() {
     if (peek() == '/' && pos + 1 < source.length() && source[pos + 1] == '*') {
-        advance(); advance(); // consume /*
+        advance(); advance();
         while (!(peek() == '*' && pos + 1 < source.length() && source[pos + 1] == '/')) {
             if (peek() == '\0') {
                 std::cerr << "Error: Unterminated multiline comment at line " << line << "\n";
@@ -48,7 +48,7 @@ void Lexer::skipMultilineComment() {
             }
             advance();
         }
-        advance(); advance(); // consume */
+        advance(); advance();
     }
 }
 
@@ -85,18 +85,34 @@ Token Lexer::readString() {
     int start_line = line;
     int start_col = column;
     
-    advance(); // consume opening quote
+    advance();
     while (peek() != '"' && peek() != '\0') {
         if (peek() == '\\') {
-            value += advance(); // backslash
-            value += advance(); // escaped char
+            value += advance();
+            value += advance();
         } else {
             value += advance();
         }
     }
-    advance(); // consume closing quote
+    advance();
     
     return Token(TokenType::STRING, value, start_line, start_col);
+}
+
+Token Lexer::readChar() {
+    int start_line = line;
+    int start_col = column;
+    
+    advance(); // consume opening '
+    char val = advance(); // read character
+    if (peek() == '\'') {
+        advance(); // consume closing '
+        return Token(TokenType::CHAR, std::string(1, val), start_line, start_col);
+    }
+    
+    error_count++;
+    std::cerr << "Error: Unclosed character literal at line " << line << "\n";
+    return Token(TokenType::END_OF_FILE, "", start_line, start_col);
 }
 
 Token Lexer::readSymbol() {
@@ -109,6 +125,7 @@ Token Lexer::readSymbol() {
         case '-': return Token(TokenType::MINUS, "-", start_line, start_col);
         case '*': return Token(TokenType::STAR, "*", start_line, start_col);
         case '/': return Token(TokenType::SLASH, "/", start_line, start_col);
+        case '%': return Token(TokenType::MOD, "%", start_line, start_col);
         case '=': 
             if (peek() == '=') {
                 advance();
@@ -192,6 +209,12 @@ std::vector<Token> Lexer::tokenize() {
                 skipMultilineComment();
                 continue;
             }
+        }
+        
+        // Character literal - MUST be checked BEFORE identifier
+        if (c == '\'') {
+            tokens.push_back(readChar());
+            continue;
         }
         
         if (std::isalpha(c) || c == '_') {

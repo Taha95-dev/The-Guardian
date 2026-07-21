@@ -1,74 +1,43 @@
 #pragma once
-#include <string>
+
 #include <vector>
-#include <functional>
+#include <string>
+#include <cstdint>
 #include <unordered_map>
-#include "../opcodes.hpp"
+#include <functional>
 
-namespace guardian::vm {
+namespace guardian::vm::formats {
 
-// ============================================
-// BINARY FORMAT — Custom binary layout
-// ============================================
-struct BinaryFormat {
+// Forward declarations
+struct GuardianHeader;
+struct Instruction;
+
+// Format registry
+struct FormatInfo {
     std::string name;
-    std::string magic;             // File signature (e.g., "GURD")
+    std::string extension;
+    std::string description;
     uint16_t version;
-    uint16_t flags;
     
-    // Callback to parse the binary
-    std::function<Bytecode(const std::vector<uint8_t>&)> parser;
+    // Parse function
+    std::function<std::vector<Instruction>(const std::vector<uint8_t>&)> parser;
     
-    // Callback to generate binary from bytecode
-    std::function<std::vector<uint8_t>(const Bytecode&)> generator;
+    // Generate function
+    std::function<std::vector<uint8_t>(const std::vector<Instruction>&)> generator;
 };
 
-// ============================================
-// FORMAT REGISTRY — Register custom formats
-// ============================================
 class FormatRegistry {
-private:
-    std::unordered_map<std::string, BinaryFormat> formats;
-    std::unordered_map<std::string, BinaryFormat> formats_by_magic;
-    
 public:
-    // Register a new binary format
-    void register_format(const BinaryFormat& format) {
-        formats[format.name] = format;
-        if (!format.magic.empty()) {
-            formats_by_magic[format.magic] = format;
-        }
-    }
+    static FormatRegistry& instance();
     
-    // Get a format by name
-    BinaryFormat* get_format(const std::string& name) {
-        auto it = formats.find(name);
-        return it != formats.end() ? &it->second : nullptr;
-    }
+    void registerFormat(const FormatInfo& format);
+    bool hasFormat(const std::string& name) const;
+    const FormatInfo& getFormat(const std::string& name) const;
+    std::vector<std::string> listFormats() const;
+    void printFormats() const;
     
-    // Get a format by magic bytes
-    BinaryFormat* get_format_by_magic(const std::vector<uint8_t>& data) {
-        for (const auto& [magic, format] : formats_by_magic) {
-            if (data.size() >= magic.size()) {
-                if (std::equal(magic.begin(), magic.end(), data.begin())) {
-                    return const_cast<BinaryFormat*>(&format);
-                }
-            }
-        }
-        return nullptr;
-    }
-    
-    // List all registered formats
-    std::vector<std::string> list_formats() const {
-        std::vector<std::string> names;
-        for (const auto& [name, _] : formats) {
-            names.push_back(name);
-        }
-        return names;
-    }
+private:
+    std::unordered_map<std::string, FormatInfo> formats;
 };
 
-// Global registry instance
-extern FormatRegistry registry;
-
-} // namespace guardian::vm
+} // namespace guardian::vm::formats

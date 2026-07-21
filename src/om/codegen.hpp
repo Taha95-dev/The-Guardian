@@ -26,7 +26,6 @@ public:
     CodeGen();
     ~CodeGen() = default;
     
-    // Generate .gbin from AST
     bool generate(const std::unique_ptr<ProgramNode>& ast, const std::string& output_path);
     
 private:
@@ -34,7 +33,6 @@ private:
     uint16_t version;
     uint16_t flags;
     
-    // Generate bytecode from AST nodes
     void generateStatement(const std::unique_ptr<ASTNode>& node, std::vector<uint8_t>& bytecode);
     void generateExpression(const std::unique_ptr<ASTNode>& node, std::vector<uint8_t>& bytecode);
     

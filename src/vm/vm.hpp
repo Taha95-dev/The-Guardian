@@ -1,104 +1,94 @@
 #pragma once
-
+#include "opcodes.hpp"
+#include "../core/molecule.hpp"
+#include "../core/quark.hpp"
+#include "../core/atom.hpp"
+#include "../atoms/text/string_atom.hpp"
+#include "../atoms/primitive/int_atom.hpp"
+#include "../atoms/primitive/float_atom.hpp"
+#include "../atoms/primitive/bool_atom.hpp"
+#include "../atoms/primitive/char_atom.hpp"
+#include "formats/format_registry.hpp"
+#include <stack>
+#include <unordered_map>
 #include <vector>
 #include <string>
-#include <stack>
 #include <variant>
-#include <cstdint>
+#include <fstream>
+#include <memory>
 
 namespace guardian::vm {
 
-// Opcodes for the VM
-enum class Opcode : uint8_t {
-    HALT = 0x00,
-    NOP = 0x01,
-    
-    // Stack operations
-    PUSH_INT = 0x10,
-    PUSH_STRING = 0x11,
-    PUSH_BOOL = 0x12,
-    PUSH_NULL = 0x13,
-    POP = 0x14,
-    DUP = 0x15,
-    
-    // Arithmetic
-    ADD = 0x20,
-    SUB = 0x21,
-    MUL = 0x22,
-    DIV = 0x23,
-    MOD = 0x24,
-    
-    // Comparison
-    EQ = 0x30,
-    NEQ = 0x31,
-    LT = 0x32,
-    GT = 0x33,
-    LTE = 0x34,
-    GTE = 0x35,
-    
-    // Logic
-    AND = 0x40,
-    OR = 0x41,
-    NOT = 0x42,
-    
-    // Control flow
-    JMP = 0x50,
-    JMP_IF = 0x51,
-    JMP_IF_NOT = 0x52,
-    CALL = 0x53,
-    RET = 0x54,
-    
-    // Variables
-    LOAD = 0x60,
-    STORE = 0x61,
-    LOAD_GLOBAL = 0x62,
-    STORE_GLOBAL = 0x63,
-    
-    // Functions
-    DEFINE_FN = 0x70,
-    CALL_FN = 0x71,
-    RETURN = 0x72,
-    
-    // Print
-    PRINT = 0x80,
-    PRINTLN = 0x81,
-};
-
-// Values on the stack
+// ============================================
+// VALUE — Can be Quark (stack) or Atom (heap)
+// ============================================
 struct Value {
-    std::variant<int, float, bool, std::string> data;
+    bool is_quark;
+    guardian::Quark quark_data;
+    std::shared_ptr<guardian::Atom> atom_data;
     
-    Value() : data(0) {}
-    Value(int v) : data(v) {}
-    Value(float v) : data(v) {}
-    Value(bool v) : data(v) {}
-    Value(const std::string& v) : data(v) {}
-    Value(const char* v) : data(std::string(v)) {}
+    Value() : is_quark(true), quark_data() {}
+    
+    // Quark constructors (for primitive values)
+    Value(int v) : is_quark(true), quark_data(v) {}
+    Value(unsigned int v) : is_quark(true), quark_data(v) {}
+    Value(int64_t v) : is_quark(true), quark_data(v) {}
+    Value(uint64_t v) : is_quark(true), quark_data(v) {}
+    Value(float v) : is_quark(true), quark_data(v) {}
+    Value(double v) : is_quark(true), quark_data(v) {}
+    Value(bool v) : is_quark(true), quark_data(v) {}
+    Value(char v) : is_quark(true), quark_data(v) {}
+    
+    // Atom constructor (for strings and complex data)
+    Value(std::shared_ptr<guardian::Atom> a) : is_quark(false), atom_data(a) {}
     
     std::string to_string() const {
-        if (std::holds_alternative<int>(data)) {
-            return std::to_string(std::get<int>(data));
+        if (is_quark) {
+            return quark_data.to_string();
         }
-        if (std::holds_alternative<float>(data)) {
-            return std::to_string(std::get<float>(data));
-        }
-        if (std::holds_alternative<bool>(data)) {
-            return std::get<bool>(data) ? "true" : "false";
-        }
-        if (std::holds_alternative<std::string>(data)) {
-            return std::get<std::string>(data);
+        if (atom_data) {
+            // Check if it's a StringAtom
+            if (auto str_atom = std::dynamic_pointer_cast<guardian::StringAtom>(atom_data)) {
+                return str_atom->get();
+            }
+            return std::string(atom_data->name());
         }
         return "null";
     }
-};
-
-struct Frame {
-    size_t return_address;
-    std::vector<Value> locals;
     
-    Frame(size_t ret) : return_address(ret) {}
+    size_t size() const {
+        if (is_quark) {
+            return quark_data.size();
+        }
+        return atom_data ? atom_data->size() : 0;
+    }
+    
+    // Convert to Atom (for storing in molecule)
+    // Only for quarks that can be converted to atoms
+    std::shared_ptr<guardian::Atom> toAtom() const {
+        if (is_quark) {
+            switch (quark_data.type) {
+                case guardian::QuarkType::INT:
+                    return std::make_shared<guardian::IntAtom>(quark_data.int_val);
+                case guardian::QuarkType::FLOAT:
+                    return std::make_shared<guardian::FloatAtom>(quark_data.float_val);
+                case guardian::QuarkType::FLOAT64:
+                    return std::make_shared<guardian::FloatAtom>(static_cast<float>(quark_data.float64_val));
+                case guardian::QuarkType::BOOL:
+                    return std::make_shared<guardian::BoolAtom>(quark_data.bool_val);
+                case guardian::QuarkType::CHAR:
+                    return std::make_shared<guardian::CharAtom>(quark_data.char_val);
+                default:
+                    return nullptr;
+            }
+        }
+        return atom_data;
+    }
 };
 
+// ============================================
+// VIRTUAL MACHINE
+// ============================================
 class VM {
 public:
     VM();
@@ -109,14 +99,31 @@ public:
     void reset();
     bool is_running() const;
     
+    void push(const Value& val);
+    Value pop();
+    Value peek() const;
+    
+    void setVariable(const std::string& name, const Value& value);
+    Value getVariable(const std::string& name) const;
+    bool hasVariable(const std::string& name) const;
+    
 private:
     std::vector<uint8_t> bytecode;
     size_t pc;
     std::vector<Value> stack;
-    std::vector<Frame> frames;
     bool running;
+    std::shared_ptr<guardian::Molecule> main_molecule;
     
     void execute(uint8_t opcode);
+    void executeAdd();
+    void executeSub();
+    void executeMul();
+    void executeDiv();
+    void executePrint();
+    void executePrintln();
+    void executeMod();
+    
+    std::string readString();
 };
 
 } // namespace guardian::vm

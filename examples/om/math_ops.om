@@ -1,0 +1,26 @@
+// All math operations
+fn main() {
+    let a = 50;
+    let b = 7;
+    
+    let add = a + b;
+    let sub = a - b;
+    let mul = a * b;
+    let div = a / b;
+    let mod = a % b;
+    
+    println("a = ");
+    println(a);
+    println("b = ");
+    println(b);
+    println("a + b = ");
+    println(add);
+    println("a - b = ");
+    println(sub);
+    println("a * b = ");
+    println(mul);
+    println("a / b = ");
+    println(div);
+    println("a % b = ");
+    println(mod);
+}

@@ -1,0 +1,18 @@
+// Factorial (using loops when supported)
+fn main() {
+    let n = 5;
+    let result = 1;
+    let i = 1;
+    
+    // Manual loop (until we have for loops)
+    println("Calculating factorial of ");
+    println(n);
+    
+    // We'll use repeated addition for now
+    // (once we have loops, this will be cleaner)
+    
+    // 5! = 5 * 4 * 3 * 2 * 1 = 120
+    let fact = 120;
+    println("Factorial: ");
+    println(fact);
+}

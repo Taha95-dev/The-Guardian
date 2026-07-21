@@ -155,3 +155,38 @@ target_link_libraries(test_new_atoms
     guardian_core
     guardian_memory
 )
+
+# Core includes
+include_directories(
+    ${CMAKE_SOURCE_DIR}/src/core
+)
+
+# Quark library
+add_library(guardian_quark
+    src/quark/quark.cpp
+)
+
+target_include_directories(guardian_quark PUBLIC
+    ${CMAKE_SOURCE_DIR}/src/quark
+)
+
+# Quark test
+add_executable(test_quarks
+    tests/test_quarks.cpp
+)
+
+target_link_libraries(test_quarks
+    guardian_quark
+)
+
+# Format test
+add_executable(test_format
+    tests/test_format.cpp
+)
+
+target_link_libraries(test_format
+    guardian_vm
+    guardian_core
+    guardian_memory
+    guardian_quark
+)
