@@ -1,0 +1,7 @@
+// First Om program
+fn main() {
+    let greeting = "Hello from Om!"
+    let year = 2026
+    println(greeting)
+    println(year)
+}
