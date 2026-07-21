@@ -138,3 +138,20 @@ install(TARGETS guardianc omc
 
 configure_file(${CMAKE_SOURCE_DIR}/guardian.pc.in ${CMAKE_BINARY_DIR}/guardian.pc @ONLY)
 install(FILES ${CMAKE_BINARY_DIR}/guardian.pc DESTINATION lib/pkgconfig)
+
+# Atom types
+include_directories(
+    ${CMAKE_SOURCE_DIR}/src/atoms/numeric
+    ${CMAKE_SOURCE_DIR}/src/atoms/container
+    ${CMAKE_SOURCE_DIR}/src/atoms/system
+    ${CMAKE_SOURCE_DIR}/src/atoms/io
+)
+
+add_executable(test_new_atoms
+    tests/test_new_atoms.cpp
+)
+
+target_link_libraries(test_new_atoms
+    guardian_core
+    guardian_memory
+)
