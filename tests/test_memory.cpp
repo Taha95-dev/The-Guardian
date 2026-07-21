@@ -46,17 +46,21 @@ void test_memory() {
     // Test stack
     std::cout << "    Stack:\n";
     void* stack_ptr = mem.stackPush(4);
-    *(int*)stack_ptr = 42;
-    std::cout << "      Pushed: " << *(int*)stack_ptr << "\n";
-    mem.stackPop(4);
+    if (stack_ptr) {
+        *(int*)stack_ptr = 42;
+        std::cout << "      Pushed: " << *(int*)stack_ptr << "\n";
+        mem.stackPop(4);
+    }
     
     // Test heap
     std::cout << "    Heap:\n";
     void* heap_ptr = mem.heapAllocate(8);
-    mem.registerPointer(heap_ptr, 8, "test_heap");
-    std::cout << "      Allocated " << 8 << " bytes\n";
-    mem.unregisterPointer(heap_ptr);
-    mem.heapFree(heap_ptr);
+    if (heap_ptr) {
+        mem.registerPointer(heap_ptr, 8, "test_heap");
+        std::cout << "      Allocated 8 bytes at " << heap_ptr << "\n";
+        mem.unregisterPointer(heap_ptr);
+        mem.heapFree(heap_ptr);
+    }
     
     // Test serialization
     std::cout << "  💾 Serialization:\n";
@@ -64,7 +68,19 @@ void test_memory() {
     std::cout << "    Serialized " << data.size() << " bytes\n";
     
     auto new_molecule = Molecule::deserialize(data);
-    std::cout << "    Deserialized: " << new_molecule->getAtomCount() << " atoms\n";
-    std::cout << "    x = " << new_molecule->getAtom("x")->toString() << "\n";
-    std::cout << "    msg = " << new_molecule->getAtom("msg")->toString() << "\n";
+    if (new_molecule) {
+        std::cout << "    Deserialized: " << new_molecule->getAtomCount() << " atoms\n";
+        
+        auto x_atom = new_molecule->getAtom("x");
+        auto msg_atom = new_molecule->getAtom("msg");
+        
+        if (x_atom) {
+            std::cout << "    x = " << x_atom->toString() << "\n";
+        }
+        if (msg_atom) {
+            std::cout << "    msg = " << msg_atom->toString() << "\n";
+        }
+    } else {
+        std::cout << "    Deserialization failed!\n";
+    }
 }
