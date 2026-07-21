@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cstring>
 #include <algorithm>
+#include <sstream>
 
 namespace guardian::memory {
 
@@ -105,15 +106,90 @@ bool Molecule::isValidPointer(void* ptr) const {
 std::vector<uint8_t> Molecule::serialize() const {
     std::vector<uint8_t> data;
     
+    // Serialize atom count
     uint32_t count = static_cast<uint32_t>(atoms.size());
-    data.resize(4 + count * (1 + 4));  // Type + length
-    // Simplified serialization
+    uint8_t* count_ptr = reinterpret_cast<uint8_t*>(&count);
+    data.insert(data.end(), count_ptr, count_ptr + 4);
+    
+    // Serialize each atom
+    for (const auto& entry : atoms) {
+        // Type
+        uint8_t type = static_cast<uint8_t>(entry.atom->getType());
+        data.push_back(type);
+        
+        // Value as string
+        std::string value = entry.atom->toString();
+        uint32_t len = static_cast<uint32_t>(value.length());
+        uint8_t* len_ptr = reinterpret_cast<uint8_t*>(&len);
+        data.insert(data.end(), len_ptr, len_ptr + 4);
+        data.insert(data.end(), value.begin(), value.end());
+    }
     
     return data;
 }
 
 std::shared_ptr<Molecule> Molecule::deserialize(const std::vector<uint8_t>& data) {
-    return std::make_shared<Molecule>();
+    auto molecule = std::make_shared<Molecule>();
+    
+    if (data.size() < 4) {
+        std::cerr << "Error: Data too small for deserialization\n";
+        return molecule;
+    }
+    
+    size_t pos = 0;
+    uint32_t count;
+    std::memcpy(&count, data.data(), 4);
+    pos += 4;
+    
+    for (uint32_t i = 0; i < count && pos < data.size(); i++) {
+        if (pos >= data.size()) {
+            std::cerr << "Error: Unexpected end of data\n";
+            break;
+        }
+        
+        uint8_t type_byte = data[pos++];
+        if (pos + 4 > data.size()) {
+            std::cerr << "Error: Missing length field\n";
+            break;
+        }
+        
+        uint32_t len;
+        std::memcpy(&len, data.data() + pos, 4);
+        pos += 4;
+        
+        if (pos + len > data.size()) {
+            std::cerr << "Error: String length exceeds data\n";
+            break;
+        }
+        
+        std::string value(data.begin() + pos, data.begin() + pos + len);
+        pos += len;
+        
+        std::shared_ptr<Atom> atom;
+        switch (static_cast<Atom::Type>(type_byte)) {
+            case Atom::Type::INT:
+                atom = std::make_shared<Atom>(std::stoi(value));
+                break;
+            case Atom::Type::FLOAT:
+                atom = std::make_shared<Atom>(std::stof(value));
+                break;
+            case Atom::Type::BOOL:
+                atom = std::make_shared<Atom>(value == "true");
+                break;
+            case Atom::Type::STRING:
+                atom = std::make_shared<Atom>(value);
+                break;
+            case Atom::Type::CHAR:
+                atom = std::make_shared<Atom>(value.empty() ? '\0' : value[0]);
+                break;
+            default:
+                atom = std::make_shared<Atom>(Atom::Type::NULL_TYPE);
+                break;
+        }
+        molecule->addAtom(atom);
+    }
+    
+    return molecule;
 }
 
 // ============================================
@@ -140,27 +216,39 @@ void* FreeListAllocator::allocate(size_t size) {
     
     // Align size to 8 bytes
     size = (size + 7) & ~7;
+    size_t total_needed = size + sizeof(FreeBlock);
     
     FreeBlock* current = free_list;
     FreeBlock* prev = nullptr;
     
     while (current) {
-        if (current->size >= size + sizeof(FreeBlock)) {
-            // Split the block
-            FreeBlock* new_block = reinterpret_cast<FreeBlock*>(
-                reinterpret_cast<uint8_t*>(current) + sizeof(FreeBlock) + size
-            );
-            new_block->size = current->size - size - sizeof(FreeBlock);
-            new_block->next = current->next;
-            
-            if (prev) {
-                prev->next = new_block;
+        if (current->size >= total_needed) {
+            // Found a block
+            if (current->size > total_needed + sizeof(FreeBlock)) {
+                // Split the block
+                FreeBlock* new_block = reinterpret_cast<FreeBlock*>(
+                    reinterpret_cast<uint8_t*>(current) + total_needed
+                );
+                new_block->size = current->size - total_needed;
+                new_block->next = current->next;
+                
+                if (prev) {
+                    prev->next = new_block;
+                } else {
+                    free_list = new_block;
+                }
+                
+                current->size = size;
             } else {
-                free_list = new_block;
+                // Use whole block
+                if (prev) {
+                    prev->next = current->next;
+                } else {
+                    free_list = current->next;
+                }
             }
             
             total_used += size;
-            
             return reinterpret_cast<uint8_t*>(current) + sizeof(FreeBlock);
         }
         
@@ -168,6 +256,7 @@ void* FreeListAllocator::allocate(size_t size) {
         current = current->next;
     }
     
+    std::cerr << "Error: Out of memory! Tried to allocate " << size << " bytes\n";
     return nullptr;
 }
 
@@ -176,11 +265,14 @@ void FreeListAllocator::free(void* ptr) {
     
     uint8_t* block_ptr = reinterpret_cast<uint8_t*>(ptr) - sizeof(FreeBlock);
     FreeBlock* block = reinterpret_cast<FreeBlock*>(block_ptr);
-    total_used -= block->size;
     
-    // Add to free list
+    // We don't know the original size, but we can store it
+    // For simplicity, we'll just add it to the free list
+    // Note: This is a simplification - in practice we'd store the size
     block->next = free_list;
     free_list = block;
+    
+    total_used -= block->size;
 }
 
 size_t FreeListAllocator::freeCount() const {
@@ -219,7 +311,7 @@ StackAllocator::~StackAllocator() {
 
 void* StackAllocator::push(size_t size) {
     if (stack_ptr + size > stack_base + stack_size) {
-        std::cerr << "Error: Stack overflow!\n";
+        std::cerr << "Error: Stack overflow! Requested " << size << " bytes\n";
         return nullptr;
     }
     void* ptr = stack_ptr;
@@ -229,7 +321,7 @@ void* StackAllocator::push(size_t size) {
 
 void StackAllocator::pop(size_t size) {
     if (stack_ptr - size < stack_base) {
-        std::cerr << "Error: Stack underflow!\n";
+        std::cerr << "Error: Stack underflow! Trying to pop " << size << " bytes\n";
         return;
     }
     stack_ptr -= size;
@@ -283,6 +375,7 @@ bool MemoryManager::registerPointer(void* ptr, size_t size, const std::string& n
 }
 
 bool MemoryManager::unregisterPointer(void* ptr) {
+    if (!ptr) return false;
     lut.erase(ptr);
     lut_names.erase(ptr);
     return true;
