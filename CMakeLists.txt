@@ -14,23 +14,31 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/src/vm
     ${CMAKE_SOURCE_DIR}/src/compiler
     ${CMAKE_SOURCE_DIR}/src/om
+    ${CMAKE_SOURCE_DIR}/src/memory
+    ${CMAKE_SOURCE_DIR}/src/atoms
+    ${CMAKE_SOURCE_DIR}/src/atoms/primitive
+    ${CMAKE_SOURCE_DIR}/src/atoms/text
+    ${CMAKE_SOURCE_DIR}/src/atoms/containers
+    ${CMAKE_SOURCE_DIR}/src/atoms/special
 )
 
 # ============================================
-# CORE LIBRARY (Atom/Molecule + LUT)
+# CORE LIBRARY
 # ============================================
 add_library(guardian_core
     src/core/atom.cpp
     src/core/molecule.cpp
 )
 
-target_include_directories(guardian_core PUBLIC
-    ${CMAKE_SOURCE_DIR}/src/core
-    ${CMAKE_SOURCE_DIR}/include/guardian/core
+# ============================================
+# MEMORY LIBRARY
+# ============================================
+add_library(guardian_memory
+    src/memory/memory.cpp
 )
 
 # ============================================
-# VM LIBRARY (Binary formats + Execution)
+# VM LIBRARY
 # ============================================
 add_library(guardian_vm
     src/vm/vm.cpp
@@ -38,33 +46,21 @@ add_library(guardian_vm
     src/vm/formats/guardian_format.cpp
 )
 
-target_include_directories(guardian_vm PUBLIC
-    ${CMAKE_SOURCE_DIR}/src/vm
-    ${CMAKE_SOURCE_DIR}/src/vm/formats
-    ${CMAKE_SOURCE_DIR}/include/guardian/vm
-)
-
 target_link_libraries(guardian_vm
     guardian_core
+    guardian_memory
 )
 
 # ============================================
-# COMPILER LIBRARY (Lexer/Parser base)
+# COMPILER LIBRARY
 # ============================================
 add_library(guardian_compiler
     src/compiler/lexer.cpp
 )
 
-target_include_directories(guardian_compiler PUBLIC
-    ${CMAKE_SOURCE_DIR}/src/compiler
-    ${CMAKE_SOURCE_DIR}/include/guardian/compiler
-)
-
 # ============================================
 # OM LANGUAGE
 # ============================================
-
-# Om Library
 add_library(om
     src/om/lexer.cpp
     src/om/parser.cpp
@@ -72,15 +68,11 @@ add_library(om
     src/om/compiler.cpp
 )
 
-target_include_directories(om PUBLIC
-    ${CMAKE_SOURCE_DIR}/src/om
-    ${CMAKE_SOURCE_DIR}/include/guardian/om
-)
-
 target_link_libraries(om
     guardian_core
     guardian_vm
     guardian_compiler
+    guardian_memory
 )
 
 # Om Compiler Executable
@@ -93,10 +85,11 @@ target_link_libraries(omc
     guardian_core
     guardian_vm
     guardian_compiler
+    guardian_memory
 )
 
 # ============================================
-# GUARDIAN CLI (Original)
+# GUARDIAN CLI
 # ============================================
 add_executable(guardianc
     src/main.cpp
@@ -106,6 +99,7 @@ target_link_libraries(guardianc
     guardian_core
     guardian_vm
     guardian_compiler
+    guardian_memory
 )
 
 # ============================================
@@ -113,15 +107,18 @@ target_link_libraries(guardianc
 # ============================================
 enable_testing()
 
+# Main test runner (includes all tests)
 add_executable(run_tests
     tests/test_runner.cpp
     tests/test_atoms.cpp
+    tests/test_memory.cpp
 )
 
 target_link_libraries(run_tests
     guardian_core
     guardian_vm
     guardian_compiler
+    guardian_memory
 )
 
 add_test(NAME GuardianTests COMMAND run_tests)
@@ -129,20 +126,15 @@ add_test(NAME GuardianTests COMMAND run_tests)
 # ============================================
 # INSTALLATION
 # ============================================
-
-# Install headers
 install(DIRECTORY include/guardian/ DESTINATION include/guardian
         FILES_MATCHING PATTERN "*.hpp")
 
-# Install libraries
-install(TARGETS guardian_core guardian_vm guardian_compiler om
+install(TARGETS guardian_core guardian_vm guardian_compiler guardian_memory om
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)
 
-# Install executables
 install(TARGETS guardianc omc
         RUNTIME DESTINATION bin)
 
-# Install pkg-config file
 configure_file(${CMAKE_SOURCE_DIR}/guardian.pc.in ${CMAKE_BINARY_DIR}/guardian.pc @ONLY)
 install(FILES ${CMAKE_BINARY_DIR}/guardian.pc DESTINATION lib/pkgconfig)

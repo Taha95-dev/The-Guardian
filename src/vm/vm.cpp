@@ -24,7 +24,6 @@ void VM::run() {
 }
 
 void VM::execute(uint8_t opcode) {
-    // For now, handle the basic opcodes
     switch (static_cast<Opcode>(opcode)) {
         case Opcode::HALT:
             running = false;
@@ -101,6 +100,91 @@ void VM::execute(uint8_t opcode) {
                 return;
             }
             stack.push_back(stack.back());
+            break;
+        }
+        
+        case Opcode::ADD: {
+            if (stack.size() < 2) {
+                std::cerr << "Error: ADD requires 2 operands\n";
+                running = false;
+                return;
+            }
+            Value right = stack.back(); stack.pop_back();
+            Value left = stack.back(); stack.pop_back();
+            
+            if (std::holds_alternative<int>(left.data) && 
+                std::holds_alternative<int>(right.data)) {
+                int result = std::get<int>(left.data) + std::get<int>(right.data);
+                stack.push_back(Value(result));
+            } else {
+                std::cerr << "Error: ADD only supports integers\n";
+                running = false;
+            }
+            break;
+        }
+        
+        case Opcode::SUB: {
+            if (stack.size() < 2) {
+                std::cerr << "Error: SUB requires 2 operands\n";
+                running = false;
+                return;
+            }
+            Value right = stack.back(); stack.pop_back();
+            Value left = stack.back(); stack.pop_back();
+            
+            if (std::holds_alternative<int>(left.data) && 
+                std::holds_alternative<int>(right.data)) {
+                int result = std::get<int>(left.data) - std::get<int>(right.data);
+                stack.push_back(Value(result));
+            } else {
+                std::cerr << "Error: SUB only supports integers\n";
+                running = false;
+            }
+            break;
+        }
+        
+        case Opcode::MUL: {
+            if (stack.size() < 2) {
+                std::cerr << "Error: MUL requires 2 operands\n";
+                running = false;
+                return;
+            }
+            Value right = stack.back(); stack.pop_back();
+            Value left = stack.back(); stack.pop_back();
+            
+            if (std::holds_alternative<int>(left.data) && 
+                std::holds_alternative<int>(right.data)) {
+                int result = std::get<int>(left.data) * std::get<int>(right.data);
+                stack.push_back(Value(result));
+            } else {
+                std::cerr << "Error: MUL only supports integers\n";
+                running = false;
+            }
+            break;
+        }
+        
+        case Opcode::DIV: {
+            if (stack.size() < 2) {
+                std::cerr << "Error: DIV requires 2 operands\n";
+                running = false;
+                return;
+            }
+            Value right = stack.back(); stack.pop_back();
+            Value left = stack.back(); stack.pop_back();
+            
+            if (std::holds_alternative<int>(left.data) && 
+                std::holds_alternative<int>(right.data)) {
+                if (std::get<int>(right.data) == 0) {
+                    std::cerr << "Error: Division by zero\n";
+                    running = false;
+                    return;
+                }
+                int result = std::get<int>(left.data) / std::get<int>(right.data);
+                stack.push_back(Value(result));
+            } else {
+                std::cerr << "Error: DIV only supports integers\n";
+                running = false;
+            }
             break;
         }
         

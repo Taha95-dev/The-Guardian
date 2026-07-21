@@ -4,8 +4,12 @@
 #include <string>
 #include <cstdint>
 #include <fstream>
+#include <memory>
 
 namespace om {
+
+struct ASTNode;
+struct ProgramNode;
 
 // Guardian Binary Format (.gbin)
 struct GuardianHeader {
@@ -22,21 +26,19 @@ public:
     CodeGen();
     ~CodeGen() = default;
     
-    // Generate .gbin from Om AST (to be implemented)
-    bool generate(const std::vector<std::string>& instructions, 
-                  const std::string& output_path);
-    
-    // Helper to write header
-    bool writeHeader(std::ofstream& out, uint32_t instruction_count);
-    
-    // Helper to write instructions
-    bool writeInstructions(std::ofstream& out, 
-                          const std::vector<std::string>& instructions);
+    // Generate .gbin from AST
+    bool generate(const std::unique_ptr<ProgramNode>& ast, const std::string& output_path);
     
 private:
     uint32_t magic;
     uint16_t version;
     uint16_t flags;
+    
+    // Generate bytecode from AST nodes
+    void generateStatement(const std::unique_ptr<ASTNode>& node, std::vector<uint8_t>& bytecode);
+    void generateExpression(const std::unique_ptr<ASTNode>& node, std::vector<uint8_t>& bytecode);
+    
+    bool writeHeader(std::ofstream& out, uint32_t bytecode_size);
 };
 
 } // namespace om

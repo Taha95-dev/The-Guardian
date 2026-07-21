@@ -104,16 +104,9 @@ public:
     VM();
     ~VM();
     
-    // Load bytecode
     void load(const std::vector<uint8_t>& bytecode, size_t entry = 0);
-    
-    // Run the program
     void run();
-    
-    // Reset state
     void reset();
-    
-    // Check if running
     bool is_running() const;
     
 private:

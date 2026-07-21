@@ -1,19 +1,18 @@
-#include "test_runner.hpp"
 #include <iostream>
 
-namespace guardian::test {
-
-// Define the global runner
-TestRunner runner;
-
-} // namespace guardian::test
+// Declare test functions
+void test_atoms();
+void test_memory();
 
 int main() {
-    std::cout << "🧪 The Guardian Test Suite" << std::endl;
-    std::cout << "═══════════════════════════" << std::endl;
+    std::cout << "🧪 Running Guardian Tests...\n\n";
     
-    // The runner is already populated by the registrars
-    guardian::test::RUN_TESTS();
+    std::cout << "=== Atom Tests ===\n";
+    test_atoms();
     
+    std::cout << "\n=== Memory Tests ===\n";
+    test_memory();
+    
+    std::cout << "\n✅ All tests passed!\n";
     return 0;
 }
