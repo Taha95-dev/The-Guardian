@@ -107,21 +107,21 @@ std::vector<uint8_t> Molecule::serialize() const {
     std::vector<uint8_t> data;
     
     // Serialize atom count
-    uint32_t count = atoms.size();
-    data.insert(data.end(), 
-                reinterpret_cast<const uint8_t*>(&count),
-                reinterpret_cast<const uint8_t*>(&count) + 4);
+    uint32_t count = static_cast<uint32_t>(atoms.size());
+    uint8_t* count_ptr = reinterpret_cast<uint8_t*>(&count);
+    data.insert(data.end(), count_ptr, count_ptr + 4);
     
     // Serialize each atom
     for (const auto& entry : atoms) {
+        // Serialize type
         uint8_t type = static_cast<uint8_t>(entry.atom->getType());
         data.push_back(type);
         
-        auto value = entry.atom->toString();
-        uint32_t len = value.length();
-        data.insert(data.end(),
-                    reinterpret_cast<const uint8_t*>(&len),
-                    reinterpret_cast<const uint8_t*>(&len) + 4);
+        // Serialize value as string
+        std::string value = entry.atom->toString();
+        uint32_t len = static_cast<uint32_t>(value.length());
+        uint8_t* len_ptr = reinterpret_cast<uint8_t*>(&len);
+        data.insert(data.end(), len_ptr, len_ptr + 4);
         data.insert(data.end(), value.begin(), value.end());
     }
     
@@ -135,17 +135,17 @@ std::shared_ptr<Molecule> Molecule::deserialize(const std::vector<uint8_t>& data
     if (data.size() < 4) return molecule;
     
     uint32_t count;
-    memcpy(&count, data.data(), 4);
+    std::memcpy(&count, data.data(), 4);
     pos += 4;
     
     for (uint32_t i = 0; i < count && pos < data.size(); i++) {
         if (pos >= data.size()) break;
         
-        uint8_t type = data[pos++];
+        uint8_t type_byte = data[pos++];
         if (pos + 4 > data.size()) break;
         
         uint32_t len;
-        memcpy(&len, data.data() + pos, 4);
+        std::memcpy(&len, data.data() + pos, 4);
         pos += 4;
         
         if (pos + len > data.size()) break;
@@ -154,7 +154,7 @@ std::shared_ptr<Molecule> Molecule::deserialize(const std::vector<uint8_t>& data
         pos += len;
         
         std::shared_ptr<Atom> atom;
-        switch (static_cast<Atom::Type>(type)) {
+        switch (static_cast<Atom::Type>(type_byte)) {
             case Atom::Type::INT:
                 atom = std::make_shared<Atom>(std::stoi(value));
                 break;
@@ -218,11 +218,9 @@ void MemoryManager::stackPop(size_t size) {
 }
 
 void* MemoryManager::heapAllocate(size_t size) {
-    // Simple first-fit allocation
     for (auto& block : heap_blocks) {
         if (block.free && block.size >= size) {
             if (block.size > size) {
-                // Split the block
                 HeapBlock new_block;
                 new_block.size = block.size - size;
                 new_block.free = true;
@@ -242,7 +240,6 @@ void MemoryManager::heapFree(void* ptr) {
     for (auto& block : heap_blocks) {
         if (block.ptr == ptr) {
             block.free = true;
-            // Coalesce adjacent free blocks
             break;
         }
     }
