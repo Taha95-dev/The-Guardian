@@ -107,6 +107,7 @@ Token Lexer::readChar() {
     char val = advance(); // read character
     if (peek() == '\'') {
         advance(); // consume closing '
+        // Store as a string with "char:" prefix
         return Token(TokenType::CHAR, std::string(1, val), start_line, start_col);
     }
     

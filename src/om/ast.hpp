@@ -28,6 +28,11 @@ enum class NodeType {
     PROGRAM,
     FUNCTION_DEF,
     VARIABLE_DEF,
+    ARRAY_DECL,
+    ARRAY_ACCESS,
+    ARRAY_LITERAL,
+    ARRAY_ASSIGN,
+    TYPED_ARRAY_LITERAL,
     ASSIGNMENT,
     IF_STATEMENT,
     FOR_LOOP,
@@ -136,6 +141,13 @@ struct CallNode : ASTNode {
     CallNode() { type = NodeType::CALL; }
 };
 
+// Array assignment: arr[0] = 42;
+struct ArrayAssignNode : ASTNode {
+    std::unique_ptr<ASTNode> access;
+    std::unique_ptr<ASTNode> value;
+    ArrayAssignNode() { type = NodeType::ARRAY_ASSIGN; }
+};
+
 // Identifier
 struct IdentifierNode : ASTNode {
     std::string name;
@@ -148,6 +160,34 @@ struct LiteralNode : ASTNode {
     Type literal_type;
     std::string value;
     LiteralNode() { type = NodeType::LITERAL; }
+};
+
+// Array declaration: let arr: int[10];
+struct ArrayDeclNode : ASTNode {
+    std::string name;
+    std::string element_type;
+    std::unique_ptr<ASTNode> size;
+    ArrayDeclNode() { type = NodeType::ARRAY_DECL; }
+};
+
+// Array access: arr[0]
+struct ArrayAccessNode : ASTNode {
+    std::string name;
+    std::unique_ptr<ASTNode> index;
+    ArrayAccessNode() { type = NodeType::ARRAY_ACCESS; }
+};
+
+// Array literal: [1, 2, 3]
+struct ArrayLiteralNode : ASTNode {
+    std::vector<std::unique_ptr<ASTNode>> elements;
+    ArrayLiteralNode() { type = NodeType::ARRAY_LITERAL; }
+};
+
+// Typed array literal: [int: 1, 2, 3]
+struct TypedArrayLiteralNode : ASTNode {
+    std::string element_type;
+    std::vector<std::unique_ptr<ASTNode>> elements;
+    TypedArrayLiteralNode() { type = NodeType::TYPED_ARRAY_LITERAL; }
 };
 
 } // namespace om

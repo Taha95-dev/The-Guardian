@@ -8,46 +8,56 @@
 namespace guardian {
 
 // ============================================
-// MOLECULE — Composable atoms with LUT
+// TYPE-TAGGED STORAGE WITH MULTIPLE LUTS
 // ============================================
 class Molecule {
 public:
-    struct AtomEntry {
-        std::string name;
-        std::unique_ptr<Atom> atom;
-    };
-    
     Molecule() : total_size(0) {}
     ~Molecule() = default;
     
-    // Add an atom (takes ownership)
-    void add_atom(std::unique_ptr<Atom> atom);
-    void add_atom(const std::string& name, std::unique_ptr<Atom> atom);
+    // String LUT (for strings and characters)
+    void add_string(const std::string& name, const std::string& value);
+    std::string get_string(const std::string& name) const;
+    bool has_string(const std::string& name) const;
     
-    // Get an atom by index
-    Atom* get_atom(size_t index) const;
+    // Number LUT (for ints and floats)
+    void add_number(const std::string& name, double value);
+    double get_number(const std::string& name) const;
+    bool has_number(const std::string& name) const;
     
-    // Get an atom by name
-    Atom* get_atom(const std::string& name) const;
+    // Bool LUT
+    void add_bool(const std::string& name, bool value);
+    bool get_bool(const std::string& name) const;
+    bool has_bool(const std::string& name) const;
     
-    // Get all atoms
-    const std::vector<AtomEntry>& get_atoms() const { return atoms; }
-    size_t atom_count() const;
-    size_t size() const;
+    // Array LUT
+    void add_array(const std::string& name, const std::vector<std::string>& value);
+    std::vector<std::string> get_array(const std::string& name) const;
+    bool has_array(const std::string& name) const;
     
-    // Pointer tracking (LUT)
-    void register_pointer(void* ptr, const std::string& name = "");
-    void unregister_pointer(void* ptr);
-    bool is_valid_pointer(void* ptr) const;
+    // Dictionary LUT
+    void add_dict(const std::string& name, const std::unordered_map<std::string, std::string>& value);
+    std::unordered_map<std::string, std::string> get_dict(const std::string& name) const;
+    bool has_dict(const std::string& name) const;
     
-    // Serialization
-    std::vector<uint8_t> serialize() const;
-    void deserialize(const std::vector<uint8_t>& data);
+    // Generic getter (for VM)
+    enum class ValueType { STRING, NUMBER, BOOL, ARRAY, DICT, NONE };
+    ValueType get_type(const std::string& name) const;
+    
+    // Size
+    size_t size() const { return total_size; }
+    
+    // Debug
+    void dump() const;
     
 private:
-    std::vector<AtomEntry> atoms;
-    std::unordered_map<std::string, size_t> name_index;
-    std::unordered_map<void*, std::string> pointer_table;
+    // Type-tagged storage
+    std::unordered_map<std::string, std::string> string_lut;
+    std::unordered_map<std::string, double> number_lut;
+    std::unordered_map<std::string, bool> bool_lut;
+    std::unordered_map<std::string, std::vector<std::string>> array_lut;
+    std::unordered_map<std::string, std::unordered_map<std::string, std::string>> dict_lut;
+    
     size_t total_size;
 };
 

@@ -150,15 +150,28 @@ bool Parser::isValidStatementStart() {
 std::unique_ptr<ASTNode> Parser::parseStatement() {
     if (isAtEnd()) return nullptr;
     
-    // Skip stray semicolons
     while (match(TokenType::SEMICOLON)) {
-        // Just skip them
+        // Skip stray semicolons
     }
     
     if (match(TokenType::FN)) {
         return parseFunctionDef();
     }
     if (match(TokenType::LET)) {
+        // Check if it's an array declaration: let name: type[size];
+        if (peek().type == TokenType::IDENTIFIER) {
+            size_t save_pos = pos;
+            Token name = peek();
+            advance();
+            
+            if (peek().type == TokenType::COLON) {
+                // It's an array declaration
+                return parseArrayDecl(name);
+            }
+            
+            // Not an array, rewind
+            pos = save_pos;
+        }
         return parseVariableDef(false);
     }
     if (match(TokenType::CONST)) {
@@ -180,15 +193,108 @@ std::unique_ptr<ASTNode> Parser::parseStatement() {
         return parseBlock();
     }
     
+    // Check for array assignment: arr[0] = 42;
+    if (peek().type == TokenType::IDENTIFIER) {
+        size_t save_pos = pos;
+        Token name = peek();
+        advance();
+        
+        if (peek().type == TokenType::LBRACKET) {
+            // It's an array access
+            auto access = parseArrayAccess(name.value, name.line, name.column);
+            if (access && match(TokenType::ASSIGN)) {
+                auto value = parseExpression();
+                match(TokenType::SEMICOLON);
+                
+                // Create an assignment node
+                auto assign = std::make_unique<ArrayAssignNode>();
+                assign->access = std::move(access);
+                assign->value = std::move(value);
+                return assign;
+            }
+            // If no assignment, rewind
+            pos = save_pos;
+        } else {
+            // Not an array access, rewind
+            pos = save_pos;
+        }
+    }
+    
     // Handle standalone expressions (like function calls)
     auto expr = parseExpression();
     if (expr) {
-        // Consume optional semicolon
         match(TokenType::SEMICOLON);
         return expr;
     }
     
     return nullptr;
+}
+
+std::unique_ptr<ASTNode> Parser::parseArrayLiteral() {
+    auto node = std::make_unique<ArrayLiteralNode>();
+    node->line = peek().line;
+    node->column = peek().column;
+    
+    advance(); // consume [
+    
+    if (!match(TokenType::RBRACKET)) {
+        do {
+            auto element = parseExpression();
+            if (element) {
+                node->elements.push_back(std::move(element));
+            }
+        } while (match(TokenType::COMMA));
+        expect(TokenType::RBRACKET, "Expected ']' after array elements");
+    }
+    
+    return node;
+}
+
+std::unique_ptr<ASTNode> Parser::parseArrayAccess(const std::string& name, int line, int column) {
+    auto node = std::make_unique<ArrayAccessNode>();
+    node->name = name;
+    node->line = line;
+    node->column = column;
+    
+    expect(TokenType::LBRACKET, "Expected '[' after array name");
+    node->index = parseExpression();
+    expect(TokenType::RBRACKET, "Expected ']' after index");
+    
+    return node;
+}
+
+std::unique_ptr<ASTNode> Parser::parseArrayDecl(const Token& name) {
+    auto node = std::make_unique<ArrayDeclNode>();
+    node->name = name.value;
+    node->line = name.line;
+    node->column = name.column;
+    
+    expect(TokenType::COLON, "Expected ':' after array name");
+    
+    // Parse type
+    Token type_token = peek();
+    if (type_token.type == TokenType::INT ||
+        type_token.type == TokenType::FLOAT ||
+        type_token.type == TokenType::BOOL ||
+        type_token.type == TokenType::CHAR ||
+        type_token.type == TokenType::STRING ||
+        type_token.type == TokenType::ANY) {
+        advance();
+        node->element_type = type_token.value;
+    } else {
+        error_count++;
+        std::cerr << "Error: Expected type keyword at line " << type_token.line << "\n";
+        return nullptr;
+    }
+    
+    expect(TokenType::LBRACKET, "Expected '[' after type");
+    node->size = parseExpression();
+    expect(TokenType::RBRACKET, "Expected ']' after size");
+    
+    // Optional semicolon
+    match(TokenType::SEMICOLON);
+    
+    return node;
 }
 
 std::unique_ptr<FunctionDefNode> Parser::parseFunctionDef() {
@@ -393,19 +499,23 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
         return literal;
     }
     
+    if (token.type == TokenType::LBRACKET) {
+        return parseTypedArrayLiteral();
+    }
+    
     if (token.type == TokenType::STRING) {
+        advance();
+        auto literal = std::make_unique<LiteralNode>();
+        literal->literal_type = LiteralNode::STRING;
+        literal->value = token.value;
+        return literal;
+    }
     
     if (token.type == TokenType::CHAR) {
         advance();
         auto literal = std::make_unique<LiteralNode>();
         literal->literal_type = LiteralNode::CHAR;
-        literal->value = token.value;
-        return literal;
-    }
-        advance();
-        auto literal = std::make_unique<LiteralNode>();
-        literal->literal_type = LiteralNode::STRING;
-        literal->value = token.value;
+        literal->value = "char:" + token.value;
         return literal;
     }
     
@@ -418,13 +528,18 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
     }
     
     if (token.type == TokenType::IDENTIFIER) {
+        // Save the identifier name
+        std::string name = token.value;
+        int line = token.line;
+        int column = token.column;
         advance();
+        
         // Check if it's a function call
         if (!isAtEnd() && peek().type == TokenType::LPAREN) {
             auto call = std::make_unique<CallNode>();
-            call->name = token.value;
-            call->line = token.line;
-            call->column = token.column;
+            call->name = name;
+            call->line = line;
+            call->column = column;
             
             advance(); // consume (
             if (!match(TokenType::RPAREN)) {
@@ -439,10 +554,24 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
             return call;
         }
         
+        // Check if it's an array access
+        if (!isAtEnd() && peek().type == TokenType::LBRACKET) {
+            auto access = std::make_unique<ArrayAccessNode>();
+            access->name = name;
+            access->line = line;
+            access->column = column;
+            
+            advance(); // consume [
+            access->index = parseExpression();
+            expect(TokenType::RBRACKET, "Expected ']' after index");
+            return access;
+        }
+        
+        // Regular identifier
         auto ident = std::make_unique<IdentifierNode>();
-        ident->name = token.value;
-        ident->line = token.line;
-        ident->column = token.column;
+        ident->name = name;
+        ident->line = line;
+        ident->column = column;
         return ident;
     }
     
@@ -456,6 +585,45 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
     error_count++;
     std::cerr << "Error: Unexpected token: '" << token.value << "' at line " << token.line << "\n";
     return nullptr;
+}
+
+std::unique_ptr<ASTNode> Parser::parseTypedArrayLiteral() {
+    auto node = std::make_unique<TypedArrayLiteralNode>();
+    node->line = peek().line;
+    node->column = peek().column;
+    
+    advance(); // consume [
+    
+    // Parse type
+    Token type_token = peek();
+    if (type_token.type == TokenType::INT ||
+        type_token.type == TokenType::FLOAT ||
+        type_token.type == TokenType::BOOL ||
+        type_token.type == TokenType::CHAR ||
+        type_token.type == TokenType::STRING ||
+        type_token.type == TokenType::ANY) {
+        advance();
+        node->element_type = type_token.value;
+    } else {
+        error_count++;
+        std::cerr << "Error: Expected type keyword at line " << type_token.line << "\n";
+        return nullptr;
+    }
+    
+    expect(TokenType::COLON, "Expected ':' after type");
+    
+    // Parse elements
+    if (!match(TokenType::RBRACKET)) {
+        do {
+            auto element = parseExpression();
+            if (element) {
+                node->elements.push_back(std::move(element));
+            }
+        } while (match(TokenType::COMMA));
+        expect(TokenType::RBRACKET, "Expected ']' after array elements");
+    }
+    
+    return node;
 }
 
 } // namespace om

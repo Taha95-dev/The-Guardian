@@ -39,6 +39,12 @@ private:
     std::unique_ptr<ASTNode> parseExpression();
     std::unique_ptr<ASTNode> parseBinaryOp(int min_precedence);
     std::unique_ptr<ASTNode> parsePrimary();
+    std::unique_ptr<ASTNode> parseTypedArrayLiteral();
+    
+    // Array functions
+    std::unique_ptr<ASTNode> parseArrayDecl(const Token& name);
+    std::unique_ptr<ASTNode> parseArrayAccess(const std::string& name, int line, int column);
+    std::unique_ptr<ASTNode> parseArrayLiteral();
     
     int getPrecedence(TokenType type);
 };

@@ -66,40 +66,95 @@ std::string VM::readString() {
 
 void VM::setVariable(const std::string& name, const Value& value) {
     if (value.is_quark) {
+        // Store quarks as atoms
         switch (value.quark_data.type) {
             case guardian::QuarkType::INT:
-                main_molecule->add_atom(name, std::make_unique<guardian::IntAtom>(value.quark_data.int_val));
+                main_molecule->add_number(name, value.quark_data.int_val);
                 break;
             case guardian::QuarkType::FLOAT:
-                main_molecule->add_atom(name, std::make_unique<guardian::FloatAtom>(value.quark_data.float_val));
+                main_molecule->add_number(name, value.quark_data.float_val);
                 break;
             case guardian::QuarkType::FLOAT64:
-                main_molecule->add_atom(name, std::make_unique<guardian::FloatAtom>(static_cast<float>(value.quark_data.float64_val)));
+                main_molecule->add_number(name, value.quark_data.float64_val);
                 break;
             case guardian::QuarkType::BOOL:
-                main_molecule->add_atom(name, std::make_unique<guardian::BoolAtom>(value.quark_data.bool_val));
+                main_molecule->add_bool(name, value.quark_data.bool_val);
                 break;
-            case guardian::QuarkType::CHAR:
-                main_molecule->add_atom(name, std::make_unique<guardian::CharAtom>(value.quark_data.char_val));
+            case guardian::QuarkType::CHAR: {
+                std::string char_str = "char:" + std::string(1, value.quark_data.char_val);
+                main_molecule->add_string(name, char_str);
                 break;
+            }
             default:
                 break;
         }
+    } else if (value.is_array) {
+        // Store array as a JSON-like string with type info
+        std::string arr_str = "array:";
+        arr_str += "[";
+        for (size_t i = 0; i < value.array_data.size(); i++) {
+            arr_str += value.array_data[i].to_string();
+            if (i < value.array_data.size() - 1) arr_str += ", ";
+        }
+        arr_str += "]";
+        main_molecule->add_string(name, arr_str);
+        std::cout << "  [DEBUG] Stored array: " << arr_str << "\n";
     } else if (value.atom_data) {
-        // For strings and other atoms
+        if (auto str_atom = std::dynamic_pointer_cast<guardian::StringAtom>(value.atom_data)) {
+            main_molecule->add_string(name, str_atom->get());
+        }
     }
 }
 
 Value VM::getVariable(const std::string& name) const {
-    auto atom = main_molecule->get_atom(name);
-    if (atom) {
-        return Value(std::shared_ptr<guardian::Atom>(atom, [](guardian::Atom*){}));
+    if (main_molecule->has_string(name)) {
+        std::string value = main_molecule->get_string(name);
+        
+        if (value.rfind("array:", 0) == 0) {
+            std::cout << "  [DEBUG] Loading array: " << value << "\n";
+            std::vector<Value> arr_data;
+            std::string arr_str = value.substr(6);
+            
+            size_t pos = 1;
+            while (pos < arr_str.length() && arr_str[pos] != ']') {
+                while (pos < arr_str.length() && (arr_str[pos] == ' ' || arr_str[pos] == ',')) {
+                    pos++;
+                }
+                if (pos >= arr_str.length() || arr_str[pos] == ']') break;
+                
+                std::string num_str;
+                while (pos < arr_str.length() && arr_str[pos] != ',' && arr_str[pos] != ']') {
+                    num_str += arr_str[pos++];
+                }
+                
+                if (!num_str.empty() && num_str != "null") {
+                    try {
+                        int val = std::stoi(num_str);
+                        arr_data.push_back(Value(val));
+                    } catch (...) {
+                        // If it's not a number, store as string
+                        arr_data.push_back(Value(std::make_shared<guardian::StringAtom>(num_str)));
+                    }
+                } else {
+                    arr_data.push_back(Value(0));
+                }
+            }
+            
+            return Value(arr_data);
+        }
+        
+        return Value(std::make_shared<guardian::StringAtom>(value));
     }
+    
+    if (main_molecule->has_number(name)) {
+        return Value(main_molecule->get_number(name));
+    }
+    
+    if (main_molecule->has_bool(name)) {
+        return Value(main_molecule->get_bool(name));
+    }
+    
     return Value(0);
-}
-
-bool VM::hasVariable(const std::string& name) const {
-    return main_molecule->get_atom(name) != nullptr;
 }
 
 void VM::execute(uint8_t opcode) {
@@ -145,6 +200,16 @@ void VM::execute(uint8_t opcode) {
             break;
         }
        
+        case Opcode::MAKE_ARRAY:
+            executeMakeArray();
+        break;
+        case Opcode::ARRAY_GET:
+            executeArrayGet();
+        break;
+        case Opcode::ARRAY_SET:
+        executeArraySet();
+        break;
+
         case Opcode::MOD:
             executeMod();
             break;
@@ -408,6 +473,110 @@ void VM::reset() {
 
 bool VM::is_running() const {
     return running;
+}
+
+void VM::executeMakeArray() {
+    // Read type code from bytecode (operand)
+    if (pc >= bytecode.size()) {
+        std::cerr << "Error: Missing type code for MAKE_ARRAY\n";
+        running = false;
+        return;
+    }
+    
+    uint8_t type_code = bytecode[pc++];
+    
+    // Pop size
+    if (stack.empty()) {
+        std::cerr << "Error: MAKE_ARRAY requires size on stack\n";
+        running = false;
+        return;
+    }
+    Value size_val = pop();
+    if (!size_val.is_quark || size_val.quark_data.type != guardian::QuarkType::INT) {
+        std::cerr << "Error: Array size must be an integer\n";
+        running = false;
+        return;
+    }
+    
+    int size = size_val.quark_data.int_val;
+    
+    // Pop elements (they're on the stack in reverse order)
+    std::vector<Value> arr_data;
+    for (int i = 0; i < size; i++) {
+        if (stack.empty()) {
+            std::cerr << "Error: Not enough elements for array\n";
+            running = false;
+            return;
+        }
+        arr_data.insert(arr_data.begin(), pop());
+    }
+    
+    push(Value(arr_data));
+}
+
+void VM::executeArrayGet() {
+    if (stack.size() < 2) {
+        std::cerr << "Error: ARRAY_GET requires array and index\n";
+        running = false;
+        return;
+    }
+    
+    Value index_val = pop();
+    Value arr_val = pop();
+    
+    if (!arr_val.is_array) {
+        std::cerr << "Error: ARRAY_GET requires an array\n";
+        running = false;
+        return;
+    }
+    
+    if (!index_val.is_quark || index_val.quark_data.type != guardian::QuarkType::INT) {
+        std::cerr << "Error: Array index must be an integer\n";
+        running = false;
+        return;
+    }
+    
+    int index = index_val.quark_data.int_val;
+    if (index < 0 || index >= (int)arr_val.array_data.size()) {
+        std::cerr << "Error: Array index out of bounds\n";
+        running = false;
+        return;
+    }
+    
+    push(arr_val.array_data[index]);
+}
+
+void VM::executeArraySet() {
+    if (stack.size() < 3) {
+        std::cerr << "Error: ARRAY_SET requires array, index, and value\n";
+        running = false;
+        return;
+    }
+    
+    Value value = pop();
+    Value index_val = pop();
+    Value arr_val = pop();
+    
+    if (!arr_val.is_array) {
+        std::cerr << "Error: ARRAY_SET requires an array\n";
+        running = false;
+        return;
+    }
+    
+    if (!index_val.is_quark || index_val.quark_data.type != guardian::QuarkType::INT) {
+        std::cerr << "Error: Array index must be an integer\n";
+        running = false;
+        return;
+    }
+    
+    int index = index_val.quark_data.int_val;
+    if (index < 0 || index >= (int)arr_val.array_data.size()) {
+        std::cerr << "Error: Array index out of bounds\n";
+        running = false;
+        return;
+    }
+    
+    arr_val.array_data[index] = value;
 }
 
 } // namespace guardian::vm

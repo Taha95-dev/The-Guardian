@@ -13,7 +13,7 @@ enum class TokenType {
     SHORTCUT,
     
     // Symbols
-    IDENTIFIER, NUMBER, STRING, CHAR,
+    IDENTIFIER, NUMBER, STRING, CHAR, ANY, INT, FLOAT, BOOL,
     PLUS, MINUS, STAR, SLASH, MOD, ASSIGN, EQUAL, NOT_EQUAL,
     LESS, GREATER, LESS_EQUAL, GREATER_EQUAL,
     AND, OR, NOT,
@@ -73,7 +73,13 @@ private:
         {"true", TokenType::TRUE},
         {"false", TokenType::FALSE},
         {"null", TokenType::NULL_TOKEN},
-        {"shortcut", TokenType::SHORTCUT}
+        {"shortcut", TokenType::SHORTCUT},
+        {"any", TokenType::ANY},
+        {"int", TokenType::INT},
+        {"float", TokenType::FLOAT},
+        {"bool", TokenType::BOOL},
+        {"char", TokenType::CHAR},
+        {"string", TokenType::STRING},
     };
 };
 

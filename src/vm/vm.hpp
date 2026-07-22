@@ -20,36 +20,53 @@
 namespace guardian::vm {
 
 // ============================================
-// VALUE — Can be Quark (stack) or Atom (heap)
+// VALUE — Can be Quark (stack) or Atom (heap) or Array
 // ============================================
 struct Value {
     bool is_quark;
+    bool is_array;
     guardian::Quark quark_data;
     std::shared_ptr<guardian::Atom> atom_data;
+    std::vector<Value> array_data;  // Store array elements directly
     
-    Value() : is_quark(true), quark_data() {}
+    Value() : is_quark(true), is_array(false) {}
     
-    // Quark constructors (for primitive values)
-    Value(int v) : is_quark(true), quark_data(v) {}
-    Value(unsigned int v) : is_quark(true), quark_data(v) {}
-    Value(int64_t v) : is_quark(true), quark_data(v) {}
-    Value(uint64_t v) : is_quark(true), quark_data(v) {}
-    Value(float v) : is_quark(true), quark_data(v) {}
-    Value(double v) : is_quark(true), quark_data(v) {}
-    Value(bool v) : is_quark(true), quark_data(v) {}
-    Value(char v) : is_quark(true), quark_data(v) {}
+    // Quark constructors
+    Value(int v) : is_quark(true), is_array(false), quark_data(v) {}
+    Value(unsigned int v) : is_quark(true), is_array(false), quark_data(v) {}
+    Value(int64_t v) : is_quark(true), is_array(false), quark_data(v) {}
+    Value(uint64_t v) : is_quark(true), is_array(false), quark_data(v) {}
+    Value(float v) : is_quark(true), is_array(false), quark_data(v) {}
+    Value(double v) : is_quark(true), is_array(false), quark_data(v) {}
+    Value(bool v) : is_quark(true), is_array(false), quark_data(v) {}
+    Value(char v) : is_quark(true), is_array(false), quark_data(v) {}
     
-    // Atom constructor (for strings and complex data)
-    Value(std::shared_ptr<guardian::Atom> a) : is_quark(false), atom_data(a) {}
+    // Atom constructor
+    Value(std::shared_ptr<guardian::Atom> a) : is_quark(false), is_array(false), atom_data(a) {}
+    
+    // Array constructor
+    Value(const std::vector<Value>& arr) : is_quark(false), is_array(true), array_data(arr) {}
     
     std::string to_string() const {
         if (is_quark) {
             return quark_data.to_string();
         }
+        if (is_array) {
+            std::string result = "[";
+            for (size_t i = 0; i < array_data.size(); i++) {
+                result += array_data[i].to_string();
+                if (i < array_data.size() - 1) result += ", ";
+            }
+            result += "]";
+            return result;
+        }
         if (atom_data) {
-            // Check if it's a StringAtom
             if (auto str_atom = std::dynamic_pointer_cast<guardian::StringAtom>(atom_data)) {
-                return str_atom->get();
+                std::string value = str_atom->get();
+                if (value.rfind("char:", 0) == 0) {
+                    return value.substr(5);
+                }
+                return value;
             }
             return std::string(atom_data->name());
         }
@@ -60,11 +77,16 @@ struct Value {
         if (is_quark) {
             return quark_data.size();
         }
+        if (is_array) {
+            size_t total = 0;
+            for (const auto& val : array_data) {
+                total += val.size();
+            }
+            return total;
+        }
         return atom_data ? atom_data->size() : 0;
     }
     
-    // Convert to Atom (for storing in molecule)
-    // Only for quarks that can be converted to atoms
     std::shared_ptr<guardian::Atom> toAtom() const {
         if (is_quark) {
             switch (quark_data.type) {
@@ -119,9 +141,14 @@ private:
     void executeSub();
     void executeMul();
     void executeDiv();
+    void executeMod();
     void executePrint();
     void executePrintln();
-    void executeMod();
+    
+    // Array operations
+    void executeMakeArray();
+    void executeArrayGet();
+    void executeArraySet();
     
     std::string readString();
 };

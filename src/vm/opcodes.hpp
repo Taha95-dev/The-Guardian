@@ -47,7 +47,7 @@ enum class Opcode : uint8_t {
     CALL = 0x53,
     RET = 0x54,
     
-    // Variables (stored in main molecule)
+    // Variables
     STORE = 0x60,
     LOAD = 0x61,
     
@@ -59,6 +59,14 @@ enum class Opcode : uint8_t {
     // Print
     PRINT = 0x80,
     PRINTLN = 0x81,
+    
+    // Array operations
+    MAKE_ARRAY = 0x90,
+    ARRAY_GET = 0x91,
+    ARRAY_SET = 0x92,
+    ARRAY_PUSH = 0x93,
+    ARRAY_POP = 0x94,
+    ARRAY_LEN = 0x95,
 };
 
 } // namespace guardian::vm

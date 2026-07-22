@@ -45,10 +45,8 @@ enum class Opcode : uint8_t {
     RET = 0x54,
     
     // Variables
-    LOAD = 0x60,
-    STORE = 0x61,
-    LOAD_GLOBAL = 0x62,
-    STORE_GLOBAL = 0x63,
+    STORE = 0x60,
+    LOAD = 0x61,
     
     // Functions
     DEFINE_FN = 0x70,
@@ -58,6 +56,14 @@ enum class Opcode : uint8_t {
     // Print
     PRINT = 0x80,
     PRINTLN = 0x81,
+    
+    // Array operations
+    MAKE_ARRAY = 0x90,
+    ARRAY_GET = 0x91,
+    ARRAY_SET = 0x92,
+    ARRAY_PUSH = 0x93,
+    ARRAY_POP = 0x94,
+    ARRAY_LEN = 0x95,
 };
 
 } // namespace om

@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <fstream>
 #include <memory>
+#include <unordered_map>
 
 namespace om {
 
@@ -33,8 +34,13 @@ private:
     uint16_t version;
     uint16_t flags;
     
-    void generateStatement(const std::unique_ptr<ASTNode>& node, std::vector<uint8_t>& bytecode);
-    void generateExpression(const std::unique_ptr<ASTNode>& node, std::vector<uint8_t>& bytecode);
+    void generateStatement(const std::unique_ptr<ASTNode>& node, 
+                          std::vector<uint8_t>& bytecode,
+                          std::unordered_map<std::string, bool>& variables);
+    
+    void generateExpression(const std::unique_ptr<ASTNode>& node, 
+                           std::vector<uint8_t>& bytecode,
+                           std::unordered_map<std::string, bool>& variables);
     
     bool writeHeader(std::ofstream& out, uint32_t bytecode_size);
 };
