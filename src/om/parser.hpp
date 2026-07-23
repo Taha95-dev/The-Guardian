@@ -2,6 +2,7 @@
 
 #include "lexer.hpp"
 #include "ast.hpp"
+#include <string>
 #include <vector>
 #include <memory>
 
@@ -40,12 +41,14 @@ private:
     std::unique_ptr<ASTNode> parseBinaryOp(int min_precedence);
     std::unique_ptr<ASTNode> parsePrimary();
     std::unique_ptr<ASTNode> parseTypedArrayLiteral();
-    
+    std::unique_ptr<ASTNode> parseStructDef();
+    std::unique_ptr<ASTNode> parseStructInstance(const std::string& name);
+    std::unique_ptr<ASTNode> parseFieldAccess(const std::string& name);
     // Array functions
     std::unique_ptr<ASTNode> parseArrayDecl(const Token& name);
     std::unique_ptr<ASTNode> parseArrayAccess(const std::string& name, int line, int column);
     std::unique_ptr<ASTNode> parseArrayLiteral();
-    
+   
     int getPrecedence(TokenType type);
 };
 

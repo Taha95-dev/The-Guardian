@@ -192,6 +192,9 @@ std::unique_ptr<ASTNode> Parser::parseStatement() {
     if (match(TokenType::LBRACE)) {
         return parseBlock();
     }
+    if (match(TokenType::SEMICOLON)) {}
+    if (match(TokenType::STRUCT)) { return parseStructDef(); }
+    if (match(TokenType::FN)) { return parseFunctionDef(); }
     
     // Check for array assignment: arr[0] = 42;
     if (peek().type == TokenType::IDENTIFIER) {
@@ -228,6 +231,66 @@ std::unique_ptr<ASTNode> Parser::parseStatement() {
     }
     
     return nullptr;
+}
+
+std::unique_ptr<ASTNode> Parser::parseStructDef() {
+    auto node = std::make_unique<StructDefNode>();
+    
+    Token name = expect(TokenType::IDENTIFIER, "Expected struct name");
+    if (name.type == TokenType::END_OF_FILE) return nullptr;
+    node->name = name.value;
+    node->line = name.line;
+    node->column = name.column;
+    
+    expect(TokenType::LBRACE, "Expected '{' after struct name");
+    
+    while (!isAtEnd() && peek().type != TokenType::RBRACE) {
+        // Parse field name (must be identifier)
+        Token field_name = peek();
+        if (field_name.type != TokenType::IDENTIFIER) {
+            error_count++;
+            std::cerr << "Error: Expected field name at line " << field_name.line << "\n";
+            std::cerr << "  Got: " << field_name.value << "\n";
+            advance();
+            continue;
+        }
+        advance(); // consume field name
+        
+        // Expect colon
+        if (!match(TokenType::COLON)) {
+            error_count++;
+            std::cerr << "Error: Expected ':' after field name at line " << peek().line << "\n";
+            continue;
+        }
+        
+        // Parse field type - ACCEPT TYPE KEYWORDS!
+        Token field_type = peek();
+        if (field_type.type == TokenType::INT ||
+            field_type.type == TokenType::FLOAT ||
+            field_type.type == TokenType::BOOL ||
+            field_type.type == TokenType::CHAR ||
+            field_type.type == TokenType::STRING ||
+            field_type.type == TokenType::ANY) {
+            advance(); // consume the type keyword
+            node->fields.push_back({field_name.value, field_type.value});
+        } else if (field_type.type == TokenType::IDENTIFIER) {
+            // Custom type (like another struct name)
+            advance();
+            node->fields.push_back({field_name.value, field_type.value});
+        } else {
+            error_count++;
+            std::cerr << "Error: Expected field type at line " << field_type.line << "\n";
+            std::cerr << "  Got: " << field_type.value << "\n";
+            advance(); // skip the problematic token
+        }
+        
+        // Optional semicolon
+        match(TokenType::SEMICOLON);
+    }
+    
+    expect(TokenType::RBRACE, "Expected '}' after struct fields");
+    
+    return node;
 }
 
 std::unique_ptr<ASTNode> Parser::parseArrayLiteral() {
@@ -534,7 +597,7 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
         int column = token.column;
         advance();
         
-        // Check if it's a function call
+        // Check if it's a function call: name(...)
         if (!isAtEnd() && peek().type == TokenType::LPAREN) {
             auto call = std::make_unique<CallNode>();
             call->name = name;
@@ -554,7 +617,17 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
             return call;
         }
         
-        // Check if it's an array access
+        // Check if it's a struct instance: Person { ... }
+        if (!isAtEnd() && peek().type == TokenType::LBRACE) {
+            return parseStructInstance(name);
+        }
+        
+        // Check if it's field access: person:name
+        if (!isAtEnd() && peek().type == TokenType::COLON) {
+            return parseFieldAccess(name);
+        }
+        
+        // Check if it's an array access: arr[0]
         if (!isAtEnd() && peek().type == TokenType::LBRACKET) {
             auto access = std::make_unique<ArrayAccessNode>();
             access->name = name;
@@ -622,6 +695,41 @@ std::unique_ptr<ASTNode> Parser::parseTypedArrayLiteral() {
         } while (match(TokenType::COMMA));
         expect(TokenType::RBRACKET, "Expected ']' after array elements");
     }
+    
+    return node;
+}
+
+std::unique_ptr<ASTNode> Parser::parseStructInstance(const std::string& name) {
+    auto node = std::make_unique<StructInstanceNode>();
+    node->struct_name = name;
+    node->line = peek().line;
+    node->column = peek().column;
+    
+    expect(TokenType::LBRACE, "Expected '{' after struct name");
+    
+    while (!isAtEnd() && peek().type != TokenType::RBRACE) {
+        Token field_name = expect(TokenType::IDENTIFIER, "Expected field name");
+        expect(TokenType::COLON, "Expected ':' after field name");
+        auto value = parseExpression();
+        match(TokenType::SEMICOLON);
+        
+        node->fields[field_name.value] = std::move(value);
+    }
+    
+    expect(TokenType::RBRACE, "Expected '}' after struct fields");
+    
+    return node;
+}
+
+std::unique_ptr<ASTNode> Parser::parseFieldAccess(const std::string& name) {
+    auto node = std::make_unique<FieldAccessNode>();
+    node->struct_name = name;
+    node->line = peek().line;
+    node->column = peek().column;
+    
+    expect(TokenType::COLON, "Expected ':' after struct name");
+    Token field = expect(TokenType::IDENTIFIER, "Expected field name");
+    node->field_name = field.value;
     
     return node;
 }

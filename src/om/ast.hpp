@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <unordered_map>
 #include <memory>
 #include <variant>
 
@@ -38,6 +39,9 @@ enum class NodeType {
     FOR_LOOP,
     WHILE_LOOP,
     RETURN_STATEMENT,
+    STRUCT_DEF,
+    STRUCT_INSTANCE,
+    FIELD_ACCESS,
     BLOCK,
     BINARY_OP,
     UNARY_OP,
@@ -188,6 +192,24 @@ struct TypedArrayLiteralNode : ASTNode {
     std::string element_type;
     std::vector<std::unique_ptr<ASTNode>> elements;
     TypedArrayLiteralNode() { type = NodeType::TYPED_ARRAY_LITERAL; }
+};
+
+struct StructDefNode : ASTNode {
+    std::string name;
+    std::vector<std::pair<std::string, std::string>> fields;
+    StructDefNode() { type = NodeType::STRUCT_DEF; }
+};
+
+struct StructInstanceNode : ASTNode {
+    std::string struct_name;
+    std::unordered_map<std::string, std::unique_ptr<ASTNode>> fields;
+    StructInstanceNode() { type = NodeType::STRUCT_INSTANCE; }
+};
+
+struct FieldAccessNode : ASTNode {
+    std::string struct_name;
+    std::string field_name;
+    FieldAccessNode() { type = NodeType::FIELD_ACCESS; }
 };
 
 } // namespace om
