@@ -1,27 +1,76 @@
-The Guardian
+# 🔷 The Guardian — Language Framework
 
-A framework for building secure, high-performance languages.
-Quick Start
-bash
+**Build custom languages with memory safety, custom binary formats, and a VM.**
 
-git clone https://github.com/Taha95-dev/The-Guardian
+The Guardian is a **language development framework** that provides everything you need to build your own programming language:
+
+- 🧬 **Core** — Atoms, Molecules, Quarks for type-safe data
+- 💾 **Memory** — Cache, LUT, Memory Manager for safety
+- 📝 **Parser** — Lexer/Parser base classes
+- 💿 **Format** — Custom binary formats (.gbin)
+- 🖥️ **VM** — Bytecode execution
+
+## Why The Guardian?
+
+| Feature | The Guardian | Other Frameworks |
+|---------|--------------|------------------|
+| Custom binary formats | ✅ Built-in | ❌ |
+| Memory safety | ✅ LUT | ❌ |
+| VM execution | ✅ | ✅ |
+| System-wide | ✅ | ❌ |
+| Size | 3,373 lines | 100,000+ lines |
+
+## Quick Start
+
+```bash
+# Install
+git clone https://github.com/Taha95-dev/The-Guardian.git
 cd The-Guardian
-mkdir build && cd build
-cmake .. && make
-./guardianc
+make build
+sudo make install
+
+# Test
+guardianc --version
+
+Build a Language
+cpp
+
+#include <guardian/core/atom.hpp>
+#include <guardian/core/molecule.hpp>
+#include <guardian/parser/parser.hpp>
+#include <guardian/format/gbin_format.hpp>
+#include <guardian/vm/vm.hpp>
+
+// Your language here!
 
 Documentation
 
-    Docs
+    User Guide
 
     Architecture
 
     API Reference
 
-    Tutorial
-
-    Axiom Language
+    Tutorials
 
 License
 
-MIT
+The Guardian is licensed under The Guardian License v1.0:
+
+    ✅ FREE for personal, educational, and open-source use
+
+    💼 Commercial use requires a license (contact via GitHub Issues)
+
+    🚫 No selling The Guardian as your own product
+
+See LICENSE.md for full details.
+Commercial Licensing
+License Type	Price	Use Cases
+Individual	$99/year	One commercial project
+Small Business	$499/year	Up to 5 commercial projects
+Enterprise	$2,499/year	Unlimited commercial projects
+OEM/Reselling	Contact me	Resell as part of your product
+
+Contact: Open an issue
+Built by Taha — 13-year-old developer building the future of code.
+
