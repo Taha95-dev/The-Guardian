@@ -10,7 +10,7 @@ The Guardian is a **modular language framework** designed to be lightweight, fle
 
 ![The Guardian Architecture](../assets/architecture.svg)
 
-> *The Guardian's layered architecture — from Core to VM.*
+*The Guardian's layered architecture — from Core to VM.*
 
 ---
 
