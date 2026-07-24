@@ -25,12 +25,20 @@ public:
     // Size
     size_t size() const { return total_size; }
     
+    // Bool methods
+    void add_bool(const std::string& name, bool value);
+    bool get_bool(const std::string& name) const;
+    bool has_bool(const std::string& name) const;
+
     // Debug
     void dump() const;
     
+    void remove(const std::string& name);
+
 private:
     std::unordered_map<std::string, std::string> string_lut;
     std::unordered_map<std::string, double> number_lut;
+    std::unordered_map<std::string, bool> bool_lut;
     size_t total_size;
 };
 

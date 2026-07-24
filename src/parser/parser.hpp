@@ -12,11 +12,56 @@ namespace guardian::parser {
 // ============================================
 struct Token {
     enum class Type {
+        // Literals
         IDENTIFIER,
         NUMBER,
         STRING,
+        
+        // Keywords
         KEYWORD,
-        SYMBOL,
+        IF,
+        ELSE,
+        FOR,
+        WHILE,
+        RETURN,
+        LET,
+        FN,
+        TRUE,
+        FALSE,
+        NULL_TOKEN,
+        STRUCT,
+        DICT,
+        ANY,
+        
+        // Symbols
+        LPAREN,
+        RPAREN,
+        LBRACE,
+        RBRACE,
+        LBRACKET,
+        RBRACKET,
+        SEMICOLON,
+        COLON,
+        COMMA,
+        DOT,
+        ASSIGN,
+        PLUS,
+        MINUS,
+        STAR,
+        SLASH,
+        MOD,
+        EQUAL,
+        NOT_EQUAL,
+        LESS,
+        GREATER,
+        LESS_EQUAL,
+        GREATER_EQUAL,
+        AND,
+        OR,
+        NOT,
+        ARROW,
+        
+        // Special
         END_OF_FILE
     };
     
@@ -44,7 +89,8 @@ struct ASTNode {
         UNARY_OP,
         CALL,
         IF,
-        LOOP,
+        FOR,
+        WHILE,
         RETURN,
         BLOCK,
         CUSTOM
@@ -54,6 +100,45 @@ struct ASTNode {
     int line;
     int column;
     virtual ~ASTNode() = default;
+};
+
+// ============================================
+// AST NODE TYPES
+// ============================================
+struct ProgramNode : ASTNode {
+    std::vector<std::unique_ptr<ASTNode>> statements;
+    ProgramNode() { type = Type::PROGRAM; }
+};
+
+struct BlockNode : ASTNode {
+    std::vector<std::unique_ptr<ASTNode>> statements;
+    BlockNode() { type = Type::BLOCK; }
+};
+
+struct IfNode : ASTNode {
+    std::unique_ptr<ASTNode> condition;
+    std::unique_ptr<ASTNode> then_branch;
+    std::unique_ptr<ASTNode> else_branch;
+    IfNode() { type = Type::IF; }
+};
+
+struct ForNode : ASTNode {
+    std::unique_ptr<ASTNode> init;
+    std::unique_ptr<ASTNode> condition;
+    std::unique_ptr<ASTNode> increment;
+    std::unique_ptr<ASTNode> body;
+    ForNode() { type = Type::FOR; }
+};
+
+struct WhileNode : ASTNode {
+    std::unique_ptr<ASTNode> condition;
+    std::unique_ptr<ASTNode> body;
+    WhileNode() { type = Type::WHILE; }
+};
+
+struct ReturnNode : ASTNode {
+    std::unique_ptr<ASTNode> value;
+    ReturnNode() { type = Type::RETURN; }
 };
 
 // ============================================
@@ -88,6 +173,12 @@ public:
     
     virtual std::unique_ptr<ASTNode> parse() = 0;
     
+    // Extended parser methods
+    std::unique_ptr<ASTNode> parseIf();
+    std::unique_ptr<ASTNode> parseFor();
+    std::unique_ptr<ASTNode> parseWhile();
+    std::unique_ptr<ASTNode> parseReturn();
+    
 protected:
     std::vector<Token> tokens;
     size_t pos;
@@ -99,6 +190,11 @@ protected:
     bool match(Token::Type type);
     bool isAtEnd() const;
     void error(const std::string& msg);
+    
+    // Virtual methods for language-specific parsing
+    virtual std::unique_ptr<ASTNode> parseExpression() = 0;
+    virtual std::unique_ptr<ASTNode> parseStatement() = 0;
+    virtual std::unique_ptr<ASTNode> parseBlock() = 0;
 };
 
 } // namespace guardian::parser

@@ -1,86 +1,175 @@
-#include "test_memory.hpp"
 #include "../src/memory/memory.hpp"
 #include <iostream>
+#include <cassert>
+#include <memory>
+#include <cstring>
 
 using namespace guardian::memory;
 
+// Forward declarations
+void test_memory_manager_basic();
+void test_memory_stats();
+void test_memory_lut();
+void test_memory_reset();
+void test_cache_manager();
+void test_memory_pool();
+void test_stress();
+
+// Main test function for memory
 void test_memory() {
-    std::cout << "  Testing Guardian Memory System...\n";
+    std::cout << "  Running memory tests...\n";
+    test_memory_manager_basic();
+    test_memory_stats();
+    test_memory_lut();
+    test_memory_reset();
+    test_cache_manager();
+    test_memory_pool();
+    test_stress();
+    std::cout << "  Memory tests complete\n";
+}
+
+void test_memory_manager_basic() {
+    std::cout << "    MemoryManager Basic Operations...\n";
+    MemoryManager mem;
     
-    // Test Atoms
-    std::cout << "  📦 Atoms:\n";
-    auto int_atom = std::make_shared<Atom>(42);
-    auto float_atom = std::make_shared<Atom>(3.14f);
-    auto bool_atom = std::make_shared<Atom>(true);
-    auto string_atom = std::make_shared<Atom>("Hello, Guardian!");
+    void* ptr = mem.allocate(64);
+    assert(ptr != nullptr);
+    mem.deallocate(ptr);
     
-    std::cout << "    Int: " << int_atom->toString() << "\n";
-    std::cout << "    Float: " << float_atom->toString() << "\n";
-    std::cout << "    Bool: " << bool_atom->toString() << "\n";
-    std::cout << "    String: " << string_atom->toString() << "\n";
+    std::cout << "    ✅ PASSED\n";
+}
+
+void test_memory_stats() {
+    std::cout << "    MemoryManager Stats...\n";
+    MemoryManager mem;
     
-    // Test Molecules
-    std::cout << "  🧬 Molecules:\n";
-    auto molecule = std::make_shared<Molecule>();
-    molecule->addAtom("x", int_atom);
-    molecule->addAtom("y", float_atom);
-    molecule->addAtom("flag", bool_atom);
-    molecule->addAtom("msg", string_atom);
+    auto stats = mem.get_stats();
+    assert(stats.total_allocated == 0);
+    assert(stats.current_allocations == 0);
     
-    std::cout << "    Molecule has " << molecule->getAtomCount() << " atoms\n";
+    void* ptr1 = mem.allocate(100);
+    void* ptr2 = mem.allocate(200);
     
-    // Test LUT (Pointer tracking)
-    std::cout << "  📋 LUT (Pointer Tracking):\n";
-    int* ptr = new int(42);
-    molecule->registerPointer(ptr, "test_ptr");
-    std::cout << "    Pointer valid: " << (molecule->isValidPointer(ptr) ? "yes" : "no") << "\n";
-    molecule->unregisterPointer(ptr);
-    std::cout << "    After unregister: " << (molecule->isValidPointer(ptr) ? "yes" : "no") << "\n";
-    delete ptr;
+    stats = mem.get_stats();
+    assert(stats.total_allocated == 300);
+    assert(stats.current_allocations == 2);
     
-    // Test Memory Manager
-    std::cout << "  💾 Memory Manager:\n";
-    MemoryManager mem(1024, 1024);
-    mem.printStats();
+    mem.deallocate(ptr1);
+    mem.deallocate(ptr2);
     
-    // Test stack
-    std::cout << "    Stack:\n";
-    void* stack_ptr = mem.stackPush(4);
-    if (stack_ptr) {
-        *(int*)stack_ptr = 42;
-        std::cout << "      Pushed: " << *(int*)stack_ptr << "\n";
-        mem.stackPop(4);
-    }
+    std::cout << "    ✅ PASSED\n";
+}
+
+void test_memory_lut() {
+    std::cout << "    MemoryManager LUT...\n";
+    MemoryManager mem;
     
-    // Test heap
-    std::cout << "    Heap:\n";
-    void* heap_ptr = mem.heapAllocate(8);
-    if (heap_ptr) {
-        mem.registerPointer(heap_ptr, 8, "test_heap");
-        std::cout << "      Allocated 8 bytes at " << heap_ptr << "\n";
-        mem.unregisterPointer(heap_ptr);
-        mem.heapFree(heap_ptr);
-    }
+    void* ptr = mem.allocate(512);
+    mem.register_pointer(ptr, 512, "lut_test");
     
-    // Test serialization
-    std::cout << "  💾 Serialization:\n";
-    auto data = molecule->serialize();
-    std::cout << "    Serialized " << data.size() << " bytes\n";
+    assert(mem.is_valid_pointer(ptr));
+    assert(!mem.is_valid_pointer((void*)0xDEADBEEF));
     
-    auto new_molecule = Molecule::deserialize(data);
-    if (new_molecule) {
-        std::cout << "    Deserialized: " << new_molecule->getAtomCount() << " atoms\n";
+    mem.unregister_pointer(ptr);
+    mem.deallocate(ptr);
+    
+    std::cout << "    ✅ PASSED\n";
+}
+
+void test_memory_reset() {
+    std::cout << "    MemoryManager Reset...\n";
+    MemoryManager mem;
+    
+    void* ptr1 = mem.allocate(100);
+    void* ptr2 = mem.allocate(200);
+    mem.register_pointer(ptr1, 100, "reset_test1");
+    mem.register_pointer(ptr2, 200, "reset_test2");
+    
+    auto stats = mem.get_stats();
+    assert(stats.current_allocations == 2);
+    assert(stats.lut_size == 2);
+    
+    mem.reset();
+    
+    stats = mem.get_stats();
+    assert(stats.current_allocations == 0);
+    assert(stats.lut_size == 0);
+    
+    std::cout << "    ✅ PASSED\n";
+}
+
+void test_cache_manager() {
+    std::cout << "    CacheManager...\n";
+    CacheManager cache;
+    
+    std::string cache_dir = cache.get_cache_dir();
+    std::cout << "      Cache directory: " << cache_dir << "\n";
+    
+    std::string hash = "test_hash_12345";
+    std::vector<uint8_t> test_data = {0x01, 0x02, 0x03, 0x04, 0x05};
+    
+    bool saved = cache.save_cache(hash, test_data);
+    if (saved) {
+        assert(cache.has_cache(hash));
         
-        auto x_atom = new_molecule->getAtom("x");
-        auto msg_atom = new_molecule->getAtom("msg");
+        std::vector<uint8_t> loaded_data;
+        bool loaded = cache.load_cache(hash, loaded_data);
+        assert(loaded);
+        assert(loaded_data.size() == test_data.size());
         
-        if (x_atom) {
-            std::cout << "    x = " << x_atom->toString() << "\n";
-        }
-        if (msg_atom) {
-            std::cout << "    msg = " << msg_atom->toString() << "\n";
-        }
-    } else {
-        std::cout << "    Deserialization failed!\n";
+        cache.clear_cache(hash);
+        assert(!cache.has_cache(hash));
     }
+    
+    std::cout << "    ✅ PASSED\n";
+}
+
+void test_memory_pool() {
+    std::cout << "    MemoryPool...\n";
+    
+    MemoryPool pool(4096);
+    assert(pool.used() == 0);
+    
+    void* ptr1 = pool.allocate(128);
+    assert(ptr1 != nullptr);
+    assert(pool.used() > 0);
+    
+    void* ptr2 = pool.allocate(512);
+    assert(ptr2 != nullptr);
+    
+    pool.deallocate(ptr2);
+    pool.deallocate(ptr1);
+    
+    pool.reset();
+    assert(pool.used() == 0);
+    
+    std::cout << "    ✅ PASSED\n";
+}
+
+void test_stress() {
+    std::cout << "    Stress Test...\n";
+    
+    MemoryManager mem;
+    const int NUM_ALLOCATIONS = 1000;
+    std::vector<void*> pointers;
+    
+    for (int i = 0; i < NUM_ALLOCATIONS; i++) {
+        size_t size = (i % 64) + 1;
+        void* ptr = mem.allocate(size);
+        pointers.push_back(ptr);
+        mem.register_pointer(ptr, size, "stress_" + std::to_string(i));
+    }
+    
+    auto stats = mem.get_stats();
+    assert(stats.current_allocations == NUM_ALLOCATIONS);
+    
+    for (int i = 0; i < NUM_ALLOCATIONS; i++) {
+        mem.unregister_pointer(pointers[i]);
+        mem.deallocate(pointers[i]);
+    }
+    
+    stats = mem.get_stats();
+    assert(stats.current_allocations == 0);
+    
+    std::cout << "    ✅ PASSED\n";
 }

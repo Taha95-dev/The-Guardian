@@ -71,4 +71,96 @@ void Parser::error(const std::string& msg) {
     std::cerr << "Error: " << msg << " at line " << peek().line << "\n";
 }
 
+// ============================================
+// EXTENDED PARSER METHODS
+// ============================================
+
+std::unique_ptr<ASTNode> Parser::parseIf() {
+    auto node = std::make_unique<IfNode>();
+    
+    // Parse condition
+    if (!match(Token::Type::LPAREN)) {
+        error("Expected '(' after 'if'");
+        return nullptr;
+    }
+    node->condition = parseExpression();
+    if (!match(Token::Type::RPAREN)) {
+        error("Expected ')' after condition");
+        return nullptr;
+    }
+    
+    // Parse then branch
+    node->then_branch = parseBlock();
+    
+    // Parse else branch (optional)
+    if (match(Token::Type::ELSE)) {
+        node->else_branch = parseBlock();
+    }
+    
+    return node;
+}
+
+std::unique_ptr<ASTNode> Parser::parseFor() {
+    auto node = std::make_unique<ForNode>();
+    
+    if (!match(Token::Type::LPAREN)) {
+        error("Expected '(' after 'for'");
+        return nullptr;
+    }
+    
+    // Parse initialization
+    node->init = parseStatement();
+    
+    // Parse condition
+    node->condition = parseExpression();
+    if (!match(Token::Type::SEMICOLON)) {
+        error("Expected ';' after condition");
+        return nullptr;
+    }
+    
+    // Parse increment
+    node->increment = parseExpression();
+    if (!match(Token::Type::RPAREN)) {
+        error("Expected ')' after for loop header");
+        return nullptr;
+    }
+    
+    // Parse body
+    node->body = parseBlock();
+    
+    return node;
+}
+
+std::unique_ptr<ASTNode> Parser::parseWhile() {
+    auto node = std::make_unique<WhileNode>();
+    
+    if (!match(Token::Type::LPAREN)) {
+        error("Expected '(' after 'while'");
+        return nullptr;
+    }
+    node->condition = parseExpression();
+    if (!match(Token::Type::RPAREN)) {
+        error("Expected ')' after condition");
+        return nullptr;
+    }
+    
+    node->body = parseBlock();
+    
+    return node;
+}
+
+std::unique_ptr<ASTNode> Parser::parseReturn() {
+    auto node = std::make_unique<ReturnNode>();
+    
+    if (!match(Token::Type::SEMICOLON)) {
+        node->value = parseExpression();
+        if (!match(Token::Type::SEMICOLON)) {
+            error("Expected ';' after return value");
+            return nullptr;
+        }
+    }
+    
+    return node;
+}
+
 } // namespace guardian::parser
