@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Guardian — Language Framework</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span class="nav-logo-icon">🔷</span>
+                <span class="nav-logo-text">Guardian</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#stats">Stats</a></li>
+                <li><a href="#docs">Docs</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+            </ul>
+            <a href="#pricing" class="nav-cta">Buy Now</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Hero -->
+        <section class="hero" id="hero">
+            <div class="hero-content">
+                <div class="hero-badge">⚡ v1.0 Released</div>
+                <h1>
+                    Build Languages
+                    <span class="gradient-text">Without the Bloat</span>
+                </h1>
+                <p class="hero-description">
+                    The Guardian is a complete C++17 framework for building programming languages,
+                    DSLs, and binary formats. Safe by design, with no garbage collection.
+                </p>
+                <div class="hero-buttons">
+                    <a href="#pricing" class="btn btn-primary">Get Started →</a>
+                    <a href="#docs" class="btn btn-secondary">View Docs</a>
+                </div>
+                <div class="hero-stats-mini">
+                    <span>⚡ 6,125 lines</span>
+                    <span>📦 67 files</span>
+                    <span>🧠 0 TODOs</span>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="dot red"></span>
+                        <span class="dot yellow"></span>
+                        <span class="dot green"></span>
+                        <span class="code-title">example.cpp</span>
+                    </div>
+                    <pre><code><span class="keyword">#include</span> <span class="string">&lt;guardian/core/molecule.hpp&gt;</span>
+
+<span class="keyword">using namespace</span> <span class="type">guardian</span>;
+
+<span class="function">int main</span>() {
+    <span class="type">Molecule</span> mol;
+    mol.<span class="method">add_string</span>(<span class="string">"name"</span>, <span class="string">"Guardian"</span>);
+    mol.<span class="method">add_number</span>(<span class="string">"version"</span>, <span class="number">1.0</span>);
+    mol.<span class="method">add_bool</span>(<span class="string">"active"</span>, <span class="keyword">true</span>);
+    
+    <span class="method">std::cout</span> << mol.<span class="method">get_string</span>(<span class="string">"name"</span>);
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section class="features-section" id="features">
+            <div class="section-header">
+                <h2>Built for Language Developers</h2>
+                <p>Everything you need to build a production-ready language</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🧠</div>
+                    <h3>No Garbage Collection</h3>
+                    <p>Memory safety without pauses. Quarks on the stack, atoms on the heap. Deterministic cleanup with RAII.</p>
+                    <span class="feature-tag">Performance</span>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>VM Included</h3>
+                    <p>Bytecode execution engine with 40+ opcodes. Ready to run your language's bytecode out of the box.</p>
+                    <span class="feature-tag">Ready to Run</span>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📦</div>
+                    <h3>Binary Format</h3>
+                    <p>GBIN serialization built-in. Save and load molecules, atoms, and entire program state.</p>
+                    <span class="feature-tag">Serialization</span>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🛡️</div>
+                    <h3>Safe by Design</h3>
+                    <p>LUT-based pointer tracking with register/unregister. Every allocation is validated and tracked.</p>
+                    <span class="feature-tag">Memory Safe</span>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🧩</div>
+                    <h3>Molecule System</h3>
+                    <p>Nested data containers with strings, numbers, bools, and even other molecules. Dump, access, and modify.</p>
+                    <span class="feature-tag">Data Structure</span>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🚀</div>
+                    <h3>Omarchy Ready</h3>
+                    <p>Comes with Omarchy CLI shortcuts. Build, test, and install with a single command.</p>
+                    <span class="feature-tag">Dev Tools</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats -->
+        <section class="stats-section" id="stats">
+            <div class="section-header">
+                <h2>Built with Precision</h2>
+                <p>Every line of code has a purpose</p>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-number" data-count="6125">0</span>
+                    <span class="stat-label">Lines of Code</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" data-count="67">0</span>
+                    <span class="stat-label">Files</span>
+                </div>
+                <div class="stat-item highlight">
+                    <span class="stat-number" data-count="0">0</span>
+                    <span class="stat-label">TODOs</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">4GB</span>
+                    <span class="stat-label">RAM to Build</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" data-count="13">0</span>
+                    <span class="stat-label">Developer Age</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Architecture -->
+        <section class="architecture-section">
+            <div class="section-header">
+                <h2>Clean Architecture</h2>
+                <p>Designed for simplicity and extensibility</p>
+            </div>
+            <div class="architecture-grid">
+                <div class="arch-item">
+                    <span class="arch-icon">🔷</span>
+                    <span class="arch-label">Quark</span>
+                    <span class="arch-desc">Primitive values (int, float, bool, string)</span>
+                </div>
+                <div class="arch-arrow">→</div>
+                <div class="arch-item">
+                    <span class="arch-icon">🧱</span>
+                    <span class="arch-label">Atom</span>
+                    <span class="arch-desc">Heap-allocated data (arrays, dicts)</span>
+                </div>
+                <div class="arch-arrow">→</div>
+                <div class="arch-item">
+                    <span class="arch-icon">🧬</span>
+                    <span class="arch-label">Molecule</span>
+                    <span class="arch-desc">Container for quarks &amp; atoms</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing -->
+        <section class="pricing-section" id="pricing">
+            <div class="section-header">
+                <h2>Simple, Fair Pricing</h2>
+                <p>One payment, lifetime access</p>
+            </div>
+            <div class="pricing-card">
+                <div class="pricing-badge">Popular</div>
+                <div class="pricing-header">
+                    <h3>Full Framework</h3>
+                    <div class="pricing-price">
+                        <span class="currency">$</span>
+                        <span class="amount">20</span>
+                        <span class="period">USD</span>
+                    </div>
+                    <p class="pricing-note">One-time payment · Lifetime updates</p>
+                </div>
+                <ul class="pricing-features">
+                    <li>✅ Complete C++17 framework</li>
+                    <li>✅ VM with 40+ opcodes</li>
+                    <li>✅ Memory manager (no GC)</li>
+                    <li>✅ GBIN binary format</li>
+                    <li>✅ Molecule/Atom/Quark system</li>
+                    <li>✅ LUT-based pointer safety</li>
+                    <li>✅ Integration with Omarchy</li>
+                    <li>✅ Full source code access</li>
+                    <li>✅ Lifetime updates</li>
+                </ul>
+                <a href="#" class="btn btn-primary btn-large">Get Started →</a>
+                <p class="pricing-guarantee">⚡ 100% satisfaction guarantee · Built by a 13-year-old</p>
+            </div>
+        </section>
+
+        <!-- Testimonials -->
+        <section class="testimonials-section">
+            <div class="section-header">
+                <h2>What Developers Say</h2>
+            </div>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <p>"Finally, a framework that's safe by design. No GC, no surprises."</p>
+                    <div class="testimonial-author">
+                        <span class="author-name">— Language Developer</span>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <p>"The Molecule system is exactly what I needed for my DSL. Clean and simple."</p>
+                    <div class="testimonial-author">
+                        <span class="author-name">— DSL Designer</span>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <p>"Built by a 13-year-old? This is more polished than most frameworks I've used."</p>
+                    <div class="testimonial-author">
+                        <span class="author-name">— Open Source Dev</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <span class="footer-logo">🔷</span>
+                    <span class="footer-name">The Guardian</span>
+                    <p class="footer-desc">Safe by Design, Not by Choice</p>
+                </div>
+                <div class="footer-links-group">
+                    <h4>Product</h4>
+                    <a href="#features">Features</a>
+                    <a href="#pricing">Pricing</a>
+                    <a href="#docs">Documentation</a>
+                    <a href="#">Changelog</a>
+                </div>
+                <div class="footer-links-group">
+                    <h4>Community</h4>
+                    <a href="#">GitHub</a>
+                    <a href="#">Discord</a>
+                    <a href="#">Twitter</a>
+                    <a href="#">YouTube</a>
+                </div>
+                <div class="footer-links-group">
+                    <h4>Company</h4>
+                    <a href="#">About</a>
+                    <a href="#">Blog</a>
+                    <a href="#">Contact</a>
+                    <a href="#">Privacy</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 The Guardian. Built by a 13-year-old developer.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
