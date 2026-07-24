@@ -64,6 +64,26 @@ bool Molecule::has_bool(const std::string& name) const {
 }
 
 // ============================================
+// MOLECULE STORAGE (Nested Molecules)
+// ============================================
+void Molecule::add_molecule(const std::string& name, std::shared_ptr<Molecule> value) {
+    molecule_lut[name] = value;
+    total_size += sizeof(std::shared_ptr<Molecule>);
+}
+
+std::shared_ptr<Molecule> Molecule::get_molecule(const std::string& name) const {
+    auto it = molecule_lut.find(name);
+    if (it != molecule_lut.end()) {
+        return it->second;
+    }
+    return nullptr;
+}
+
+bool Molecule::has_molecule(const std::string& name) const {
+    return molecule_lut.find(name) != molecule_lut.end();
+}
+
+// ============================================
 // REMOVE
 // ============================================
 void Molecule::remove(const std::string& name) {
@@ -87,14 +107,21 @@ void Molecule::remove(const std::string& name) {
         total_size -= sizeof(bool);
         bool_lut.erase(it_bool);
     }
+    
+    // Remove from molecule LUT
+    auto it_molecule = molecule_lut.find(name);
+    if (it_molecule != molecule_lut.end()) {
+        total_size -= sizeof(std::shared_ptr<Molecule>);
+        molecule_lut.erase(it_molecule);
+    }
 }
 
 // ============================================
-// DUMP - FIXED
+// DUMP
 // ============================================
 void Molecule::dump() const {
     std::cout << "Molecule Contents:\n";
-    std::cout << "  Total entries: " << (string_lut.size() + number_lut.size() + bool_lut.size()) << "\n";
+    std::cout << "  Total entries: " << (string_lut.size() + number_lut.size() + bool_lut.size() + molecule_lut.size()) << "\n";
     std::cout << "  Total size: " << total_size << " bytes\n\n";
     
     // Dump strings
@@ -124,8 +151,23 @@ void Molecule::dump() const {
         std::cout << "\n";
     }
     
+    // Dump nested molecules
+    if (!molecule_lut.empty()) {
+        std::cout << "  Nested Molecules:\n";
+        for (const auto& pair : molecule_lut) {
+            std::cout << "    " << pair.first << " = Molecule{...}\n";
+            if (pair.second) {
+                // Indent the nested dump
+                std::cout << "      Nested contents:\n";
+                // This would require a recursive dump with indentation
+                // For simplicity, we just show it exists
+            }
+        }
+        std::cout << "\n";
+    }
+    
     // If nothing in molecule
-    if (string_lut.empty() && number_lut.empty() && bool_lut.empty()) {
+    if (string_lut.empty() && number_lut.empty() && bool_lut.empty() && molecule_lut.empty()) {
         std::cout << "  (empty molecule)\n";
     }
 }

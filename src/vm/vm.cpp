@@ -265,6 +265,7 @@ Value parseDictFromString(const std::string& str) {
 // VARIABLE OPERATIONS
 // ============================================
 void VM::setVariable(const std::string& name, const Value& value) {
+    // Handle quarks (primitive values)
     if (value.is_quark) {
         switch (value.quark_data.type) {
             case Value::QuarkData::INT:
@@ -277,11 +278,43 @@ void VM::setVariable(const std::string& name, const Value& value) {
             case Value::QuarkData::STRING:
                 main_molecule->add_string(name, value.quark_data.string_val);
                 break;
-            default:
+            case Value::QuarkData::NONE:
+                main_molecule->add_string(name, "null");
                 break;
         }
+        return;
     }
-    // TODO: Handle array/dict/molecule storage if needed
+    
+    // Handle atoms (heap-allocated values)
+    if (value.is_atom && value.atom_data) {
+        // For arrays: store as JSON-like string
+        if (value.atom_data->type == Value::AtomData::ARRAY) {
+            main_molecule->add_string(name, value.to_string());
+            return;
+        }
+        
+        // For dictionaries: store as JSON-like string
+        if (value.atom_data->type == Value::AtomData::DICT) {
+            main_molecule->add_string(name, value.to_string());
+            return;
+        }
+        
+        // For molecules: store as nested molecule
+        if (value.atom_data->type == Value::AtomData::MOLECULE && 
+            value.atom_data->molecule_data) {
+            main_molecule->add_molecule(name, value.atom_data->molecule_data);
+            return;
+        }
+        
+        // For custom atoms
+        if (value.atom_data->type == Value::AtomData::CUSTOM) {
+            main_molecule->add_string(name, "CustomAtom");
+            return;
+        }
+    }
+    
+    // Fallback: store as string representation
+    main_molecule->add_string(name, value.to_string());
 }
 
 Value VM::getVariable(const std::string& name) const {
@@ -293,6 +326,14 @@ Value VM::getVariable(const std::string& name) const {
     // Check for bool
     if (main_molecule->has_bool(name)) {
         return Value(main_molecule->get_bool(name));
+    }
+    
+    // Check for nested molecule
+    if (main_molecule->has_molecule(name)) {
+        auto mol = main_molecule->get_molecule(name);
+        if (mol) {
+            return Value(mol);  // Returns as Molecule atom
+        }
     }
     
     // Check for string
@@ -318,7 +359,8 @@ Value VM::getVariable(const std::string& name) const {
 bool VM::hasVariable(const std::string& name) const {
     return main_molecule->has_number(name) ||
            main_molecule->has_bool(name) ||
-           main_molecule->has_string(name);
+           main_molecule->has_string(name) ||
+           main_molecule->has_molecule(name);
 }
 
 // ============================================
