@@ -1,4 +1,0 @@
-fn main() {
-    let c = 'O';
-    println(c);
-}

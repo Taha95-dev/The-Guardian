@@ -2,7 +2,6 @@
 
 #include "lexer.hpp"
 #include "ast.hpp"
-#include <string>
 #include <vector>
 #include <memory>
 
@@ -11,14 +10,13 @@ namespace om {
 class Parser {
 public:
     Parser(const std::vector<Token>& tokens);
-    
     std::unique_ptr<ProgramNode> parse();
     
 private:
     std::vector<Token> tokens;
     size_t pos;
-    int error_count = 0;
-    int max_errors = 10;
+    int error_count;
+    int max_errors;
     
     bool isAtEnd() const;
     Token peek() const;
@@ -28,29 +26,12 @@ private:
     std::string tokenTypeToString(TokenType type);
     bool isValidStatementStart();
     
-    // Parsing functions
     std::unique_ptr<ASTNode> parseStatement();
     std::unique_ptr<FunctionDefNode> parseFunctionDef();
     std::unique_ptr<VariableDefNode> parseVariableDef(bool is_const);
-    std::unique_ptr<ASTNode> parseIfStatement();
-    std::unique_ptr<ASTNode> parseForLoop();
-    std::unique_ptr<ASTNode> parseWhileLoop();
-    std::unique_ptr<ASTNode> parseReturnStatement();
     std::unique_ptr<BlockNode> parseBlock();
     std::unique_ptr<ASTNode> parseExpression();
-    std::unique_ptr<ASTNode> parseBinaryOp(int min_precedence);
     std::unique_ptr<ASTNode> parsePrimary();
-    std::unique_ptr<ASTNode> parseTypedArrayLiteral();
-    std::unique_ptr<ASTNode> parseStructDef();
-    std::unique_ptr<ASTNode> parseStructInstance(const std::string& name);
-    std::unique_ptr<ASTNode> parseFieldAccess(const std::string& name);
-    std::unique_ptr<ASTNode> parseDictLiteral();
-    // Array functions
-    std::unique_ptr<ASTNode> parseArrayDecl(const Token& name);
-    std::unique_ptr<ASTNode> parseArrayAccess(const std::string& name, int line, int column);
-    std::unique_ptr<ASTNode> parseArrayLiteral();
-   
-    int getPrecedence(TokenType type);
 };
 
 } // namespace om

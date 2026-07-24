@@ -2,57 +2,21 @@
 
 #include <string>
 #include <vector>
-#include <unordered_map>
 #include <memory>
-#include <variant>
 
 namespace om {
 
-// Forward declarations
-struct ProgramNode;
-struct FunctionDefNode;
-struct VariableDefNode;
-struct AssignmentNode;
-struct IfStatementNode;
-struct ForLoopNode;
-struct WhileLoopNode;
-struct ReturnStatementNode;
-struct BlockNode;
-struct BinaryOpNode;
-struct UnaryOpNode;
-struct CallNode;
-struct IdentifierNode;
-struct LiteralNode;
-
-// AST Node types
 enum class NodeType {
     PROGRAM,
     FUNCTION_DEF,
     VARIABLE_DEF,
-    ARRAY_DECL,
-    DICT_LITERAL,
-    DICT_ACCESS,
-    ARRAY_ACCESS,
-    ARRAY_LITERAL,
-    ARRAY_ASSIGN,
-    TYPED_ARRAY_LITERAL,
-    ASSIGNMENT,
-    IF_STATEMENT,
-    FOR_LOOP,
-    WHILE_LOOP,
-    RETURN_STATEMENT,
-    STRUCT_DEF,
-    STRUCT_INSTANCE,
-    FIELD_ACCESS,
     BLOCK,
     BINARY_OP,
-    UNARY_OP,
-    CALL,
+    LITERAL,
     IDENTIFIER,
-    LITERAL
+    CALL,
 };
 
-// Base AST Node
 struct ASTNode {
     NodeType type;
     int line;
@@ -60,13 +24,11 @@ struct ASTNode {
     virtual ~ASTNode() = default;
 };
 
-// Program (root node)
 struct ProgramNode : ASTNode {
     std::vector<std::unique_ptr<ASTNode>> statements;
     ProgramNode() { type = NodeType::PROGRAM; }
 };
 
-// Function definition
 struct FunctionDefNode : ASTNode {
     std::string name;
     std::vector<std::string> params;
@@ -74,7 +36,6 @@ struct FunctionDefNode : ASTNode {
     FunctionDefNode() { type = NodeType::FUNCTION_DEF; }
 };
 
-// Variable definition
 struct VariableDefNode : ASTNode {
     std::string name;
     std::unique_ptr<ASTNode> value;
@@ -82,50 +43,11 @@ struct VariableDefNode : ASTNode {
     VariableDefNode() : is_const(false) { type = NodeType::VARIABLE_DEF; }
 };
 
-// Assignment
-struct AssignmentNode : ASTNode {
-    std::string name;
-    std::unique_ptr<ASTNode> value;
-    AssignmentNode() { type = NodeType::ASSIGNMENT; }
-};
-
-// If statement
-struct IfStatementNode : ASTNode {
-    std::unique_ptr<ASTNode> condition;
-    std::unique_ptr<ASTNode> then_branch;
-    std::unique_ptr<ASTNode> else_branch;
-    IfStatementNode() { type = NodeType::IF_STATEMENT; }
-};
-
-// For loop
-struct ForLoopNode : ASTNode {
-    std::unique_ptr<ASTNode> init;
-    std::unique_ptr<ASTNode> condition;
-    std::unique_ptr<ASTNode> increment;
-    std::unique_ptr<ASTNode> body;
-    ForLoopNode() { type = NodeType::FOR_LOOP; }
-};
-
-// While loop
-struct WhileLoopNode : ASTNode {
-    std::unique_ptr<ASTNode> condition;
-    std::unique_ptr<ASTNode> body;
-    WhileLoopNode() { type = NodeType::WHILE_LOOP; }
-};
-
-// Return statement
-struct ReturnStatementNode : ASTNode {
-    std::unique_ptr<ASTNode> value;
-    ReturnStatementNode() { type = NodeType::RETURN_STATEMENT; }
-};
-
-// Block (scope)
 struct BlockNode : ASTNode {
     std::vector<std::unique_ptr<ASTNode>> statements;
     BlockNode() { type = NodeType::BLOCK; }
 };
 
-// Binary operation
 struct BinaryOpNode : ASTNode {
     std::string op;
     std::unique_ptr<ASTNode> left;
@@ -133,100 +55,22 @@ struct BinaryOpNode : ASTNode {
     BinaryOpNode() { type = NodeType::BINARY_OP; }
 };
 
-// Unary operation
-struct UnaryOpNode : ASTNode {
-    std::string op;
-    std::unique_ptr<ASTNode> operand;
-    UnaryOpNode() { type = NodeType::UNARY_OP; }
-};
-
-// Function call
-struct CallNode : ASTNode {
-    std::string name;
-    std::vector<std::unique_ptr<ASTNode>> args;
-    CallNode() { type = NodeType::CALL; }
-};
-
-// Array assignment: arr[0] = 42;
-struct ArrayAssignNode : ASTNode {
-    std::unique_ptr<ASTNode> access;
-    std::unique_ptr<ASTNode> value;
-    ArrayAssignNode() { type = NodeType::ARRAY_ASSIGN; }
-};
-
-// Identifier
-struct IdentifierNode : ASTNode {
-    std::string name;
-    IdentifierNode() { type = NodeType::IDENTIFIER; }
-};
-
-// Literal
 struct LiteralNode : ASTNode {
-    enum Type { STRING, NUMBER, BOOLEAN, NULL_TOKEN, CHAR, };
+    enum Type { NUMBER, STRING, BOOLEAN };
     Type literal_type;
     std::string value;
     LiteralNode() { type = NodeType::LITERAL; }
 };
 
-// Array declaration: let arr: int[10];
-struct ArrayDeclNode : ASTNode {
+struct IdentifierNode : ASTNode {
     std::string name;
-    std::string element_type;
-    std::unique_ptr<ASTNode> size;
-    ArrayDeclNode() { type = NodeType::ARRAY_DECL; }
+    IdentifierNode() { type = NodeType::IDENTIFIER; }
 };
 
-// Array access: arr[0]
-struct ArrayAccessNode : ASTNode {
+struct CallNode : ASTNode {
     std::string name;
-    std::unique_ptr<ASTNode> index;
-    ArrayAccessNode() { type = NodeType::ARRAY_ACCESS; }
-};
-
-// Array literal: [1, 2, 3]
-struct ArrayLiteralNode : ASTNode {
-    std::vector<std::unique_ptr<ASTNode>> elements;
-    ArrayLiteralNode() { type = NodeType::ARRAY_LITERAL; }
-};
-
-// Typed array literal: [int: 1, 2, 3]
-struct TypedArrayLiteralNode : ASTNode {
-    std::string element_type;
-    std::vector<std::unique_ptr<ASTNode>> elements;
-    TypedArrayLiteralNode() { type = NodeType::TYPED_ARRAY_LITERAL; }
-};
-
-struct StructDefNode : ASTNode {
-    std::string name;
-    std::vector<std::pair<std::string, std::string>> fields;
-    StructDefNode() { type = NodeType::STRUCT_DEF; }
-};
-
-struct StructInstanceNode : ASTNode {
-    std::string struct_name;
-    std::unordered_map<std::string, std::unique_ptr<ASTNode>> fields;
-    StructInstanceNode() { type = NodeType::STRUCT_INSTANCE; }
-};
-
-struct FieldAccessNode : ASTNode {
-    std::string struct_name;
-    std::string field_name;
-    std::unique_ptr<ASTNode> array_access;  // For arr[index]:field
-    bool is_array_field_access = false;     // Flag for array field access
-    FieldAccessNode() { type = NodeType::FIELD_ACCESS; }
-};
-
-// Dictionary literal: {"key": value}
-struct DictLiteralNode : ASTNode {
-    std::unordered_map<std::string, std::unique_ptr<ASTNode>> pairs;
-    DictLiteralNode() { type = NodeType::DICT_LITERAL; }
-};
-
-// Dictionary access: person{key}
-struct DictAccessNode : ASTNode {
-    std::string name;
-    std::unique_ptr<ASTNode> key;
-    DictAccessNode() { type = NodeType::DICT_ACCESS; }
+    std::vector<std::unique_ptr<ASTNode>> args;
+    CallNode() { type = NodeType::CALL; }
 };
 
 } // namespace om

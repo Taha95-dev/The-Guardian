@@ -1,8 +1,0 @@
-fn main() {
-    let arr = [int: 42, 100, 142, 2026, 13];
-    println(arr[0]);
-    println(arr[1]);
-    println(arr[2]);
-    println(arr[3]);
-    println(arr[4]);
-}

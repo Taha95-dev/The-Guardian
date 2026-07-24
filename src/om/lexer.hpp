@@ -8,17 +8,16 @@ namespace om {
 
 enum class TokenType {
     // Keywords
-    FN, LET, CONST, IF, ELSE, FOR, WHILE, RETURN, STRUCT,
+    FN, LET, CONST, IF, ELSE, FOR, WHILE, RETURN,
     TRUE, FALSE, NULL_TOKEN,
-    SHORTCUT, STRUCT_PREFIX, DICT_PREFIX,
     
     // Symbols
-    IDENTIFIER, NUMBER, STRING, CHAR, ANY, INT, FLOAT, BOOL,
-    PLUS, MINUS, STAR, SLASH, MOD, ASSIGN, EQUAL, NOT_EQUAL,
+    IDENTIFIER, NUMBER, STRING,
+    PLUS, MINUS, STAR, SLASH, ASSIGN, EQUAL, NOT_EQUAL,
     LESS, GREATER, LESS_EQUAL, GREATER_EQUAL,
     AND, OR, NOT,
     LPAREN, RPAREN, LBRACE, RBRACE, LBRACKET, RBRACKET,
-    SEMICOLON, COLON, COMMA, DOT, ARROW,
+    SEMICOLON, COLON, COMMA, DOT,
     
     // Comments
     COMMENT, MULTILINE_COMMENT,
@@ -33,10 +32,7 @@ struct Token {
     int line;
     int column;
     
-    // Default constructor
     Token() : type(TokenType::END_OF_FILE), value(""), line(0), column(0) {}
-    
-    // Parameterized constructor
     Token(TokenType type, const std::string& value, int line, int column)
         : type(type), value(value), line(line), column(column) {}
 };
@@ -51,7 +47,6 @@ private:
     size_t pos;
     int line;
     int column;
-    int error_count = 0;
     
     char peek() const;
     char advance();
@@ -61,7 +56,6 @@ private:
     Token readIdentifier();
     Token readNumber();
     Token readString();
-    Token readChar();
     Token readSymbol();
     
     std::unordered_map<std::string, TokenType> keywords = {
@@ -73,17 +67,9 @@ private:
         {"for", TokenType::FOR},
         {"while", TokenType::WHILE},
         {"return", TokenType::RETURN},
-        {"struct", TokenType::STRUCT},
         {"true", TokenType::TRUE},
         {"false", TokenType::FALSE},
-        {"null", TokenType::NULL_TOKEN},
-        {"shortcut", TokenType::SHORTCUT},
-        {"any", TokenType::ANY},
-        {"int", TokenType::INT},
-        {"float", TokenType::FLOAT},
-        {"bool", TokenType::BOOL},
-        {"char", TokenType::CHAR},
-        {"string", TokenType::STRING},
+        {"null", TokenType::NULL_TOKEN}
     };
 };
 

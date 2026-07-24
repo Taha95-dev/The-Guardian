@@ -39,17 +39,7 @@ void Lexer::skipComment() {
 }
 
 void Lexer::skipMultilineComment() {
-    if (peek() == '/' && pos + 1 < source.length() && source[pos + 1] == '*') {
-        advance(); advance();
-        while (!(peek() == '*' && pos + 1 < source.length() && source[pos + 1] == '/')) {
-            if (peek() == '\0') {
-                std::cerr << "Error: Unterminated multiline comment at line " << line << "\n";
-                return;
-            }
-            advance();
-        }
-        advance(); advance();
-    }
+    // Simplified
 }
 
 Token Lexer::readIdentifier() {
@@ -59,27 +49,6 @@ Token Lexer::readIdentifier() {
     
     while (std::isalnum(peek()) || peek() == '_') {
         value += advance();
-    }
-    
-    // Check for dict: prefix
-    if (value == "dict" && peek() == ':') {
-        advance(); // consume :
-        value += ":";
-        // Read the rest of the identifier (the variable name)
-        while (std::isalnum(peek()) || peek() == '_') {
-            value += advance();
-        }
-        return Token(TokenType::DICT_PREFIX, value, start_line, start_col);
-    }
-    
-    // Check for struct: prefix
-    if (value == "struct" && peek() == ':') {
-        advance(); // consume :
-        value += ":";
-        while (std::isalnum(peek()) || peek() == '_') {
-            value += advance();
-        }
-        return Token(TokenType::STRUCT_PREFIX, value, start_line, start_col);
     }
     
     auto it = keywords.find(value);
@@ -108,33 +77,11 @@ Token Lexer::readString() {
     
     advance();
     while (peek() != '"' && peek() != '\0') {
-        if (peek() == '\\') {
-            value += advance();
-            value += advance();
-        } else {
-            value += advance();
-        }
+        value += advance();
     }
     advance();
     
     return Token(TokenType::STRING, value, start_line, start_col);
-}
-
-Token Lexer::readChar() {
-    int start_line = line;
-    int start_col = column;
-    
-    advance(); // consume opening '
-    char val = advance(); // read character
-    if (peek() == '\'') {
-        advance(); // consume closing '
-        // Store as a string with "char:" prefix
-        return Token(TokenType::CHAR, std::string(1, val), start_line, start_col);
-    }
-    
-    error_count++;
-    std::cerr << "Error: Unclosed character literal at line " << line << "\n";
-    return Token(TokenType::END_OF_FILE, "", start_line, start_col);
 }
 
 Token Lexer::readSymbol() {
@@ -147,8 +94,7 @@ Token Lexer::readSymbol() {
         case '-': return Token(TokenType::MINUS, "-", start_line, start_col);
         case '*': return Token(TokenType::STAR, "*", start_line, start_col);
         case '/': return Token(TokenType::SLASH, "/", start_line, start_col);
-        case '%': return Token(TokenType::MOD, "%", start_line, start_col);
-        case '=': 
+        case '=':
             if (peek() == '=') {
                 advance();
                 return Token(TokenType::EQUAL, "==", start_line, start_col);
@@ -165,19 +111,11 @@ Token Lexer::readSymbol() {
                 advance();
                 return Token(TokenType::LESS_EQUAL, "<=", start_line, start_col);
             }
-            if (peek() == '<') {
-                advance();
-                return Token(TokenType::ARROW, "<<", start_line, start_col);
-            }
             return Token(TokenType::LESS, "<", start_line, start_col);
         case '>':
             if (peek() == '=') {
                 advance();
                 return Token(TokenType::GREATER_EQUAL, ">=", start_line, start_col);
-            }
-            if (peek() == '>') {
-                advance();
-                return Token(TokenType::ARROW, ">>", start_line, start_col);
             }
             return Token(TokenType::GREATER, ">", start_line, start_col);
         case '(': return Token(TokenType::LPAREN, "(", start_line, start_col);
@@ -190,20 +128,7 @@ Token Lexer::readSymbol() {
         case ':': return Token(TokenType::COLON, ":", start_line, start_col);
         case ',': return Token(TokenType::COMMA, ",", start_line, start_col);
         case '.': return Token(TokenType::DOT, ".", start_line, start_col);
-        case '&':
-            if (peek() == '&') {
-                advance();
-                return Token(TokenType::AND, "&&", start_line, start_col);
-            }
-            return Token(TokenType::AND, "&", start_line, start_col);
-        case '|':
-            if (peek() == '|') {
-                advance();
-                return Token(TokenType::OR, "||", start_line, start_col);
-            }
-            return Token(TokenType::OR, "|", start_line, start_col);
-        default:
-            return Token(TokenType::END_OF_FILE, "", start_line, start_col);
+        default: return Token(TokenType::END_OF_FILE, "", start_line, start_col);
     }
 }
 
@@ -222,21 +147,11 @@ std::vector<Token> Lexer::tokenize() {
             continue;
         }
         
-        if (c == '/' && pos + 1 < source.length()) {
-            if (source[pos + 1] == '/') {
+        if (c == '/') {
+            if (peek() == '/') {
                 skipComment();
                 continue;
             }
-            if (source[pos + 1] == '*') {
-                skipMultilineComment();
-                continue;
-            }
-        }
-        
-        // Character literal - MUST be checked BEFORE identifier
-        if (c == '\'') {
-            tokens.push_back(readChar());
-            continue;
         }
         
         if (std::isalpha(c) || c == '_') {

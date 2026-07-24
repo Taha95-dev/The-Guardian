@@ -1,7 +1,0 @@
-fn main() {
-    let a = 50;
-    let b = 7;
-    let result = a % b;
-    println("50 % 7 = ");
-    println(result);
-}
