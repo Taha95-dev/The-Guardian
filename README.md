@@ -74,3 +74,11 @@ OEM/Reselling	Contact me	Resell as part of your product
 Contact: Open an issue
 Built by Taha — 13-year-old developer building the future of code.
 
+
+## Documentation
+
+- [Security Model](docs/security_model.md) — Learn about memory safety and security
+- [Tutorial](docs/tutorial.md) — Build your first language with The Guardian
+- [User Guide](docs/user-guide/) — Complete documentation
+- [Architecture](docs/architecture/) — How The Guardian works
+- [API Reference](docs/api/) — Full API documentation
