@@ -27,6 +27,7 @@ public:
     }
     
     const char* name() const override { return "IntAtom"; }
+    void release() override {}
     
     int get() const { return value; }
     void set(int val) { value = val; }

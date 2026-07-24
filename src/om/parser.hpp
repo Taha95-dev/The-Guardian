@@ -17,8 +17,8 @@ public:
 private:
     std::vector<Token> tokens;
     size_t pos;
-    int error_count;
-    int max_errors;
+    int error_count = 0;
+    int max_errors = 10;
     
     bool isAtEnd() const;
     Token peek() const;
@@ -44,6 +44,7 @@ private:
     std::unique_ptr<ASTNode> parseStructDef();
     std::unique_ptr<ASTNode> parseStructInstance(const std::string& name);
     std::unique_ptr<ASTNode> parseFieldAccess(const std::string& name);
+    std::unique_ptr<ASTNode> parseDictLiteral();
     // Array functions
     std::unique_ptr<ASTNode> parseArrayDecl(const Token& name);
     std::unique_ptr<ASTNode> parseArrayAccess(const std::string& name, int line, int column);

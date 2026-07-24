@@ -7,21 +7,27 @@
 
 namespace guardian {
 
-// ============================================
-// TYPE-TAGGED STORAGE WITH MULTIPLE LUTS
-// ============================================
 class Molecule {
 public:
     Molecule() : total_size(0) {}
     ~Molecule() = default;
     
-    // String LUT (for strings and characters)
+    // String LUT
     void add_string(const std::string& name, const std::string& value);
     std::string get_string(const std::string& name) const;
     bool has_string(const std::string& name) const;
+
+    // Atom LUT (for struct fields)
+    void add_atom(const std::string& name, std::unique_ptr<guardian::Atom> atom);
+    guardian::Atom* get_atom(const std::string& name) const;
+    bool has_atom(const std::string& name) const;
     
-    // Number LUT (for ints and floats)
+    // Number LUT
     void add_number(const std::string& name, double value);
+    void add_atom_shared(const std::string& name, std::shared_ptr<guardian::Atom> atom);
+    std::shared_ptr<guardian::Atom> get_atom_shared(const std::string& name) const;
+    bool has_atom_shared(const std::string& name) const;
+    std::unordered_map<std::string, std::shared_ptr<guardian::Atom>> atom_lut_shared;
     double get_number(const std::string& name) const;
     bool has_number(const std::string& name) const;
     
@@ -41,7 +47,7 @@ public:
     bool has_dict(const std::string& name) const;
     
     // Generic getter (for VM)
-    enum class ValueType { STRING, NUMBER, BOOL, ARRAY, DICT, NONE };
+    enum class ValueType { STRING, NUMBER, BOOL, ARRAY, DICT, ATOM, NONE };
     ValueType get_type(const std::string& name) const;
     
     // Size
@@ -50,13 +56,16 @@ public:
     // Debug
     void dump() const;
     
+    // Release all atoms
+    void release_all();
+    
 private:
-    // Type-tagged storage
     std::unordered_map<std::string, std::string> string_lut;
     std::unordered_map<std::string, double> number_lut;
     std::unordered_map<std::string, bool> bool_lut;
     std::unordered_map<std::string, std::vector<std::string>> array_lut;
     std::unordered_map<std::string, std::unordered_map<std::string, std::string>> dict_lut;
+    std::unordered_map<std::string, std::unique_ptr<guardian::Atom>> atom_lut;
     
     size_t total_size;
 };

@@ -1,0 +1,74 @@
+// ============================================
+// FULL FEATURE TEST
+// ============================================
+
+// 1. Struct definition
+struct Person {
+    name: string
+    age: int
+    active: bool
+    score: float
+}
+
+// 2. Main function
+fn main() {
+    // 3. Variables
+    let x = 42
+    let y = 3.14
+    let z = true
+    let c = 'O'
+    let msg = "Hello from Om!"
+    
+    // 4. Print primitives
+    println("=== Primitive Types ===")
+    println("Integer: ")
+    println(x)
+    println("Float: ")
+    println(y)
+    println("Boolean: ")
+    println(z)
+    println("Character: ")
+    println(c)
+    println("String: ")
+    println(msg)
+    
+    // 5. Struct
+    let p = Person {
+        name: "Taha"
+        age: 13
+        active: true
+        score: 95.5
+    }
+    
+    // 6. Print struct fields
+    println("=== Struct Fields ===")
+    println("Name: ")
+    println(p:name)
+    println("Age: ")
+    println(p:age)
+    println("Active: ")
+    println(p:active)
+    println("Score: ")
+    println(p:score)
+    
+    // 7. Arrays
+    let arr = [int: 10, 20, 30, 40, 50]
+    println("=== Array ===")
+    println(arr[0])
+    println(arr[1])
+    println(arr[2])
+    println(arr[3])
+    println(arr[4])
+    
+    // 8. Array with struct
+    let people = [any: p, p, p]
+    println("=== Array of Structs ===")
+    println(people[0]:name)
+    println(people[1]:name)
+    println(people[2]:name)
+    
+    // 9. Nested structs (future)
+    // TODO: Add nested struct support
+    
+    println("=== All tests passed! ===")
+}

@@ -25,6 +25,7 @@ public:
     }
     
     const char* name() const override { return "BoolAtom"; }
+    void release() override {};
     
     bool get() const { return value; }
     void set(bool val) { value = val; }

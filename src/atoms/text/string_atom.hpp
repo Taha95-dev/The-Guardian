@@ -19,14 +19,19 @@ public:
         std::vector<uint8_t> bytes(value.size() + 1);
         std::memcpy(bytes.data(), value.data(), value.size() + 1);
         return bytes;
-    }
-    
-    void deserialize(const std::vector<uint8_t>& data) override {
-        if (data.empty()) return;
-        value = std::string(reinterpret_cast<const char*>(data.data()));
-    }
+    } 
     
     const char* name() const override { return "StringAtom"; }
+    void deserialize(const std::vector<uint8_t>& data) override {
+        if (data.size() < 4) return;
+        uint32_t len;
+        std::memcpy(&len, data.data(), 4);
+        if (data.size() >= 4 + len) {
+            value = std::string(data.begin() + 4, data.begin() + 4 + len);
+        }
+    }
+
+    void release() override {};
     
     const std::string& get() const { return value; }
     void set(const std::string& val) { value = val; }

@@ -31,6 +31,7 @@ public:
     virtual std::vector<uint8_t> serialize() const = 0;
     virtual void deserialize(const std::vector<uint8_t>& data) = 0;
     virtual const char* name() const = 0;
+    virtual void release() {};
     
     // Fast type checking — NO dynamic_cast!
     virtual AtomType type() const = 0;

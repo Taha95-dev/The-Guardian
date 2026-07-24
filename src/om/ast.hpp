@@ -30,6 +30,8 @@ enum class NodeType {
     FUNCTION_DEF,
     VARIABLE_DEF,
     ARRAY_DECL,
+    DICT_LITERAL,
+    DICT_ACCESS,
     ARRAY_ACCESS,
     ARRAY_LITERAL,
     ARRAY_ASSIGN,
@@ -209,7 +211,22 @@ struct StructInstanceNode : ASTNode {
 struct FieldAccessNode : ASTNode {
     std::string struct_name;
     std::string field_name;
+    std::unique_ptr<ASTNode> array_access;  // For arr[index]:field
+    bool is_array_field_access = false;     // Flag for array field access
     FieldAccessNode() { type = NodeType::FIELD_ACCESS; }
+};
+
+// Dictionary literal: {"key": value}
+struct DictLiteralNode : ASTNode {
+    std::unordered_map<std::string, std::unique_ptr<ASTNode>> pairs;
+    DictLiteralNode() { type = NodeType::DICT_LITERAL; }
+};
+
+// Dictionary access: person{key}
+struct DictAccessNode : ASTNode {
+    std::string name;
+    std::unique_ptr<ASTNode> key;
+    DictAccessNode() { type = NodeType::DICT_ACCESS; }
 };
 
 } // namespace om

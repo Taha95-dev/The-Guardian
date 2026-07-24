@@ -24,6 +24,28 @@ bool Molecule::has_string(const std::string& name) const {
 }
 
 // ============================================
+// ATOM LUT
+// ============================================
+void Molecule::add_atom(const std::string& name, std::unique_ptr<guardian::Atom> atom) {
+    if (atom) {
+        total_size += atom->size();
+        atom_lut[name] = std::move(atom);
+    }
+}
+
+guardian::Atom* Molecule::get_atom(const std::string& name) const {
+    auto it = atom_lut.find(name);
+    if (it != atom_lut.end()) {
+        return it->second.get();
+    }
+    return nullptr;
+}
+
+bool Molecule::has_atom(const std::string& name) const {
+    return atom_lut.find(name) != atom_lut.end();
+}
+
+// ============================================
 // NUMBER LUT
 // ============================================
 void Molecule::add_number(const std::string& name, double value) {
@@ -117,31 +139,41 @@ Molecule::ValueType Molecule::get_type(const std::string& name) const {
     if (bool_lut.find(name) != bool_lut.end()) return ValueType::BOOL;
     if (array_lut.find(name) != array_lut.end()) return ValueType::ARRAY;
     if (dict_lut.find(name) != dict_lut.end()) return ValueType::DICT;
+    if (atom_lut.find(name) != atom_lut.end()) return ValueType::ATOM;
+    if (atom_lut_shared.find(name) != atom_lut_shared.end()) return ValueType::ATOM;
     return ValueType::NONE;
 }
 
 // ============================================
-// DUMP (for debugging)
+// RELEASE ALL
+// ============================================
+void Molecule::release_all() {
+    for (auto& [name, atom] : atom_lut) {
+        if (atom) {
+            atom->release();
+        }
+    }
+    atom_lut.clear();
+}
+
+// ============================================
+// DUMP
 // ============================================
 void Molecule::dump() const {
     std::cout << "Molecule Contents:\n";
     
-    // Strings
     for (const auto& [name, value] : string_lut) {
         std::cout << "  [string] " << name << " = \"" << value << "\"\n";
     }
     
-    // Numbers
     for (const auto& [name, value] : number_lut) {
         std::cout << "  [number] " << name << " = " << value << "\n";
     }
     
-    // Bools
     for (const auto& [name, value] : bool_lut) {
         std::cout << "  [bool] " << name << " = " << (value ? "true" : "false") << "\n";
     }
     
-    // Arrays
     for (const auto& [name, value] : array_lut) {
         std::cout << "  [array] " << name << " = [";
         for (size_t i = 0; i < value.size(); i++) {
@@ -151,7 +183,6 @@ void Molecule::dump() const {
         std::cout << "]\n";
     }
     
-    // Dictionaries
     for (const auto& [name, value] : dict_lut) {
         std::cout << "  [dict] " << name << " = {";
         size_t i = 0;
@@ -162,6 +193,28 @@ void Molecule::dump() const {
         }
         std::cout << "}\n";
     }
+}
+
+// ============================================
+// SHARED ATOM LUT
+// ============================================
+void Molecule::add_atom_shared(const std::string& name, std::shared_ptr<guardian::Atom> atom) {
+    if (atom) {
+        total_size += atom->size();
+        atom_lut_shared[name] = atom;
+    }
+}
+
+std::shared_ptr<guardian::Atom> Molecule::get_atom_shared(const std::string& name) const {
+    auto it = atom_lut_shared.find(name);
+    if (it != atom_lut_shared.end()) {
+        return it->second;
+    }
+    return nullptr;
+}
+
+bool Molecule::has_atom_shared(const std::string& name) const {
+    return atom_lut_shared.find(name) != atom_lut_shared.end();
 }
 
 } // namespace guardian

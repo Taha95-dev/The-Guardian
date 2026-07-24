@@ -20,6 +20,16 @@ enum class Opcode : uint8_t {
     POP = 0x15,
     DUP = 0x16,
     
+    // Molecule operations (for structs)
+    MAKE_MOLECULE = 0xA0,
+    STORE_ATOM = 0xA1,
+    GET_ATOM = 0xA2,
+
+    // Dicts
+    MAKE_DICT = 0xB0,
+    DICT_GET = 0xB1,
+    DICT_SET = 0xB3,
+
     // Arithmetic
     ADD = 0x20,
     SUB = 0x21,

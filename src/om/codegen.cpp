@@ -88,27 +88,122 @@ void CodeGen::generateStatement(const std::unique_ptr<ASTNode>& node,
             break;
         }
         
+        case NodeType::STRUCT_INSTANCE: {
+            auto inst = static_cast<StructInstanceNode*>(node.get());
+            
+            // Create a molecule
+            bytecode.push_back(static_cast<uint8_t>(Opcode::MAKE_MOLECULE));
+            
+            // Store each field as an atom in the molecule
+            for (const auto& [field_name, field_value] : inst->fields) {
+                generateExpression(field_value, bytecode, variables);
+                bytecode.push_back(static_cast<uint8_t>(Opcode::STORE_ATOM));
+                uint32_t name_len = field_name.length();
+                bytecode.insert(bytecode.end(),
+                               reinterpret_cast<uint8_t*>(&name_len),
+                               reinterpret_cast<uint8_t*>(&name_len) + 4);
+                bytecode.insert(bytecode.end(), field_name.begin(), field_name.end());
+            }
+            break;
+        }
+
+        case NodeType::DICT_LITERAL: {
+            auto dict = static_cast<DictLiteralNode*>(node.get());
+            
+            // Push key count
+            int count = dict->pairs.size();
+            bytecode.push_back(static_cast<uint8_t>(Opcode::PUSH_INT));
+            bytecode.insert(bytecode.end(),
+                           reinterpret_cast<uint8_t*>(&count),
+                           reinterpret_cast<uint8_t*>(&count) + 4);
+            
+            // Push each key-value pair
+            for (const auto& [key, value] : dict->pairs) {
+                // Push key
+                bytecode.push_back(static_cast<uint8_t>(Opcode::PUSH_STRING));
+                uint32_t key_len = key.length();
+                bytecode.insert(bytecode.end(),
+                               reinterpret_cast<uint8_t*>(&key_len),
+                               reinterpret_cast<uint8_t*>(&key_len) + 4);
+                bytecode.insert(bytecode.end(), key.begin(), key.end());
+                
+                // Push value
+                generateExpression(value, bytecode, variables);
+            }
+            
+            // Make dictionary
+            bytecode.push_back(static_cast<uint8_t>(Opcode::MAKE_DICT));
+            break;
+        }
+
+        case NodeType::DICT_ACCESS: {
+            auto access = static_cast<DictAccessNode*>(node.get());
+            
+            // Load the dictionary
+            bytecode.push_back(static_cast<uint8_t>(Opcode::LOAD));
+            uint32_t name_len = access->name.length();
+            bytecode.insert(bytecode.end(),
+                           reinterpret_cast<uint8_t*>(&name_len),
+                           reinterpret_cast<uint8_t*>(&name_len) + 4);
+            bytecode.insert(bytecode.end(), access->name.begin(), access->name.end());
+            
+            // Push the key
+            generateExpression(access->key, bytecode, variables);
+            
+            // Get from dictionary
+            bytecode.push_back(static_cast<uint8_t>(Opcode::DICT_GET));
+            break;
+        }
+
+        case NodeType::FIELD_ACCESS: {
+            auto access = static_cast<FieldAccessNode*>(node.get());
+            
+            if (access->is_array_field_access && access->array_access) {
+                // Handle arr[index]:field
+                // First, get the array element (which is a struct pointer)
+                generateExpression(access->array_access, bytecode, variables);
+                // Then get the field from the struct
+                bytecode.push_back(static_cast<uint8_t>(Opcode::GET_ATOM));
+                uint32_t field_len = access->field_name.length();
+                bytecode.insert(bytecode.end(),
+                               reinterpret_cast<uint8_t*>(&field_len),
+                               reinterpret_cast<uint8_t*>(&field_len) + 4);
+                bytecode.insert(bytecode.end(), access->field_name.begin(), access->field_name.end());
+            } else {
+                // Regular field access: struct:field
+                bytecode.push_back(static_cast<uint8_t>(Opcode::LOAD));
+                uint32_t name_len = access->struct_name.length();
+                bytecode.insert(bytecode.end(),
+                               reinterpret_cast<uint8_t*>(&name_len),
+                               reinterpret_cast<uint8_t*>(&name_len) + 4);
+                bytecode.insert(bytecode.end(), access->struct_name.begin(), access->struct_name.end());
+                
+                bytecode.push_back(static_cast<uint8_t>(Opcode::GET_ATOM));
+                uint32_t field_len = access->field_name.length();
+                bytecode.insert(bytecode.end(),
+                               reinterpret_cast<uint8_t*>(&field_len),
+                               reinterpret_cast<uint8_t*>(&field_len) + 4);
+                bytecode.insert(bytecode.end(), access->field_name.begin(), access->field_name.end());
+            }
+            break;
+        }
+        
         case NodeType::ARRAY_DECL: {
             auto decl = static_cast<ArrayDeclNode*>(node.get());
             
-            // Generate size (pushes size onto stack)
             generateExpression(decl->size, bytecode, variables);
             
-            // Type code as a separate byte in the instruction stream (not on stack)
             uint8_t type_code = 0;
             if (decl->element_type == "int") type_code = 1;
             else if (decl->element_type == "float") type_code = 2;
             else if (decl->element_type == "bool") type_code = 3;
             else if (decl->element_type == "char") type_code = 4;
             else if (decl->element_type == "string") type_code = 5;
-            else type_code = 0; // any
+            else type_code = 0;
             
-            // MAKE_ARRAY instruction takes: [size, type_code]
-            // Format: MAKE_ARRAY <type_code>
             bytecode.push_back(static_cast<uint8_t>(Opcode::MAKE_ARRAY));
-            bytecode.push_back(type_code);  // Type code as operand
+            bytecode.push_back(type_code);
             
-            // Store array
             bytecode.push_back(static_cast<uint8_t>(Opcode::STORE));
             uint32_t name_len = decl->name.length();
             bytecode.insert(bytecode.end(),
@@ -119,25 +214,24 @@ void CodeGen::generateStatement(const std::unique_ptr<ASTNode>& node,
             variables[decl->name] = true;
             break;
         }
-            
+        
         case NodeType::ARRAY_ASSIGN: {
             auto assign = static_cast<ArrayAssignNode*>(node.get());
             
-            // Generate value
             generateExpression(assign->value, bytecode, variables);
-            
-            // Generate array access (this pushes array and index)
             generateExpression(assign->access, bytecode, variables);
             
-            // Use ARRAY_SET
             bytecode.push_back(static_cast<uint8_t>(Opcode::ARRAY_SET));
             break;
         }
         
         case NodeType::CALL: {
             auto call = static_cast<CallNode*>(node.get());
+            std::cout << "  [DEBUG] Codegen: CALL " << call->name << " with " << call->args.size() << " args\n";
+            
             if (call->name == "println" || call->name == "print") {
                 for (const auto& arg : call->args) {
+                    std::cout << "  [DEBUG] Codegen: generating arg of type " << (int)arg->type << "\n";
                     generateExpression(arg, bytecode, variables);
                 }
                 bytecode.push_back(static_cast<uint8_t>(
@@ -211,10 +305,26 @@ void CodeGen::generateExpression(const std::unique_ptr<ASTNode>& node,
             break;
         }
         
+        case NodeType::STRUCT_INSTANCE: {
+            auto inst = static_cast<StructInstanceNode*>(node.get());
+            
+            bytecode.push_back(static_cast<uint8_t>(Opcode::MAKE_MOLECULE));
+            
+            for (const auto& [field_name, field_value] : inst->fields) {
+                generateExpression(field_value, bytecode, variables);
+                bytecode.push_back(static_cast<uint8_t>(Opcode::STORE_ATOM));
+                uint32_t name_len = field_name.length();
+                bytecode.insert(bytecode.end(),
+                               reinterpret_cast<uint8_t*>(&name_len),
+                               reinterpret_cast<uint8_t*>(&name_len) + 4);
+                bytecode.insert(bytecode.end(), field_name.begin(), field_name.end());
+            }
+            break;
+        } 
+        
         case NodeType::ARRAY_ACCESS: {
             auto access = static_cast<ArrayAccessNode*>(node.get());
             
-            // Load array
             bytecode.push_back(static_cast<uint8_t>(Opcode::LOAD));
             uint32_t name_len = access->name.length();
             bytecode.insert(bytecode.end(),
@@ -222,10 +332,8 @@ void CodeGen::generateExpression(const std::unique_ptr<ASTNode>& node,
                            reinterpret_cast<uint8_t*>(&name_len) + 4);
             bytecode.insert(bytecode.end(), access->name.begin(), access->name.end());
             
-            // Push index
             generateExpression(access->index, bytecode, variables);
             
-            // Get array element
             bytecode.push_back(static_cast<uint8_t>(Opcode::ARRAY_GET));
             break;
         }
@@ -233,33 +341,29 @@ void CodeGen::generateExpression(const std::unique_ptr<ASTNode>& node,
         case NodeType::TYPED_ARRAY_LITERAL: {
             auto arr = static_cast<TypedArrayLiteralNode*>(node.get());
             
-            // Push each element
             for (const auto& element : arr->elements) {
                 generateExpression(element, bytecode, variables);
             }
             
-            // Push length
             int length = arr->elements.size();
             bytecode.push_back(static_cast<uint8_t>(Opcode::PUSH_INT));
             bytecode.insert(bytecode.end(),
                            reinterpret_cast<uint8_t*>(&length),
                            reinterpret_cast<uint8_t*>(&length) + 4);
             
-            // Type code as OPERAND (not on stack)
             uint8_t type_code = 0;
             if (arr->element_type == "int") type_code = 1;
             else if (arr->element_type == "float") type_code = 2;
             else if (arr->element_type == "bool") type_code = 3;
             else if (arr->element_type == "char") type_code = 4;
             else if (arr->element_type == "string") type_code = 5;
-            else type_code = 0; // any
+            else type_code = 0;
             
-            // MAKE_ARRAY with type code as operand
             bytecode.push_back(static_cast<uint8_t>(Opcode::MAKE_ARRAY));
-            bytecode.push_back(type_code);  // Operand
+            bytecode.push_back(type_code);
             break;
         }
-
+        
         case NodeType::BINARY_OP: {
             auto binary = static_cast<BinaryOpNode*>(node.get());
             generateExpression(binary->left, bytecode, variables);
@@ -279,6 +383,29 @@ void CodeGen::generateExpression(const std::unique_ptr<ASTNode>& node,
             break;
         }
         
+
+        case NodeType::FIELD_ACCESS: {
+            auto access = static_cast<FieldAccessNode*>(node.get());
+            std::cout << "  [DEBUG] Codegen: FIELD_ACCESS " << access->struct_name << ":" << access->field_name << "\n";
+            
+            // Load the struct
+            bytecode.push_back(static_cast<uint8_t>(Opcode::LOAD));
+            uint32_t name_len = access->struct_name.length();
+            bytecode.insert(bytecode.end(),
+                           reinterpret_cast<uint8_t*>(&name_len),
+                           reinterpret_cast<uint8_t*>(&name_len) + 4);
+            bytecode.insert(bytecode.end(), access->struct_name.begin(), access->struct_name.end());
+            
+            // Get the field
+            bytecode.push_back(static_cast<uint8_t>(Opcode::GET_ATOM));
+            uint32_t field_len = access->field_name.length();
+            bytecode.insert(bytecode.end(),
+                           reinterpret_cast<uint8_t*>(&field_len),
+                           reinterpret_cast<uint8_t*>(&field_len) + 4);
+            bytecode.insert(bytecode.end(), access->field_name.begin(), access->field_name.end());
+            break;
+        }
+
         default:
             break;
     }

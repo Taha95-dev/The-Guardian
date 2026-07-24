@@ -112,6 +112,7 @@ std::string Parser::tokenTypeToString(TokenType type) {
         case TokenType::FOR: return "for";
         case TokenType::WHILE: return "while";
         case TokenType::RETURN: return "return";
+        case TokenType::STRUCT: return "struct";
         case TokenType::TRUE: return "true";
         case TokenType::FALSE: return "false";
         case TokenType::IDENTIFIER: return "identifier";
@@ -139,6 +140,7 @@ bool Parser::isValidStatementStart() {
            type == TokenType::WHILE ||
            type == TokenType::RETURN ||
            type == TokenType::LBRACE ||
+           type == TokenType::STRUCT ||
            type == TokenType::IDENTIFIER ||
            type == TokenType::NUMBER ||
            type == TokenType::STRING ||
@@ -154,8 +156,42 @@ std::unique_ptr<ASTNode> Parser::parseStatement() {
         // Skip stray semicolons
     }
     
+    // Check for dict: prefix (dictionary declaration)
+    if (match(TokenType::DICT_PREFIX)) {
+        // Get the variable name
+        Token name = expect(TokenType::IDENTIFIER, "Expected variable name after dict:");
+        expect(TokenType::ASSIGN, "Expected '=' after dict:name");
+        
+        // Parse dictionary literal
+        auto dict_literal = parseDictLiteral();
+        if (!dict_literal) {
+            return nullptr;
+        }
+        
+        // Create variable definition
+        auto var_def = std::make_unique<VariableDefNode>();
+        var_def->name = name.value;
+        var_def->value = std::move(dict_literal);
+        var_def->is_const = false;
+        var_def->line = name.line;
+        var_def->column = name.column;
+        
+        match(TokenType::SEMICOLON);
+        return var_def;
+    }
+    
+    // Check for struct: prefix (struct instance)
+    if (match(TokenType::STRUCT_PREFIX)) {
+        // Get the struct name
+        Token name = expect(TokenType::IDENTIFIER, "Expected struct name after struct:");
+        // Parse struct instance
+        auto instance = parseStructInstance(name.value);
+        match(TokenType::SEMICOLON);
+        return instance;
+    }
+
     if (match(TokenType::FN)) {
-        return parseFunctionDef();
+       return parseFunctionDef();
     }
     if (match(TokenType::LET)) {
         // Check if it's an array declaration: let name: type[size];
@@ -186,15 +222,15 @@ std::unique_ptr<ASTNode> Parser::parseStatement() {
     if (match(TokenType::WHILE)) {
         return parseWhileLoop();
     }
+    if (match(TokenType::STRUCT)) {
+        return parseStructDef();
+    }
     if (match(TokenType::RETURN)) {
         return parseReturnStatement();
     }
     if (match(TokenType::LBRACE)) {
         return parseBlock();
     }
-    if (match(TokenType::SEMICOLON)) {}
-    if (match(TokenType::STRUCT)) { return parseStructDef(); }
-    if (match(TokenType::FN)) { return parseFunctionDef(); }
     
     // Check for array assignment: arr[0] = 42;
     if (peek().type == TokenType::IDENTIFIER) {
@@ -397,6 +433,13 @@ std::unique_ptr<VariableDefNode> Parser::parseVariableDef(bool is_const) {
     Token name = expect(TokenType::IDENTIFIER, "Expected variable name");
     if (name.type == TokenType::END_OF_FILE) return nullptr;
     
+    // Skip if it's a dict: or struct: prefix (handled in parseStatement)
+    if (name.value.find("dict:") == 0 || name.value.find("struct:") == 0) {
+        error_count++;
+        std::cerr << "Error: dict: and struct: prefixes should be used without 'let'\n";
+        return nullptr;
+    }
+    
     node->name = name.value;
     node->line = name.line;
     node->column = name.column;
@@ -554,6 +597,7 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
     
     Token token = peek();
     
+    // Literals
     if (token.type == TokenType::NUMBER) {
         advance();
         auto literal = std::make_unique<LiteralNode>();
@@ -566,6 +610,14 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
         return parseTypedArrayLiteral();
     }
     
+    if (token.type == TokenType::DICT_PREFIX) {
+        std::string name = token.value;
+        // Remove "dict:" prefix
+        name = name.substr(5);
+        // It's a dictionary literal
+        return parseDictLiteral();
+    } 
+
     if (token.type == TokenType::STRING) {
         advance();
         auto literal = std::make_unique<LiteralNode>();
@@ -590,14 +642,37 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
         return literal;
     }
     
+    // Identifiers and their variations
     if (token.type == TokenType::IDENTIFIER) {
-        // Save the identifier name
         std::string name = token.value;
         int line = token.line;
         int column = token.column;
         advance();
-        
-        // Check if it's a function call: name(...)
+       
+        // 0. Dictionary access: name:{"key"}
+        if (!isAtEnd() && peek().type == TokenType::COLON) {
+            // Check if it's followed by LBRACE
+            size_t save_pos = pos;
+            advance(); // consume :
+            if (!isAtEnd() && peek().type == TokenType::LBRACE) {
+                // It's a dictionary access: name:{"key"}
+                auto access = std::make_unique<DictAccessNode>();
+                access->name = name;
+                access->line = line;
+                access->column = column;
+                
+                advance(); // consume {
+                access->key = parseExpression();
+                expect(TokenType::RBRACE, "Expected '}' after dictionary key");
+                return access;
+            } else {
+                // It's a field access: person:name
+                pos = save_pos;
+                return parseFieldAccess(name);
+            }
+        }
+
+        // 1. Function call: name(...)
         if (!isAtEnd() && peek().type == TokenType::LPAREN) {
             auto call = std::make_unique<CallNode>();
             call->name = name;
@@ -617,17 +692,19 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
             return call;
         }
         
-        // Check if it's a struct instance: Person { ... }
-        if (!isAtEnd() && peek().type == TokenType::LBRACE) {
+        if (token.type == TokenType::STRUCT_PREFIX) {
+            std::string name = token.value;
+            // Remove "struct:" prefix
+            name = name.substr(7);
             return parseStructInstance(name);
         }
         
-        // Check if it's field access: person:name
+        // 3. Field access: person:name
         if (!isAtEnd() && peek().type == TokenType::COLON) {
             return parseFieldAccess(name);
         }
         
-        // Check if it's an array access: arr[0]
+        // 4. Array access: arr[0] or arr[0]:field
         if (!isAtEnd() && peek().type == TokenType::LBRACKET) {
             auto access = std::make_unique<ArrayAccessNode>();
             access->name = name;
@@ -637,10 +714,26 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
             advance(); // consume [
             access->index = parseExpression();
             expect(TokenType::RBRACKET, "Expected ']' after index");
+            
+            // Check for field access after array access: arr[0]:field
+            if (!isAtEnd() && peek().type == TokenType::COLON) {
+                auto field_access = std::make_unique<FieldAccessNode>();
+                field_access->struct_name = name;
+                field_access->line = line;
+                field_access->column = column;
+                field_access->array_access = std::move(access);
+                field_access->is_array_field_access = true;
+                
+                advance(); // consume :
+                Token field = expect(TokenType::IDENTIFIER, "Expected field name");
+                field_access->field_name = field.value;
+                return field_access;
+            }
+            
             return access;
         }
         
-        // Regular identifier
+        // 5. Regular identifier
         auto ident = std::make_unique<IdentifierNode>();
         ident->name = name;
         ident->line = line;
@@ -648,6 +741,7 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
         return ident;
     }
     
+    // Parenthesized expression
     if (token.type == TokenType::LPAREN) {
         advance();
         auto expr = parseExpression();
@@ -658,6 +752,42 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
     error_count++;
     std::cerr << "Error: Unexpected token: '" << token.value << "' at line " << token.line << "\n";
     return nullptr;
+}
+
+std::unique_ptr<ASTNode> Parser::parseDictLiteral() {
+    auto node = std::make_unique<DictLiteralNode>();
+    node->line = peek().line;
+    node->column = peek().column;
+    
+    advance(); // consume {
+    
+    if (!match(TokenType::RBRACE)) {
+        do {
+            // Parse key (can be identifier or string)
+            Token key;
+            if (peek().type == TokenType::STRING) {
+                key = advance();
+            } else if (peek().type == TokenType::IDENTIFIER) {
+                key = advance();
+            } else {
+                error_count++;
+                std::cerr << "Error: Expected key at line " << peek().line << "\n";
+                return nullptr;
+            }
+            
+            if (!match(TokenType::COLON)) {
+                error_count++;
+                std::cerr << "Error: Expected ':' after key at line " << peek().line << "\n";
+                return nullptr;
+            }
+            
+            auto value = parseExpression();
+            node->pairs[key.value] = std::move(value);
+        } while (match(TokenType::COMMA));
+        expect(TokenType::RBRACE, "Expected '}' after dictionary");
+    }
+    
+    return node;
 }
 
 std::unique_ptr<ASTNode> Parser::parseTypedArrayLiteral() {

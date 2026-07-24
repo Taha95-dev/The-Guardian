@@ -10,7 +10,7 @@ enum class TokenType {
     // Keywords
     FN, LET, CONST, IF, ELSE, FOR, WHILE, RETURN, STRUCT,
     TRUE, FALSE, NULL_TOKEN,
-    SHORTCUT,
+    SHORTCUT, STRUCT_PREFIX, DICT_PREFIX,
     
     // Symbols
     IDENTIFIER, NUMBER, STRING, CHAR, ANY, INT, FLOAT, BOOL,
@@ -33,6 +33,10 @@ struct Token {
     int line;
     int column;
     
+    // Default constructor
+    Token() : type(TokenType::END_OF_FILE), value(""), line(0), column(0) {}
+    
+    // Parameterized constructor
     Token(TokenType type, const std::string& value, int line, int column)
         : type(type), value(value), line(line), column(column) {}
 };

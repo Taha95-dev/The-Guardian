@@ -61,6 +61,27 @@ Token Lexer::readIdentifier() {
         value += advance();
     }
     
+    // Check for dict: prefix
+    if (value == "dict" && peek() == ':') {
+        advance(); // consume :
+        value += ":";
+        // Read the rest of the identifier (the variable name)
+        while (std::isalnum(peek()) || peek() == '_') {
+            value += advance();
+        }
+        return Token(TokenType::DICT_PREFIX, value, start_line, start_col);
+    }
+    
+    // Check for struct: prefix
+    if (value == "struct" && peek() == ':') {
+        advance(); // consume :
+        value += ":";
+        while (std::isalnum(peek()) || peek() == '_') {
+            value += advance();
+        }
+        return Token(TokenType::STRUCT_PREFIX, value, start_line, start_col);
+    }
+    
     auto it = keywords.find(value);
     if (it != keywords.end()) {
         return Token(it->second, value, start_line, start_col);

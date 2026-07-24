@@ -30,6 +30,108 @@ void VM::push(const Value& val) {
     stack.push_back(val);
 }
 
+void VM::executeMakeMolecule() {
+    // Allocate struct on heap
+    auto molecule = new guardian::Molecule();
+    
+    // Register with LUT for safety
+    // main_molecule->register_pointer(molecule, "struct");
+    
+    // Push pointer as a value
+    push(Value(molecule, Value::PtrType::STRUCT));
+}
+
+void VM::executeStoreAtom() {
+    std::string name = readString();
+    Value val = pop();
+    
+    // Get the struct pointer from the stack
+    if (stack.empty()) {
+        std::cerr << "Error: No struct to store atom in\n";
+        running = false;
+        return;
+    }
+    
+    Value struct_val = stack.back();
+    if (!struct_val.is_struct_ptr) {
+        std::cerr << "Error: Not a struct pointer\n";
+        running = false;
+        return;
+    }
+    
+    // Cast to Molecule*
+    guardian::Molecule* molecule = static_cast<guardian::Molecule*>(struct_val.struct_ptr);
+    
+    // Convert value to atom
+    std::shared_ptr<guardian::Atom> atom;
+    if (val.is_quark) {
+        switch (val.quark_data.type) {
+            case guardian::QuarkType::INT:
+                atom = std::make_shared<guardian::IntAtom>(val.quark_data.int_val);
+                break;
+            case guardian::QuarkType::FLOAT:
+                atom = std::make_shared<guardian::FloatAtom>(val.quark_data.float_val);
+                break;
+            case guardian::QuarkType::BOOL:
+                atom = std::make_shared<guardian::BoolAtom>(val.quark_data.bool_val);
+                break;
+            case guardian::QuarkType::CHAR: {
+                std::string char_str = "char:" + std::string(1, val.quark_data.char_val);
+                atom = std::make_shared<guardian::StringAtom>(char_str);
+                break;
+            }
+            default:
+                break;
+        }
+    } else if (val.atom_data) {
+        atom = val.atom_data;
+    }
+    
+    if (atom) {
+        // Store in the struct's molecule
+        molecule->add_atom_shared(name, atom);
+    }
+}
+
+void VM::executeGetAtom() {
+    std::string name = readString();
+    
+    std::cout << "  [DEBUG] GET_ATOM: getting field '" << name << "'\n";
+    
+    if (stack.empty()) {
+        std::cerr << "Error: No struct to get atom from\n";
+        running = false;
+        return;
+    }
+    
+    // The struct pointer should be on top of the stack
+    Value struct_val = pop();
+    
+    std::cout << "  [DEBUG] GET_ATOM: struct_val.is_struct_ptr = " << struct_val.is_struct_ptr << "\n";
+    
+    if (!struct_val.is_struct_ptr) {
+        std::cerr << "Error: Not a struct pointer\n";
+        push(Value(0)); // Push placeholder
+        return;
+    }
+    
+    guardian::Molecule* molecule = static_cast<guardian::Molecule*>(struct_val.struct_ptr);
+    if (!molecule) {
+        std::cerr << "Error: Null struct pointer\n";
+        push(Value(0));
+        return;
+    }
+    
+    auto atom = molecule->get_atom_shared(name);
+    if (atom) {
+        std::cout << "  [DEBUG] GET_ATOM: found atom for '" << name << "'\n";
+        push(Value(atom));
+    } else {
+        std::cerr << "Error: Field '" << name << "' not found in struct\n";
+        push(Value(0));
+    }
+}
+
 Value VM::pop() {
     if (stack.empty()) {
         std::cerr << "Error: Stack underflow\n";
@@ -88,17 +190,27 @@ void VM::setVariable(const std::string& name, const Value& value) {
             default:
                 break;
         }
+    } else if (value.is_struct_ptr) {
+        // Store struct pointer as a string marker
+        std::string marker = "STRUCT_PTR:" + std::to_string(reinterpret_cast<uintptr_t>(value.struct_ptr));
+        main_molecule->add_string(name, marker);
+        std::cout << "  [DEBUG] setVariable: stored struct pointer for " << name << "\n";
+    } else if (value.is_molecule) {
+        // Store molecule as a struct pointer
+        // Convert molecule to a raw pointer and store it
+        void* ptr = value.molecule_data.get();
+        std::string marker = "STRUCT_PTR:" + std::to_string(reinterpret_cast<uintptr_t>(ptr));
+        main_molecule->add_string(name, marker);
+        std::cout << "  [DEBUG] setVariable: stored molecule for " << name << "\n";
     } else if (value.is_array) {
-        // Store array as a JSON-like string with type info
-        std::string arr_str = "array:";
-        arr_str += "[";
+        // Store array as a JSON-like string
+        std::string arr_str = "array:[";
         for (size_t i = 0; i < value.array_data.size(); i++) {
             arr_str += value.array_data[i].to_string();
             if (i < value.array_data.size() - 1) arr_str += ", ";
         }
         arr_str += "]";
         main_molecule->add_string(name, arr_str);
-        std::cout << "  [DEBUG] Stored array: " << arr_str << "\n";
     } else if (value.atom_data) {
         if (auto str_atom = std::dynamic_pointer_cast<guardian::StringAtom>(value.atom_data)) {
             main_molecule->add_string(name, str_atom->get());
@@ -107,9 +219,20 @@ void VM::setVariable(const std::string& name, const Value& value) {
 }
 
 Value VM::getVariable(const std::string& name) const {
+    std::cout << "  [DEBUG] getVariable: " << name << "\n";
+    
     if (main_molecule->has_string(name)) {
         std::string value = main_molecule->get_string(name);
         
+        // Check if it's a struct pointer
+        if (value.rfind("STRUCT_PTR:", 0) == 0) {
+            std::string addr_str = value.substr(11);
+            void* ptr = reinterpret_cast<void*>(std::stoull(addr_str));
+            std::cout << "  [DEBUG] getVariable: loaded struct pointer for " << name << "\n";
+            return Value(ptr);
+        }
+        
+        // Check if it's an array
         if (value.rfind("array:", 0) == 0) {
             std::cout << "  [DEBUG] Loading array: " << value << "\n";
             std::vector<Value> arr_data;
@@ -132,7 +255,6 @@ Value VM::getVariable(const std::string& name) const {
                         int val = std::stoi(num_str);
                         arr_data.push_back(Value(val));
                     } catch (...) {
-                        // If it's not a number, store as string
                         arr_data.push_back(Value(std::make_shared<guardian::StringAtom>(num_str)));
                     }
                 } else {
@@ -175,7 +297,17 @@ void VM::execute(uint8_t opcode) {
             push(Value(value));
             break;
         }
-        
+       
+        case Opcode::MAKE_MOLECULE:
+            executeMakeMolecule();
+            break;
+        case Opcode::STORE_ATOM:
+            executeStoreAtom();
+            break;
+        case Opcode::GET_ATOM:
+            executeGetAtom();
+            break;
+
         case Opcode::PUSH_FLOAT: {
             if (pc + 4 > bytecode.size()) {
                 std::cerr << "Error: Invalid PUSH_FLOAT instruction\n";
@@ -460,7 +592,29 @@ void VM::executePrintln() {
         running = false;
         return;
     }
+    
     Value val = pop();
+    
+    // Debug: see what we're printing
+    std::cout << "  [DEBUG] PRINTLN: is_quark=" << val.is_quark 
+              << ", is_struct_ptr=" << val.is_struct_ptr 
+              << ", is_molecule=" << val.is_molecule << "\n";
+    
+    // If it's a struct pointer, we need to print the whole struct or a specific field
+    if (val.is_struct_ptr) {
+        // For now, just print the pointer address
+        std::cout << "Struct at " << val.struct_ptr << "\n";
+        // TODO: Print all fields of the struct
+        return;
+    }
+    
+    // If it's a molecule, print it
+    if (val.is_molecule) {
+        std::cout << "Molecule{...}\n";
+        return;
+    }
+    
+    // Regular printing for quarks, atoms, arrays
     std::cout << val.to_string() << "\n";
 }
 
@@ -508,7 +662,12 @@ void VM::executeMakeArray() {
             running = false;
             return;
         }
-        arr_data.insert(arr_data.begin(), pop());
+        Value val = pop();
+        // If it's a struct pointer, preserve it
+        if (val.is_struct_ptr) {
+            std::cout << "  [DEBUG] MAKE_ARRAY: storing struct pointer\n";
+        }
+        arr_data.insert(arr_data.begin(), val);
     }
     
     push(Value(arr_data));
@@ -543,7 +702,86 @@ void VM::executeArrayGet() {
         return;
     }
     
-    push(arr_val.array_data[index]);
+    Value result = arr_val.array_data[index];
+    
+    // If the result is a struct pointer, preserve it
+    if (result.is_struct_ptr) {
+        std::cout << "  [DEBUG] ARRAY_GET: returning struct pointer\n";
+        push(result);
+    } else {
+        push(result);
+    }
+}
+
+void VM::executeMakeDict() {
+    // Pop count
+    if (stack.empty()) {
+        std::cerr << "Error: MAKE_DICT requires count on stack\n";
+        running = false;
+        return;
+    }
+    
+    Value count_val = pop();
+    if (!count_val.is_quark || count_val.quark_data.type != guardian::QuarkType::INT) {
+        std::cerr << "Error: Dict count must be an integer\n";
+        running = false;
+        return;
+    }
+    
+    int count = count_val.quark_data.int_val;
+    auto dict = new std::unordered_map<std::string, Value>();
+    
+    for (int i = 0; i < count; i++) {
+        Value val = pop();
+        std::string key = pop().to_string();
+        (*dict)[key] = val;
+    }
+    
+    // Push dictionary pointer
+    push(Value(dict, Value::PtrType::DICT));
+}
+
+void VM::executeDictGet() {
+    if (stack.size() < 2) {
+        std::cerr << "Error: DICT_GET requires dict and key\n";
+        running = false;
+        return;
+    }
+    
+    // Pop key
+    Value key_val = pop();
+    // Pop dict
+    Value dict_val = pop();
+    
+    if (!dict_val.is_dict) {
+        std::cerr << "Error: DICT_GET requires a dictionary\n";
+        running = false;
+        return;
+    }
+    
+    std::string key = key_val.to_string();
+    
+    // If dict_data has the key
+    if (!dict_val.dict_data.empty()) {
+        auto it = dict_val.dict_data.find(key);
+        if (it != dict_val.dict_data.end()) {
+            push(it->second);
+            return;
+        }
+    }
+    
+    // If dict_ptr is set, use it
+    if (dict_val.dict_ptr) {
+        auto* dict = static_cast<std::unordered_map<std::string, Value>*>(dict_val.dict_ptr);
+        auto it = dict->find(key);
+        if (it != dict->end()) {
+            push(it->second);
+            return;
+        }
+    }
+    
+    std::cerr << "Error: Key '" << key << "' not found in dictionary\n";
+    push(Value(0));
 }
 
 void VM::executeArraySet() {

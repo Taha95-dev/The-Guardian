@@ -20,33 +20,67 @@
 namespace guardian::vm {
 
 // ============================================
-// VALUE — Can be Quark (stack) or Atom (heap) or Array
+// VALUE — Can be Quark, Atom, Array, Molecule, or Struct Pointer
 // ============================================
 struct Value {
     bool is_quark;
     bool is_array;
+    bool is_molecule;
+    bool is_struct_ptr;          // NEW: pointer to struct on heap
+    bool is_dict;
     guardian::Quark quark_data;
+    std::unordered_map<std::string, Value> dict_data;
     std::shared_ptr<guardian::Atom> atom_data;
-    std::vector<Value> array_data;  // Store array elements directly
+    std::vector<Value> array_data;
+    std::shared_ptr<guardian::Molecule> molecule_data;
+    void* struct_ptr;            // NEW: raw pointer to struct on heap
+    void* dict_ptr;
     
-    Value() : is_quark(true), is_array(false) {}
-    
+    Value() : is_quark(true), is_array(false), is_molecule(false), is_struct_ptr(false), struct_ptr(nullptr) {}
+
     // Quark constructors
-    Value(int v) : is_quark(true), is_array(false), quark_data(v) {}
-    Value(unsigned int v) : is_quark(true), is_array(false), quark_data(v) {}
-    Value(int64_t v) : is_quark(true), is_array(false), quark_data(v) {}
-    Value(uint64_t v) : is_quark(true), is_array(false), quark_data(v) {}
-    Value(float v) : is_quark(true), is_array(false), quark_data(v) {}
-    Value(double v) : is_quark(true), is_array(false), quark_data(v) {}
-    Value(bool v) : is_quark(true), is_array(false), quark_data(v) {}
-    Value(char v) : is_quark(true), is_array(false), quark_data(v) {}
+    Value(int v) : is_quark(true), is_array(false), is_molecule(false), is_struct_ptr(false), quark_data(v), struct_ptr(nullptr) {}
+    Value(unsigned int v) : is_quark(true), is_array(false), is_molecule(false), is_struct_ptr(false), quark_data(v), struct_ptr(nullptr) {}
+    Value(int64_t v) : is_quark(true), is_array(false), is_molecule(false), is_struct_ptr(false), quark_data(v), struct_ptr(nullptr) {}
+    Value(uint64_t v) : is_quark(true), is_array(false), is_molecule(false), is_struct_ptr(false), quark_data(v), struct_ptr(nullptr) {}
+    Value(float v) : is_quark(true), is_array(false), is_molecule(false), is_struct_ptr(false), quark_data(v), struct_ptr(nullptr) {}
+    Value(double v) : is_quark(true), is_array(false), is_molecule(false), is_struct_ptr(false), quark_data(v), struct_ptr(nullptr) {}
+    Value(bool v) : is_quark(true), is_array(false), is_molecule(false), is_struct_ptr(false), quark_data(v), struct_ptr(nullptr) {}
+    Value(char v) : is_quark(true), is_array(false), is_molecule(false), is_struct_ptr(false), quark_data(v), struct_ptr(nullptr) {}
     
     // Atom constructor
-    Value(std::shared_ptr<guardian::Atom> a) : is_quark(false), is_array(false), atom_data(a) {}
+    Value(std::shared_ptr<guardian::Atom> a) 
+        : is_quark(false), is_array(false), is_molecule(false), is_struct_ptr(false), atom_data(a), struct_ptr(nullptr) {}
     
     // Array constructor
-    Value(const std::vector<Value>& arr) : is_quark(false), is_array(true), array_data(arr) {}
+    Value(const std::vector<Value>& arr) 
+        : is_quark(false), is_array(true), is_molecule(false), is_struct_ptr(false), array_data(arr), struct_ptr(nullptr) {}
     
+    // Molecule constructor
+    Value(std::shared_ptr<guardian::Molecule> m) 
+        : is_quark(false), is_array(false), is_molecule(true), is_struct_ptr(false), molecule_data(m), struct_ptr(nullptr) {} 
+
+    // Dictionary constructor
+    Value(const std::unordered_map<std::string, Value>& d) 
+        : is_quark(false), is_array(false), is_molecule(false), is_struct_ptr(false), 
+          is_dict(true), dict_data(d), dict_ptr(nullptr) {}
+    
+    
+
+    // Pointer type enum (scoped, no leaking!)
+    enum class PtrType {
+        STRUCT,
+        DICT
+    };
+    
+    // Single pointer constructor with type flag
+    Value(void* ptr, PtrType type) 
+        : is_quark(false), is_array(false), is_molecule(false), 
+          is_struct_ptr(type == PtrType::STRUCT), 
+          is_dict(type == PtrType::DICT),
+          struct_ptr(type == PtrType::STRUCT ? ptr : nullptr), 
+          dict_ptr(type == PtrType::DICT ? ptr : nullptr) {}
+
     std::string to_string() const {
         if (is_quark) {
             return quark_data.to_string();
@@ -60,14 +94,38 @@ struct Value {
             result += "]";
             return result;
         }
+        if (is_molecule) {
+            return "Molecule{...}";
+        }
+        if (is_struct_ptr) {
+            return "Struct*(" + std::to_string(reinterpret_cast<uintptr_t>(struct_ptr)) + ")";
+        }
         if (atom_data) {
+            // Check for StringAtom (strings and characters)
             if (auto str_atom = std::dynamic_pointer_cast<guardian::StringAtom>(atom_data)) {
                 std::string value = str_atom->get();
                 if (value.rfind("char:", 0) == 0) {
-                    return value.substr(5);
+                    return value.substr(5);  // Return just the character
                 }
-                return value;
+                return value;  // Return the string
             }
+            // Check for IntAtom
+            if (auto int_atom = std::dynamic_pointer_cast<guardian::IntAtom>(atom_data)) {
+                return std::to_string(int_atom->get());
+            }
+            // Check for FloatAtom
+            if (auto float_atom = std::dynamic_pointer_cast<guardian::FloatAtom>(atom_data)) {
+                return std::to_string(float_atom->get());
+            }
+            // Check for BoolAtom
+            if (auto bool_atom = std::dynamic_pointer_cast<guardian::BoolAtom>(atom_data)) {
+                return bool_atom->get() ? "true" : "false";
+            }
+            // Check for CharAtom
+            if (auto char_atom = std::dynamic_pointer_cast<guardian::CharAtom>(atom_data)) {
+                return std::string(1, char_atom->get());
+            }
+            // Fallback
             return std::string(atom_data->name());
         }
         return "null";
@@ -83,6 +141,12 @@ struct Value {
                 total += val.size();
             }
             return total;
+        }
+        if (is_molecule) {
+            return molecule_data ? molecule_data->size() : 0;
+        }
+        if (is_struct_ptr) {
+            return sizeof(void*);
         }
         return atom_data ? atom_data->size() : 0;
     }
@@ -103,6 +167,12 @@ struct Value {
                 default:
                     return nullptr;
             }
+        }
+        if (is_molecule) {
+            return nullptr;
+        }
+        if (is_struct_ptr) {
+            return nullptr;
         }
         return atom_data;
     }
@@ -149,6 +219,15 @@ private:
     void executeMakeArray();
     void executeArrayGet();
     void executeArraySet();
+    
+    // Molecule operations
+    void executeMakeMolecule();
+    void executeStoreAtom();
+    void executeGetAtom();
+    
+    // Dictionary operations
+    void executeMakeDict();
+    void executeDictGet();
     
     std::string readString();
 };
