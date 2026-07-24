@@ -82,3 +82,28 @@ Built by Taha — 13-year-old developer building the future of code.
 - [User Guide](docs/user-guide/) — Complete documentation
 - [Architecture](docs/architecture/) — How The Guardian works
 - [API Reference](docs/api/) — Full API documentation
+<p align="center">
+  <img src="assets/banner.svg" alt="The Guardian Banner" width="100%">
+</p>
+
+
+## Architecture
+
+![The Guardian Architecture](assets/architecture.svg)
+
+The Guardian is built as a layered, modular framework. See the [full architecture documentation](docs/architecture.md) for details.
+
+---
+
+## Documentation
+
+- [Architecture Overview](docs/architecture.md) — How The Guardian works
+- [Security Model](docs/security_model.md) — Learn about memory safety
+- [Tutorial](docs/tutorial.md) — Build your first language
+- [User Guide](docs/user-guide/) — Complete documentation
+- [API Reference](docs/api/) — Full API docs
+- [Contributing Guide](CONTRIBUTING.md) — How to contribute
+- [Changelog](CHANGELOG.md) — Version history
+
+---
+

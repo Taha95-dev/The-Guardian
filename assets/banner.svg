@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 200" width="1200" height="200">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0a0f"/>
+      <stop offset="50%" style="stop-color:#16213e"/>
+      <stop offset="100%" style="stop-color:#0a0a0f"/>
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00d4ff"/>
+      <stop offset="100%" style="stop-color:#7b2ffc"/>
+    </linearGradient>
+    <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00d4ff; stop-opacity:0"/>
+      <stop offset="50%" style="stop-color:#00d4ff; stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#00d4ff; stop-opacity:0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="200" fill="url(#bgGrad)"/>
+
+  <!-- Decorative lines -->
+  <line x1="100" y1="50" x2="1100" y2="50" stroke="url(#lineGrad)" stroke-width="1" opacity="0.3"/>
+  <line x1="100" y1="150" x2="1100" y2="150" stroke="url(#lineGrad)" stroke-width="1" opacity="0.3"/>
+
+  <!-- Shield icon -->
+  <g transform="translate(180, 60)">
+    <path d="M50 10 L90 30 L90 70 C90 95 70 110 50 115 C30 110 10 95 10 70 L10 30 Z"
+          fill="none" stroke="url(#accentGrad)" stroke-width="2.5"/>
+    <circle cx="50" cy="60" r="18" fill="none" stroke="url(#accentGrad)" stroke-width="2"/>
+    <circle cx="50" cy="60" r="8" fill="#00d4ff"/>
+  </g>
+
+  <!-- Title -->
+  <text x="300" y="100" font-family="'Segoe UI', Arial, sans-serif" font-size="48" font-weight="bold" fill="#00d4ff" letter-spacing="4">
+    THE GUARDIAN
+  </text>
+
+  <!-- Subtitle -->
+  <text x="300" y="135" font-family="'Segoe UI', Arial, sans-serif" font-size="18" fill="#8892b0" letter-spacing="6">
+    LANGUAGE FRAMEWORK
+  </text>
+
+  <!-- Right side: built with -->
+  <text x="950" y="100" font-family="'Segoe UI', Arial, sans-serif" font-size="14" fill="#8892b0" text-anchor="end" letter-spacing="2">
+    BUILT WITH
+  </text>
+  <text x="950" y="120" font-family="'Courier New', monospace" font-size="14" fill="#7b2ffc" text-anchor="end">
+    C++ &bull; CMake &bull; 3373 LOC
+  </text>
+
+  <!-- Stats -->
+  <rect x="1050" y="140" width="100" height="20" rx="4" fill="#00d4ff" opacity="0.15"/>
+  <text x="1100" y="154" font-family="'Segoe UI', Arial, sans-serif" font-size="10" fill="#00d4ff" text-anchor="middle">
+    v0.1.0
+  </text>
+
+  <!-- Bottom accent -->
+  <rect x="300" y="170" width="200" height="2" fill="url(#accentGrad)" opacity="0.5"/>
+</svg>
