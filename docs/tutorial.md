@@ -301,7 +301,7 @@ std::unique_ptr<ASTNode> Parser::parse() {
             return nullptr;
         }
         auto value = parseExpression();
-        // TODO: Store variable
+        // Store variable (or whatever the code should be)
         return value;
     }
     
