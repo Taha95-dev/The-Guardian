@@ -93,6 +93,7 @@ target_compile_features(guardian_parser PUBLIC cxx_std_17)
 # ============================================
 set(VM_SOURCES
     src/vm/vm.cpp
+    src/vm/codegen.cpp
 )
 
 add_library(guardian_vm STATIC ${VM_SOURCES})
@@ -166,6 +167,12 @@ install(TARGETS guardian_core guardian_memory guardian_format guardian_vm
 
 install(TARGETS guardianc
     RUNTIME DESTINATION bin
+)
+
+install(FILES
+    src/vm/codegen.hpp
+    src/vm/opcodes.hpp
+    DESTINATION include/guardian/vm
 )
 
 install(DIRECTORY include/guardian

@@ -1,401 +1,176 @@
+#include <guardian/parser/parser.hpp>
+#include <guardian/vm/codegen.hpp>
+#include <guardian/vm/vm.hpp>
+#include <guardian/format/gbin_format.hpp>
 #include <iostream>
 #include <fstream>
-#include <string>
-#include <vector>
 #include <sstream>
-#include <cctype>
-#include <guardian/core/molecule.hpp>
+#include <memory>
 
 using namespace guardian;
 
-// ── Token Types ──
-enum class TokenType {
-    // Keywords
-    LET, PRINT, IF, ELSE, WHILE, FUNC, RETURN,
-    // Types
-    INT, FLOAT, STRING, BOOL,
-    // Literals
-    IDENTIFIER, NUMBER, STRING_LITERAL, BOOL_LITERAL,
-    // Operators
-    PLUS, MINUS, STAR, SLASH, EQUALS,
-    // Symbols
-    LPAREN, RPAREN, LBRACE, RBRACE, SEMICOLON, COMMA, COLON,
-    // Other
-    COMMENT, EOF_TOKEN
+// ── Axiom AST Nodes ──
+struct AxiomProgramNode : public parser::ProgramNode {
+    // Additional Axiom-specific fields
 };
 
-struct Token {
-    TokenType type;
-    std::string value;
-    int line;
-    int column;
+struct AxiomLetNode : public parser::ASTNode {
+    std::string name;
+    std::unique_ptr<parser::ASTNode> value;
+    AxiomLetNode() { type = parser::ASTNode::Type::VARIABLE; }
+};
 
-    Token(TokenType t, const std::string& v = "", int l = 0, int c = 0)
-        : type(t), value(v), line(l), column(c) {}
-
-    std::string to_string() const {
-        switch (type) {
-            case TokenType::LET: return "LET";
-            case TokenType::PRINT: return "PRINT";
-            case TokenType::IF: return "IF";
-            case TokenType::ELSE: return "ELSE";
-            case TokenType::WHILE: return "WHILE";
-            case TokenType::FUNC: return "FUNC";
-            case TokenType::RETURN: return "RETURN";
-            case TokenType::INT: return "INT";
-            case TokenType::FLOAT: return "FLOAT";
-            case TokenType::STRING: return "STRING";
-            case TokenType::BOOL: return "BOOL";
-            case TokenType::IDENTIFIER: return "IDENTIFIER(" + value + ")";
-            case TokenType::NUMBER: return "NUMBER(" + value + ")";
-            case TokenType::STRING_LITERAL: return "STRING_LITERAL(\"" + value + "\")";
-            case TokenType::BOOL_LITERAL: return "BOOL_LITERAL(" + value + ")";
-            case TokenType::PLUS: return "PLUS";
-            case TokenType::MINUS: return "MINUS";
-            case TokenType::STAR: return "STAR";
-            case TokenType::SLASH: return "SLASH";
-            case TokenType::EQUALS: return "EQUALS";
-            case TokenType::LPAREN: return "LPAREN";
-            case TokenType::RPAREN: return "RPAREN";
-            case TokenType::LBRACE: return "LBRACE";
-            case TokenType::RBRACE: return "RBRACE";
-            case TokenType::SEMICOLON: return "SEMICOLON";
-            case TokenType::COMMA: return "COMMA";
-            case TokenType::COLON: return "COLON";
-            case TokenType::COMMENT: return "COMMENT(" + value + ")";
-            case TokenType::EOF_TOKEN: return "EOF";
-            default: return "UNKNOWN";
-        }
+struct AxiomPrintNode : public parser::ASTNode {
+    std::unique_ptr<parser::ASTNode> value;
+    bool newline;
+    AxiomPrintNode(bool nl = true) : newline(nl) { 
+        type = parser::ASTNode::Type::CUSTOM; 
     }
 };
 
-// ── Lexer ──
-class Lexer {
-private:
-    std::string source;
-    size_t pos;
-    int line;
-    int column;
-
-    char peek() const {
-        if (pos >= source.length()) return '\0';
-        return source[pos];
-    }
-
-    char advance() {
-        char c = peek();
-        pos++;
-        if (c == '\n') {
-            line++;
-            column = 1;
-        } else {
-            column++;
-        }
-        return c;
-    }
-
-    void skipWhitespace() {
-        while (std::isspace(peek())) {
-            advance();
-        }
-    }
-
-    Token makeToken(TokenType type, const std::string& value = "") {
-        return Token(type, value, line, column);
-    }
-
+// ── Axiom Parser ──
+class AxiomParser : public parser::Parser {
 public:
-    Lexer(const std::string& src) : source(src), pos(0), line(1), column(1) {}
+    AxiomParser(const std::vector<parser::Token>& tokens) 
+        : Parser(tokens) {}
 
-    std::vector<Token> tokenize() {
-        std::vector<Token> tokens;
-
-        while (true) {
-            char c = peek();
-
-            if (c == '\0') {
-                tokens.push_back(makeToken(TokenType::EOF_TOKEN));
-                break;
-            }
-
-            // Skip whitespace
-            if (std::isspace(c)) {
-                skipWhitespace();
-                continue;
-            }
-
-            // Comments
-            if (c == '/' && peekNext() == '/') {
-                std::string comment;
-                while (peek() != '\n' && peek() != '\0') {
-                    comment += advance();
-                }
-                tokens.push_back(makeToken(TokenType::COMMENT, comment));
-                continue;
-            }
-
-            // Strings
-            if (c == '"') {
-                std::string str;
-                advance(); // skip opening "
-                while (peek() != '"' && peek() != '\0') {
-                    str += advance();
-                }
-                if (peek() == '"') advance(); // skip closing "
-                tokens.push_back(makeToken(TokenType::STRING_LITERAL, str));
-                continue;
-            }
-
-            // Identifiers and keywords
-            if (std::isalpha(c) || c == '_') {
-                std::string ident;
-                while (std::isalnum(peek()) || peek() == '_') {
-                    ident += advance();
-                }
-
-                // Check keywords
-                if (ident == "let") {
-                    tokens.push_back(makeToken(TokenType::LET));
-                } else if (ident == "print") {
-                    tokens.push_back(makeToken(TokenType::PRINT));
-                } else if (ident == "if") {
-                    tokens.push_back(makeToken(TokenType::IF));
-                } else if (ident == "else") {
-                    tokens.push_back(makeToken(TokenType::ELSE));
-                } else if (ident == "while") {
-                    tokens.push_back(makeToken(TokenType::WHILE));
-                } else if (ident == "func") {
-                    tokens.push_back(makeToken(TokenType::FUNC));
-                } else if (ident == "return") {
-                    tokens.push_back(makeToken(TokenType::RETURN));
-                } else if (ident == "int") {
-                    tokens.push_back(makeToken(TokenType::INT));
-                } else if (ident == "float") {
-                    tokens.push_back(makeToken(TokenType::FLOAT));
-                } else if (ident == "string") {
-                    tokens.push_back(makeToken(TokenType::STRING));
-                } else if (ident == "bool") {
-                    tokens.push_back(makeToken(TokenType::BOOL));
-                } else if (ident == "true" || ident == "false") {
-                    tokens.push_back(makeToken(TokenType::BOOL_LITERAL, ident));
-                } else {
-                    tokens.push_back(makeToken(TokenType::IDENTIFIER, ident));
-                }
-                continue;
-            }
-
-            // Numbers (including floats)
-            if (std::isdigit(c) || c == '.') {
-                std::string num;
-                bool hasDot = false;
-                
-                while (std::isdigit(peek()) || peek() == '.') {
-                    if (peek() == '.') {
-                        if (hasDot) break; // Second dot is error
-                        hasDot = true;
-                    }
-                    num += advance();
-                }
-                
-                tokens.push_back(makeToken(TokenType::NUMBER, num));
-                continue;
-            }
-
-            // Single-character tokens
-            switch (c) {
-                case '+': advance(); tokens.push_back(makeToken(TokenType::PLUS)); break;
-                case '-': advance(); tokens.push_back(makeToken(TokenType::MINUS)); break;
-                case '*': advance(); tokens.push_back(makeToken(TokenType::STAR)); break;
-                case '/': advance(); tokens.push_back(makeToken(TokenType::SLASH)); break;
-                case '=': advance(); tokens.push_back(makeToken(TokenType::EQUALS)); break;
-                case '(': advance(); tokens.push_back(makeToken(TokenType::LPAREN)); break;
-                case ')': advance(); tokens.push_back(makeToken(TokenType::RPAREN)); break;
-                case '{': advance(); tokens.push_back(makeToken(TokenType::LBRACE)); break;
-                case '}': advance(); tokens.push_back(makeToken(TokenType::RBRACE)); break;
-                case ';': advance(); tokens.push_back(makeToken(TokenType::SEMICOLON)); break;
-                case ',': advance(); tokens.push_back(makeToken(TokenType::COMMA)); break;
-                case ':': advance(); tokens.push_back(makeToken(TokenType::COLON)); break;
-                default:
-                    std::cerr << "Unknown character: " << c << " at line " << line << "\n";
-                    advance();
-                    break;
+    std::unique_ptr<parser::ASTNode> parse() override {
+        auto program = std::make_unique<AxiomProgramNode>();
+        
+        while (!isAtEnd()) {
+            auto stmt = parseStatement();
+            if (stmt) {
+                program->statements.push_back(std::move(stmt));
             }
         }
+        
+        return program;
+    }
 
-        return tokens;
+protected:
+    std::unique_ptr<parser::ASTNode> parseExpression() override {
+        // Axiom expression parsing
+        return nullptr;
+    }
+
+    std::unique_ptr<parser::ASTNode> parseStatement() override {
+        auto tok = peek();
+        
+        if (tok.value == "let") {
+            return parseLet();
+        } else if (tok.value == "print" || tok.value == "println") {
+            return parsePrint();
+        }
+        
+        advance(); // Skip unknown
+        return nullptr;
+    }
+
+    std::unique_ptr<parser::ASTNode> parseBlock() override {
+        // Axiom block parsing
+        return nullptr;
     }
 
 private:
-    char peekNext() const {
-        if (pos + 1 >= source.length()) return '\0';
-        return source[pos + 1];
-    }
-};
-
-// ── Parser ──
-class Parser {
-private:
-    std::vector<Token> tokens;
-    size_t pos;
-
-    Token peek() const {
-        if (pos >= tokens.size()) return Token(TokenType::EOF_TOKEN);
-        return tokens[pos];
-    }
-
-    Token advance() {
-        if (pos >= tokens.size()) return Token(TokenType::EOF_TOKEN);
-        return tokens[pos++];
-    }
-
-    bool match(TokenType type) {
-        if (peek().type == type) {
-            advance();
-            return true;
-        }
-        return false;
-    }
-
-    bool expect(TokenType type, const std::string& error_msg) {
-        if (peek().type == type) {
-            advance();
-            return true;
-        }
-        std::cerr << "Error: " << error_msg << " at line " << peek().line << "\n";
-        return false;
-    }
-
-public:
-    Parser(const std::vector<Token>& t) : tokens(t), pos(0) {}
-
-    void parse() {
-        std::cout << "Parsing Axiom program...\n\n";
-
-        while (peek().type != TokenType::EOF_TOKEN) {
-            parseStatement();
-        }
-
-        std::cout << "\nParsing complete!\n";
-    }
-
-    void parseStatement() {
-        Token token = peek();
-
-        switch (token.type) {
-            case TokenType::LET:
-                parseLetStatement();
-                break;
-            case TokenType::PRINT:
-                parsePrintStatement();
-                break;
-            case TokenType::COMMENT:
-                std::cout << "  Comment: " << token.value << "\n";
-                advance();
-                break;
-            default:
-                std::cout << "  Unknown statement: " << token.to_string() << "\n";
-                advance();
-                break;
-        }
-    }
-
-    void parseLetStatement() {
+    std::unique_ptr<parser::ASTNode> parseLet() {
         advance(); // consume 'let'
         
-        Token name = advance();
-        if (name.type != TokenType::IDENTIFIER) {
-            std::cerr << "Expected identifier after 'let'\n";
-            return;
+        auto nameTok = advance();
+        if (nameTok.type != parser::Token::Type::IDENTIFIER) {
+            error("Expected identifier after 'let'");
+            return nullptr;
         }
-
-        if (!expect(TokenType::EQUALS, "Expected '=' after identifier")) return;
-
-        // Parse value
-        std::string value_str;
-        Token value = peek();
         
-        // Handle different value types
-        if (value.type == TokenType::STRING_LITERAL) {
-            value_str = "\"" + value.value + "\"";
-            advance();
-        } else if (value.type == TokenType::NUMBER) {
-            value_str = value.value;
-            advance();
-        } else if (value.type == TokenType::BOOL_LITERAL) {
-            value_str = value.value;
-            advance();
-        } else if (value.type == TokenType::IDENTIFIER) {
-            value_str = value.value;
-            advance();
-        } else {
-            std::cerr << "Unexpected value type: " << value.to_string() << "\n";
-            return;
+        if (!match(parser::Token::Type::ASSIGN)) {
+            error("Expected '='");
+            return nullptr;
         }
-
-        std::cout << "  Variable: " << name.value << " = " << value_str << "\n";
-
-        if (!expect(TokenType::SEMICOLON, "Expected ';' after statement")) {
-            // If we don't see a semicolon, try to advance to find one
-            while (peek().type != TokenType::SEMICOLON && peek().type != TokenType::EOF_TOKEN) {
-                advance();
-            }
-            if (peek().type == TokenType::SEMICOLON) {
-                advance();
-            }
-        }
+        
+        auto node = std::make_unique<AxiomLetNode>();
+        node->name = nameTok.value;
+        node->value = parseExpression();
+        
+        match(parser::Token::Type::SEMICOLON);
+        return node;
     }
-
-    void parsePrintStatement() {
-        advance(); // consume 'print'
-
-        if (!expect(TokenType::LPAREN, "Expected '(' after print")) return;
-
-        // Parse expression
-        std::string expr;
-        int parenCount = 1;
+    
+    std::unique_ptr<parser::ASTNode> parsePrint() {
+        bool newline = (peek().value == "println");
+        advance(); // consume 'print' or 'println'
         
-        while (parenCount > 0 && peek().type != TokenType::EOF_TOKEN) {
-            Token t = peek();
-            
-            if (t.type == TokenType::LPAREN) {
-                parenCount++;
-            } else if (t.type == TokenType::RPAREN) {
-                parenCount--;
-                if (parenCount == 0) {
-                    advance();
-                    break;
-                }
-            }
-            
-            if (parenCount > 0) {
-                expr += t.to_string() + " ";
-                advance();
-            }
+        if (!match(parser::Token::Type::LPAREN)) {
+            error("Expected '('");
+            return nullptr;
         }
-
-        std::cout << "  Print: " << expr << "\n";
-
-        if (peek().type == TokenType::SEMICOLON) {
-            advance();
-        } else {
-            std::cerr << "Warning: Expected ';' after print at line " << peek().line << "\n";
+        
+        auto node = std::make_unique<AxiomPrintNode>(newline);
+        node->value = parseExpression();
+        
+        if (!match(parser::Token::Type::RPAREN)) {
+            error("Expected ')'");
+            return nullptr;
         }
+        
+        match(parser::Token::Type::SEMICOLON);
+        return node;
     }
 };
 
-// ── Main ──
+// ── Axiom Compiler ──
+class AxiomCompiler {
+public:
+    bool compile(const std::string& source, const std::string& output) {
+        std::cout << "🔷 Axiom Compiler (Using Guardian APIs)\n";
+        std::cout << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+        
+        // 1. Tokenize using Guardian's Lexer
+        std::cout << "🔤 Lexing source...\n";
+        compiler::Lexer lexer(source);
+        std::vector<compiler::Token> tokens = lexer.tokenize();
+        std::cout << "   Found " << tokens.size() << " tokens\n";
+        
+        // 2. Parse using AxiomParser
+        std::cout << "📚 Parsing...\n";
+        AxiomParser parser(tokens);
+        auto ast = parser.parse();
+        std::cout << "   AST built\n";
+        
+        // 3. Generate bytecode using Guardian's CodeGen
+        std::cout << "⚡ Generating bytecode...\n";
+        vm::CodeGen codegen;
+        
+        // TODO: Walk the AST and emit bytecode
+        // This is where we'd use Guardian's CodeGen API
+        
+        auto bytecode = codegen.getBytecode();
+        std::cout << "   Generated " << bytecode.size() << " bytes\n";
+        
+        // 4. Save using Guardian's GBIN format
+        std::cout << "💾 Saving to " << output << "...\n";
+        format::GbinFormat gbin;
+        gbin.set_version(1);
+        gbin.set_data(bytecode);
+        gbin.write(output);
+        
+        // 5. Run on Guardian's VM
+        std::cout << "🧠 Running on Guardian VM...\n";
+        vm::VM vm;
+        vm.load(bytecode);
+        vm.run();
+        
+        return true;
+    }
+};
+
 int main(int argc, char* argv[]) {
-    if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <file.ax>\n";
+    if (argc < 3) {
+        std::cerr << "Usage: " << argv[0] << " <input.ax> <output.axbin>\n";
         return 1;
     }
 
-    std::string filename = argv[1];
-
-    // Read file
-    std::ifstream file(filename);
+    std::ifstream file(argv[1]);
     if (!file.is_open()) {
-        std::cerr << "Error: Could not open file " << filename << "\n";
+        std::cerr << "Error: Could not open file\n";
         return 1;
     }
 
@@ -403,34 +178,8 @@ int main(int argc, char* argv[]) {
     buffer << file.rdbuf();
     std::string source = buffer.str();
 
-    std::cout << "📜 Axiom Language Parser\n";
-    std::cout << "━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
-    std::cout << "File: " << filename << "\n";
-    std::cout << "Size: " << source.length() << " bytes\n\n";
-
-    // Lex
-    Lexer lexer(source);
-    std::vector<Token> tokens = lexer.tokenize();
-
-    std::cout << "🔤 Tokens:\n";
-    for (const auto& token : tokens) {
-        if (token.type != TokenType::EOF_TOKEN) {
-            std::cout << "  " << token.to_string() << "\n";
-        }
-    }
-    std::cout << "\n";
-
-    // Parse
-    Parser parser(tokens);
-    parser.parse();
-
-    // Use The Guardian (show Molecule)
-    std::cout << "\n🧬 Using The Guardian:\n";
-    Molecule mol;
-    mol.add_string("language", "Axiom");
-    mol.add_number("version", 1.0);
-    mol.add_bool("complete", false);
-    mol.dump();
-
+    AxiomCompiler compiler;
+    compiler.compile(source, argv[2]);
+    
     return 0;
 }

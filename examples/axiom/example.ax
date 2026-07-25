@@ -1,8 +1,0 @@
-// This is a comment
-let name = "Axiom"
-let version = 1.0
-let active = true
-
-print("Hello from Axiom!")
-print("Version: " + version)
-print(active)

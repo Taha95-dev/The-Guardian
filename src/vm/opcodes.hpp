@@ -1,15 +1,21 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
+#include <vector>
+#include <unordered_map>
 
 namespace guardian::vm {
 
+// ============================================
+// OPCODES
+// ============================================
 enum class Opcode : uint8_t {
     // ============================================
     // BASIC OPCODES (0x00-0x0F)
     // ============================================
-    HALT = 0x00,
-    NOP = 0x01,
+    NOP = 0x00,
+    HALT = 0xFF,  // MOVED to 0xFF to avoid data conflicts
     
     // ============================================
     // STACK OPERATIONS (0x10-0x1F)
@@ -82,6 +88,8 @@ enum class Opcode : uint8_t {
     // ============================================
     PRINT = 0x80,
     PRINTLN = 0x81,
+    SPACE = 0x82,     // Print a space
+    NEWLINE = 0x83,   // Print a newline
     
     // ============================================
     // ARRAYS (0x90-0x9F)
@@ -108,6 +116,60 @@ enum class Opcode : uint8_t {
     MAKE_MOLECULE = 0xB0,
     STORE_ATOM = 0xB1,
     GET_ATOM = 0xB2,
+    REMOVE_ATOM = 0xB3,  // ADDED
+};
+
+// ============================================
+// SYMBOL TYPES
+// ============================================
+enum class SymbolType : uint8_t {
+    VARIABLE = 0x01,
+    FUNCTION = 0x02,
+    LABEL = 0x03,
+    IMPORT = 0x04,
+    EXPORT = 0x05,
+};
+
+// ============================================
+// SYMBOL
+// ============================================
+struct Symbol {
+    std::string name;
+    SymbolType type;
+    uint32_t index;
+    uint32_t address;
+};
+
+// ============================================
+// SECTION TYPES
+// ============================================
+enum class SectionType : uint8_t {
+    CODE = 0x01,
+    DATA = 0x02,
+    SYMBOLS = 0x03,
+    STRINGS = 0x04,
+    DEBUG = 0x05,
+};
+
+// ============================================
+// SECTION HEADER
+// ============================================
+struct SectionHeader {
+    SectionType type;
+    uint32_t size;
+    uint32_t offset;
+};
+
+// ============================================
+// BYTECODE HEADER
+// ============================================
+struct BytecodeHeader {
+    uint32_t magic;          // "GDVN" = Guardian VM
+    uint16_t version_major;
+    uint16_t version_minor;
+    uint32_t entry_point;
+    uint32_t section_count;
+    uint32_t total_size;
 };
 
 } // namespace guardian::vm
