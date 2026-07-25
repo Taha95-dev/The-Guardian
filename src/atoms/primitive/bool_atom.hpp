@@ -1,34 +1,33 @@
 #pragma once
 #include "../../core/atom.hpp"
-#include <cstring>  // ← ADD THIS
+#include <cstdint>
+#include <vector>
+#include <cstring>
 
 namespace guardian {
 
 class BoolAtom : public Atom {
-    bool value;
-    AtomType type() const override { return AtomType::BOOL; }
-    
 public:
     BoolAtom() : value(false) {}
-    explicit BoolAtom(bool val) : value(val) {}
+    explicit BoolAtom(bool v) : value(v) {}
     
-    size_t size() const override { return 1; }
+    bool get() const { return value; }
+    void set(bool v) { value = v; }
     
+    size_t size() const override { return sizeof(bool); }
     std::vector<uint8_t> serialize() const override {
         return std::vector<uint8_t>{static_cast<uint8_t>(value ? 1 : 0)};
     }
-    
     void deserialize(const std::vector<uint8_t>& data) override {
         if (!data.empty()) {
             value = data[0] != 0;
         }
     }
-    
     const char* name() const override { return "BoolAtom"; }
-    void release() override {};
+    AtomType type() const override { return AtomType::BOOL; }
     
-    bool get() const { return value; }
-    void set(bool val) { value = val; }
+private:
+    bool value;
 };
 
 } // namespace guardian

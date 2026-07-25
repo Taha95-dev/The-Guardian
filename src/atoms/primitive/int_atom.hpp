@@ -1,36 +1,35 @@
 #pragma once
 #include "../../core/atom.hpp"
-#include <cstring>  // ← ADD THIS
+#include <cstdint>
+#include <vector>
+#include <cstring>
 
 namespace guardian {
 
 class IntAtom : public Atom {
-    int value;
-    AtomType type() const override { return AtomType::INT; }
-    
 public:
     IntAtom() : value(0) {}
-    explicit IntAtom(int val) : value(val) {}
+    explicit IntAtom(int32_t v) : value(v) {}
     
-    size_t size() const override { return sizeof(int); }
+    int32_t get() const { return value; }
+    void set(int32_t v) { value = v; }
     
+    size_t size() const override { return sizeof(int32_t); }
     std::vector<uint8_t> serialize() const override {
-        std::vector<uint8_t> bytes(sizeof(int));
-        std::memcpy(bytes.data(), &value, sizeof(int));
-        return bytes;
+        std::vector<uint8_t> data(sizeof(int32_t));
+        std::memcpy(data.data(), &value, sizeof(int32_t));
+        return data;
     }
-    
     void deserialize(const std::vector<uint8_t>& data) override {
-        if (data.size() >= sizeof(int)) {
-            std::memcpy(&value, data.data(), sizeof(int));
+        if (data.size() >= sizeof(int32_t)) {
+            std::memcpy(&value, data.data(), sizeof(int32_t));
         }
     }
-    
     const char* name() const override { return "IntAtom"; }
-    void release() override {}
+    AtomType type() const override { return AtomType::INT32; }
     
-    int get() const { return value; }
-    void set(int val) { value = val; }
+private:
+    int32_t value;
 };
 
 } // namespace guardian

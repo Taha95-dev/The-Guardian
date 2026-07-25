@@ -1,40 +1,60 @@
 #pragma once
-#include <cstddef>
-#include <vector>
 #include <cstdint>
+#include <vector>
 #include <string>
+#include <memory>
 
 namespace guardian {
 
-// ============================================
-// ATOM TYPE ENUM — Fast type checking (no RTTI!)
-// ============================================
+// ── Atom Types ──
 enum class AtomType : uint8_t {
-    INT,
-    FLOAT,
-    STRING,
+    // Numeric types
+    INT8,
+    INT16,
+    INT32,
+    INT64,
+    UINT8,
+    UINT16,
+    UINT32,
+    UINT64,
+    FLOAT32,
+    FLOAT64,
+    
+    // Basic types
+    INT,        // Alias for INT32
+    FLOAT,      // Alias for FLOAT64
     BOOL,
     CHAR,
+    STRING,
+    
+    // Container types
     ARRAY,
+    VECTOR,
+    LIST,
+    MAP,
+    
+    // Special types
+    POINTER,
     NULL_TYPE,
     CUSTOM
 };
 
-// ============================================
-// BASE ATOM CLASS
-// ============================================
+// ── Atom Base Class ──
 class Atom {
 public:
     virtual ~Atom() = default;
     
+    // Core methods
     virtual size_t size() const = 0;
     virtual std::vector<uint8_t> serialize() const = 0;
     virtual void deserialize(const std::vector<uint8_t>& data) = 0;
     virtual const char* name() const = 0;
-    virtual void release() {};
-    
-    // Fast type checking — NO dynamic_cast!
     virtual AtomType type() const = 0;
+    
+    // Utility
+    virtual std::string to_string() const {
+        return std::string(name());
+    }
 };
 
 } // namespace guardian
