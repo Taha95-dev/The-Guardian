@@ -1,69 +1,60 @@
-#include "../src/quark/quark.hpp"
 #include <iostream>
-#include <chrono>
+#include <cassert>
+#include <guardian/core/quark.hpp>
 
 using namespace guardian;
 
-int main() {
-    std::cout << "🔬 Testing Quarks (Ultra-lightweight values)\n\n";
+void test_quarks() {
+    std::cout << "  Testing quarks...\n";
     
-    // Test creation
-    std::cout << "📦 Creating quarks:\n";
-    Quark i(42);
-    Quark f(3.14159);
-    Quark b(true);
-    Quark c('A');
-    Quark p(nullptr);
-    
-    std::cout << "  Int: " << i.to_string() << " (" << i.size() << " bytes)\n";
-    std::cout << "  Float64: " << f.to_string() << " (" << f.size() << " bytes)\n";
-    std::cout << "  Bool: " << b.to_string() << " (" << b.size() << " bytes)\n";
-    std::cout << "  Char: " << c.to_string() << " (" << c.size() << " bytes)\n";
-    std::cout << "  Pointer: " << p.to_string() << " (" << p.size() << " bytes)\n";
-    
-    // Test arithmetic
-    std::cout << "\n🧮 Arithmetic:\n";
-    Quark a(10);
-    Quark d(3.5);
-    
-    Quark add = a + d;
-    Quark sub = a - d;
-    Quark mul = a * d;
-    Quark div = a / d;
-    
-    std::cout << "  10 + 3.5 = " << add.to_string() << "\n";
-    std::cout << "  10 - 3.5 = " << sub.to_string() << "\n";
-    std::cout << "  10 * 3.5 = " << mul.to_string() << "\n";
-    std::cout << "  10 / 3.5 = " << div.to_string() << "\n";
-    
-    // Performance test
-    std::cout << "\n⚡ Performance Test (10 million operations):\n";
-    
-    auto start = std::chrono::high_resolution_clock::now();
-    
-    int sum = 0;
-    for (int i = 0; i < 10000000; i++) {
-        sum += i;
+    // Test integer quark
+    {
+        std::cout << "    Integer quark... ";
+        Quark q(42);
+        assert(q.type == QuarkType::INT);
+        assert(q.int_val == 42);
+        assert(q.to_string() == "42");
+        std::cout << "✅\n";
     }
     
-    auto end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    
-    std::cout << "  C++ int: " << duration.count() << "ms (sum=" << sum << ")\n";
-    
-    // Quark performance
-    start = std::chrono::high_resolution_clock::now();
-    
-    Quark qsum(0);
-    for (int i = 0; i < 10000000; i++) {
-        qsum = qsum + Quark(i);
+    // Test float quark
+    {
+        std::cout << "    Float quark... ";
+        Quark q(3.14159);
+        assert(q.type == QuarkType::FLOAT64);
+        assert(q.float64_val == 3.14159);
+        std::cout << "✅\n";
     }
     
-    end = std::chrono::high_resolution_clock::now();
-    duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    // Test bool quark
+    {
+        std::cout << "    Bool quark... ";
+        Quark q(true);
+        assert(q.type == QuarkType::BOOL);
+        assert(q.bool_val == true);
+        assert(q.to_string() == "true");
+        std::cout << "✅\n";
+    }
     
-    std::cout << "  Quark: " << duration.count() << "ms (sum=" << qsum.to_string() << ")\n";
+    // Test string quark (pointer)
+    {
+        std::cout << "    String quark... ";
+        std::string str = "Hello, Quark!";
+        Quark q((void*)str.c_str());
+        assert(q.type == QuarkType::POINTER);
+        assert(q.to_string().find("ptr:") != std::string::npos);
+        std::cout << "✅\n";
+    }
     
-    std::cout << "\n✅ Quarks working!\n";
-    return 0;
+    // Test quark size
+    {
+        std::cout << "    Quark size... ";
+        Quark q(42);
+        assert(q.size() == sizeof(int32_t));
+        Quark q2(3.14);
+        assert(q2.size() == sizeof(double));
+        std::cout << "✅\n";
+    }
+    
+    std::cout << "  ✅ All quark tests passed!\n";
 }
