@@ -21,10 +21,26 @@ The Guardian is a **language development framework** that provides everything yo
 | Feature | The Guardian | Other Frameworks |
 |---------|--------------|------------------|
 | Custom binary formats | ✅ Built-in | ❌ |
-| Memory safety | ✅ LUT | ❌ |
+| Memory safety (LUT) | ✅ | ❌ |
 | VM execution | ✅ | ✅ |
-| System-wide | ✅ | ❌ |
-| Size | 3,373 lines | 100,000+ lines |
+| No Garbage Collection | ✅ | ❌ |
+| Modern C++17 API | ✅ | ⚠️ |
+| Nested data structures | ✅ | ⚠️ |
+| System-wide installation | ✅ | ❌ |
+| Built-in language demo | ✅ (Axiom) | ❌ |
+| Size | ~7,000 lines | 100,000+ lines |
+| Built by a 13-year-old | ✅ | ❌ |
+| Price | $20 one-time | $500+ |
+
+## 💰 Pricing
+
+| License | Price | Type | Who |
+|---------|-------|------|-----|
+| Personal/Educational | **FREE** | One-time | Students, open-source, learning |
+| Commercial | **$20** | One-time | One commercial project |
+| Enterprise | **$99/year** | Subscription | Unlimited commercial projects |
+
+[👉 Buy Commercial License ($20)](https://kashiflyas.gumroad.com/l/ekhyi)
 
 ## Quick Start
 

@@ -5,30 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>The Guardian — Language Framework</title>
     <link rel="stylesheet" href="style.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="nav-logo">
-                <span class="nav-logo-icon">🔷</span>
-                <span class="nav-logo-text">Guardian</span>
-            </div>
-            <ul class="nav-links">
-                <li><a href="#features">Features</a></li>
-                <li><a href="#stats">Stats</a></li>
-                <li><a href="#docs">Docs</a></li>
-                <li><a href="#pricing">Pricing</a></li>
-            </ul>
-            <a href="#pricing" class="nav-cta">Buy Now</a>
-        </div>
-    </nav>
-
     <div class="container">
         <!-- Hero -->
-        <section class="hero" id="hero">
+        <section class="hero">
             <div class="hero-content">
                 <div class="hero-badge">⚡ v1.0 Released</div>
                 <h1>
@@ -40,37 +21,18 @@
                     DSLs, and binary formats. Safe by design, with no garbage collection.
                 </p>
                 <div class="hero-buttons">
-                    <a href="#pricing" class="btn btn-primary">Get Started →</a>
-                    <a href="#docs" class="btn btn-secondary">View Docs</a>
+                    <a href="https://buy.polar.sh/polar_cl_czZ7LW2XcJR1zNjUoiGbBYU4MNOI4ShcvcR6l00HLU9" class="btn btn-primary">Buy Now — $20 →</a>
+                    <a href="#" class="btn btn-secondary">View Docs</a>
                 </div>
                 <div class="hero-stats-mini">
-                    <span>⚡ 6,125 lines</span>
-                    <span>📦 67 files</span>
-                    <span>🧠 0 Tasks</span>
+                    <span>⚡ 7,000+ lines</span>
+                    <span>📦 70+ files</span>
+                    <span>🧠 0 TODOs</span>
+                    <span>🛡️ Memory Safe</span>
                 </div>
             </div>
             <div class="hero-visual">
-                <div class="code-block">
-                    <div class="code-header">
-                        <span class="dot red"></span>
-                        <span class="dot yellow"></span>
-                        <span class="dot green"></span>
-                        <span class="code-title">example.cpp</span>
-                    </div>
-                    <pre><code><span class="keyword">#include</span> <span class="string">&lt;guardian/core/molecule.hpp&gt;</span>
-
-<span class="keyword">using namespace</span> <span class="type">guardian</span>;
-
-<span class="function">int main</span>() {
-    <span class="type">Molecule</span> mol;
-    mol.<span class="method">add_string</span>(<span class="string">"name"</span>, <span class="string">"Guardian"</span>);
-    mol.<span class="method">add_number</span>(<span class="string">"version"</span>, <span class="number">1.0</span>);
-    mol.<span class="method">add_bool</span>(<span class="string">"active"</span>, <span class="keyword">true</span>);
-    
-    <span class="method">std::cout</span> << mol.<span class="method">get_string</span>(<span class="string">"name"</span>);
-    <span class="keyword">return</span> <span class="number">0</span>;
-}</code></pre>
-                </div>
+                <img src="../assets/logo.svg" alt="The Guardian Logo" width="300" />
             </div>
         </section>
 
@@ -128,51 +90,24 @@
             </div>
             <div class="stats-grid">
                 <div class="stat-item">
-                    <span class="stat-number" data-count="6125">0</span>
+                    <span class="stat-number">7,000+</span>
                     <span class="stat-label">Lines of Code</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-number" data-count="67">0</span>
+                    <span class="stat-number">70+</span>
                     <span class="stat-label">Files</span>
                 </div>
                 <div class="stat-item highlight">
-                    <span class="stat-number" data-count="0">0</span>
-                    <span class="stat-label">Tasks</span>
+                    <span class="stat-number">0</span>
+                    <span class="stat-label">TODOs</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-number">4GB</span>
                     <span class="stat-label">RAM to Build</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-number" data-count="13">0</span>
+                    <span class="stat-number">13</span>
                     <span class="stat-label">Developer Age</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- Architecture -->
-        <section class="architecture-section">
-            <div class="section-header">
-                <h2>Clean Architecture</h2>
-                <p>Designed for simplicity and extensibility</p>
-            </div>
-            <div class="architecture-grid">
-                <div class="arch-item">
-                    <span class="arch-icon">🔷</span>
-                    <span class="arch-label">Quark</span>
-                    <span class="arch-desc">Primitive values (int, float, bool, string)</span>
-                </div>
-                <div class="arch-arrow">→</div>
-                <div class="arch-item">
-                    <span class="arch-icon">🧱</span>
-                    <span class="arch-label">Atom</span>
-                    <span class="arch-desc">Heap-allocated data (arrays, dicts)</span>
-                </div>
-                <div class="arch-arrow">→</div>
-                <div class="arch-item">
-                    <span class="arch-icon">🧬</span>
-                    <span class="arch-label">Molecule</span>
-                    <span class="arch-desc">Container for quarks &amp; atoms</span>
                 </div>
             </div>
         </section>
@@ -201,39 +136,14 @@
                     <li>✅ GBIN binary format</li>
                     <li>✅ Molecule/Atom/Quark system</li>
                     <li>✅ LUT-based pointer safety</li>
-                    <li>✅ Integration with Omarchy</li>
+                    <li>✅ Omarchy integration</li>
                     <li>✅ Full source code access</li>
                     <li>✅ Lifetime updates</li>
                 </ul>
-                <a href="#" class="btn btn-primary btn-large">Get Started →</a>
+                <a href="https://buy.polar.sh/polar_cl_czZ7LW2XcJR1zNjUoiGbBYU4MNOI4ShcvcR6l00HLU9" class="btn btn-primary btn-large">
+                    🛒 Buy Now — $20
+                </a>
                 <p class="pricing-guarantee">⚡ 100% satisfaction guarantee · Built by a 13-year-old</p>
-            </div>
-        </section>
-
-        <!-- Testimonials -->
-        <section class="testimonials-section">
-            <div class="section-header">
-                <h2>What Developers Say</h2>
-            </div>
-            <div class="testimonials-grid">
-                <div class="testimonial-card">
-                    <p>"Finally, a framework that's safe by design. No GC, no surprises."</p>
-                    <div class="testimonial-author">
-                        <span class="author-name">— Language Developer</span>
-                    </div>
-                </div>
-                <div class="testimonial-card">
-                    <p>"The Molecule system is exactly what I needed for my DSL. Clean and simple."</p>
-                    <div class="testimonial-author">
-                        <span class="author-name">— DSL Designer</span>
-                    </div>
-                </div>
-                <div class="testimonial-card">
-                    <p>"Built by a 13-year-old? This is more polished than most frameworks I've used."</p>
-                    <div class="testimonial-author">
-                        <span class="author-name">— Open Source Dev</span>
-                    </div>
-                </div>
             </div>
         </section>
 
@@ -241,7 +151,7 @@
         <footer>
             <div class="footer-grid">
                 <div class="footer-brand">
-                    <span class="footer-logo">🔷</span>
+                    <img src="../assets/logo.svg" alt="The Guardian" width="40" />
                     <span class="footer-name">The Guardian</span>
                     <p class="footer-desc">Safe by Design, Not by Choice</p>
                 </div>
@@ -249,22 +159,20 @@
                     <h4>Product</h4>
                     <a href="#features">Features</a>
                     <a href="#pricing">Pricing</a>
-                    <a href="#docs">Documentation</a>
+                    <a href="#">Documentation</a>
                     <a href="#">Changelog</a>
                 </div>
                 <div class="footer-links-group">
                     <h4>Community</h4>
-                    <a href="#">GitHub</a>
+                    <a href="https://github.com/Taha95-dev/The-Guardian">GitHub</a>
                     <a href="#">Discord</a>
                     <a href="#">Twitter</a>
-                    <a href="#">YouTube</a>
                 </div>
                 <div class="footer-links-group">
                     <h4>Company</h4>
                     <a href="#">About</a>
                     <a href="#">Blog</a>
                     <a href="#">Contact</a>
-                    <a href="#">Privacy</a>
                 </div>
             </div>
             <div class="footer-bottom">
@@ -272,7 +180,5 @@
             </div>
         </footer>
     </div>
-
-    <script src="script.js"></script>
 </body>
 </html>
