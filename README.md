@@ -1,9 +1,10 @@
 # 🔷 The Guardian — Language Framework
 
 <p align="center">
-  <img src="assets/logo.svg" alt="The Guardian Logo" width="80" style="vertical-align:middle">
-  <span style="font-size: 2em; font-weight: bold; vertical-align:middle;">THE GUARDIAN</span>
+  <img src="assets/banner.svg" alt="The Guardian Banner" width="100%">
 </p>
+
+<br>
 
 **Build custom languages with memory safety, custom binary formats, and a VM.**
 
