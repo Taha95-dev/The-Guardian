@@ -7,3 +7,9 @@ build/
 *.swp
 *.swo
 .DS_Store
+.env
+*.pem
+.env
+*.pem
+*.key
+*.secret
