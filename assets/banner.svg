@@ -41,7 +41,7 @@
   </text>
   
   <!-- TAGLINE -->
-  <text x="90" y="98" 
+  <text x="90" y="80" 
         font-family="'Arial', sans-serif" 
         font-size="14" 
         fill="#666" 
