@@ -89,10 +89,6 @@ Built by Taha — 13-year-old developer building the future of code.
 - [User Guide](docs/user-guide/) — Complete documentation
 - [Architecture](docs/architecture/) — How The Guardian works
 - [API Reference](docs/api/) — Full API documentation
-<p align="center">
-  <img src="assets/banner.svg" alt="The Guardian Banner" width="100%">
-</p>
-
 
 ## Architecture
 
