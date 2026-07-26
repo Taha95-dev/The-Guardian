@@ -1,41 +1,74 @@
-# The Guardian
+# 📚 The Guardian Documentation
 
-A framework for building secure, high-performance languages.
+Welcome to The Guardian documentation — your complete guide to building languages with The Guardian.
 
-## Quick Start
+## Quick Links
+
+- [Getting Started](#getting-started) — Install and run your first language
+- [User Guide](user-guide/) — Complete framework documentation
+- [API Reference](api/) — Full C++ API documentation
+- [Examples](examples/) — Example languages and usage
+- [Architecture](architecture/) — How The Guardian works
+
+## Getting Started
+
+### Installation
+
 ```bash
-git clone https://github.com/Taha95-dev/The-Guardian
+git clone https://github.com/Taha95-dev/The-Guardian.git
 cd The-Guardian
-mkdir build && cd build
-cmake .. && make
-./guardianc
+make build
+sudo make install
 
-Features
+Your First Language
+cpp
 
-    Atoms & Molecules — Simple, composable building blocks
+#include <guardian/core/molecule.hpp>
+#include <guardian/vm/vm.hpp>
 
-    Virtual Machine — Fast, secure execution
+using namespace guardian;
 
-    Binary Format — Custom .gbin format
+int main() {
+    // Create a molecule
+    Molecule mol;
+    mol.add_string("greeting", "Hello from The Guardian!");
+    
+    // Run it on the VM
+    vm::VM vm;
+    vm.run();
+    
+    return 0;
+}
 
-    Security — Built-in sandboxing and permissions
+Why The Guardian?
+Feature	The Guardian
+Memory Safe	LUT-based pointer tracking
+No GC	Stack + heap management
+Custom Formats	GBIN binary format
+VM	Bytecode execution
+Clean API	C++17, modern
+0 Bloat	7,000 lines, focused
+Documentation Sections
 
-    Concurrency — Built-in parallelism
+    User Guide — Complete usage guide
 
-    Axiom Language — The official language
+    API Reference — All classes and functions
 
-Documentation
+    Examples — Real-world examples
 
-    Architecture
+    Architecture — Design and internals
 
-    API Reference
+Built by a 13-Year-Old
 
-    Tutorial
-
-    Security Model
-
-    Axiom Language
-
+The Guardian was built on 4GB RAM with Arch Linux and Neovim. It's proof that great software doesn't require expensive hardware — just focus and passion.
 License
 
-MIT
+    Personal/Educational: FREE
+
+    Commercial: $20 one-time
+
+    Enterprise: $99/year
+
+    Buy a license
+
+The Guardian — Safe by Design, Not by Choice.

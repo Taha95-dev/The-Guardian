@@ -1,127 +1,93 @@
-# The Guardian Architecture
+# 🏗️ Architecture
 
-## Overview
+The Guardian is built as a layered, modular framework.
 
-The Guardian is a layered language framework:
+## Layer Diagram
 
-┌─────────────────────────────────────────────────────────────┐
-│ The Guardian Framework │
-│ │
-│ ┌─────────────────────────────────────────────────────┐ │
-│ │ CLI (guardianc) │ │
-│ └─────────────────────────────────────────────────────┘ │
-│ │
-│ ┌─────────────────────────────────────────────────────┐ │
-│ │ VM │ │
-│ │ ┌─────────────┐ ┌─────────────┐ ┌───────────┐ │ │
-│ │ │ Bytecode │ │ Stack │ │ Execution │ │ │
-│ │ │ Execution │ │ Operations │ │ Loop │ │ │
-│ │ └─────────────┘ └─────────────┘ └───────────┘ │ │
-│ └─────────────────────────────────────────────────────┘ │
-│ │
-│ ┌─────────────────────────────────────────────────────┐ │
-│ │ Format │ │
-│ │ ┌─────────────┐ ┌─────────────┐ ┌───────────┐ │ │
-│ │ │ .gbin │ │ Format │ │ Custom │ │ │
-│ │ │ Format │ │ Registry │ │ Formats │ │ │
-│ │ └─────────────┘ └─────────────┘ └───────────┘ │ │
-│ └─────────────────────────────────────────────────────┘ │
-│ │
-│ ┌─────────────────────────────────────────────────────┐ │
-│ │ Parser │ │
-│ │ ┌─────────────┐ ┌─────────────┐ ┌───────────┐ │ │
-│ │ │ Lexer │ │ Parser │ │ AST │ │ │
-│ │ │ Base │ │ Base │ │ Base │ │ │
-│ │ └─────────────┘ └─────────────┘ └───────────┘ │ │
-│ └─────────────────────────────────────────────────────┘ │
-│ │
-│ ┌─────────────────────────────────────────────────────┐ │
-│ │ Memory │ │
-│ │ ┌─────────────┐ ┌─────────────┐ ┌───────────┐ │ │
-│ │ │ Cache │ │ LUT │ │ Memory │ │ │
-│ │ │ Manager │ │ (Lookup │ │ Manager │ │ │
-│ │ └─────────────┘ └─────────────┘ └───────────┘ │ │
-│ └─────────────────────────────────────────────────────┘ │
-│ │
-│ ┌─────────────────────────────────────────────────────┐ │
-│ │ Core │ │
-│ │ ┌─────────────┐ ┌─────────────┐ ┌───────────┐ │ │
-│ │ │ Atoms │ │ Molecules │ │ Quarks │ │ │
-│ │ └─────────────┘ └─────────────┘ └───────────┘ │ │
-│ └─────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│                       User Language                     │
+│           (Your language built with The Guardian)       │
+├─────────────────────────────────────────────────────────┤
+│                      VM Layer                           │
+│   ┌─────────────┐ ┌─────────────┐ ┌─────────────┐       │
+│   │ Opcodes     │ │ Executor    │ │ CodeGen     │       │
+│   └─────────────┘ └─────────────┘ └─────────────┘       │
+├─────────────────────────────────────────────────────────┤
+│                   Format Layer                          │
+│   ┌─────────────┐ ┌─────────────┐ ┌─────────────┐       │
+│   │ GBIN        │ │ Registry    │ │ Custom      │       │
+│   └─────────────┘ └─────────────┘ └─────────────┘       │
+├─────────────────────────────────────────────────────────┤
+│                   Memory Layer                          │
+│   ┌─────────────┐ ┌─────────────┐ ┌─────────────┐       │
+│   │ LUT         │ │ Manager     │ │ Pool        │       │
+│   └─────────────┘ └─────────────┘ └─────────────┘       │
+├─────────────────────────────────────────────────────────┤
+│                   Core Layer                            │
+│   ┌─────────────┐ ┌─────────────┐ ┌─────────────┐       │
+│   │ Atoms       │ │ Molecules   │ │ Quarks      │       │
+│   └─────────────┘ └─────────────┘ └─────────────┘       │
+└─────────────────────────────────────────────────────────┘
+
+
+## Core Principles
+
+### 1. Safe by Design, Not by Choice
+
+Safety is built into the architecture, not added on.
+
+- Every pointer is tracked
+- Every allocation is validated
+- No undefined behavior
+- No GC needed
+
+### 2. No Bloat
+
+The Guardian is 7,000 lines of focused code.
+
+- No unnecessary dependencies
+- No over-engineering
+- Every line has a purpose
+
+### 3. Built for Language Developers
+
+The Guardian is designed specifically for building languages.
+
+- Clean APIs
+- Flexible architecture
+- Easy to extend
+
+## Data Flow
+
+Source Code
+↓
+[Lexer] → Tokens
+↓
+[Parser] → AST
+↓
+[Compiler] → Bytecode
+↓
+[VM] → Execution
 text
 
 
-## Component Details
+## Memory Model
 
-### Core
+Quarks → Stack (fast, automatic)
+Atoms → Heap (managed, tracked)
+Molecules → Container (holds both)
+text
 
-The Core provides the fundamental data types:
 
-- **Atoms**: Immutable, type-safe data units
-- **Molecules**: Composable data structures with LUT
-- **Quarks**: 0-overhead primitive values
+## Security Model
 
-### Memory
+The Guardian uses LUT (Lookup Table) to track every pointer allocation.
 
-The Memory layer provides safety and persistence:
+- Every allocation is registered
+- Every deallocation is validated
+- No dangling pointers
+- No use-after-free
+- No double-free
 
-- **Cache Manager**: Persistent VM state
-- **LUT (Lookup Table)**: Pointer tracking for memory safety
-- **Memory Manager**: Allocation, deallocation, stats
-
-### Parser
-
-The Parser layer provides language parsing:
-
-- **Lexer Base**: Tokenization
-- **Parser Base**: AST construction
-- **AST Base**: Abstract syntax tree nodes
-
-### Format
-
-The Format layer provides binary formats:
-
-- **.gbin Format**: Guardian Binary Format
-- **Format Registry**: Register custom formats
-- **Serialization**: Read/write binary data
-
-### VM
-
-The VM layer provides bytecode execution:
-
-- **Bytecode Execution**: Run bytecode
-- **Stack Operations**: Push, pop, peek
-- **Execution Loop**: Main VM loop
-
-## Libraries
-
-| Library | Purpose |
-|---------|---------|
-| `libguardian_core.a` | Core types |
-| `libguardian_memory.a` | Memory management |
-| `libguardian_parser.a` | Parsing |
-| `libguardian_format.a` | Binary formats |
-| `libguardian_vm.a` | VM execution |
-
-## System-wide Installation
-
-The Guardian installs to:
-
-/usr/local/
-├── bin/
-│ └── guardianc
-├── lib/
-│ ├── libguardian_core.a
-│ ├── libguardian_memory.a
-│ ├── libguardian_parser.a
-│ ├── libguardian_format.a
-│ └── libguardian_vm.a
-└── include/
-└── guardian/
-├── core/
-├── memory/
-├── parser/
-├── format/
-└── vm/ EOF
+---
+*The Guardian — Safe by Design, Not by Choice.*

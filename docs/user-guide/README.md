@@ -1,76 +1,90 @@
-# The Guardian User Guide
+# 🧭 User Guide
+
+The Guardian is a complete language framework. This guide will take you from zero to building your own language.
 
 ## Table of Contents
 
-1. [Installation](installation.md)
-2. [Core Concepts](core-concepts.md)
-3. [Building a Language](building-a-language.md)
-4. [Custom Binary Formats](custom-formats.md)
-5. [VM Execution](vm-execution.md)
-6. [Memory Safety](memory-safety.md)
-7. [Examples](examples.md)
+1. [Installation](#installation)
+2. [Core Concepts](#core-concepts)
+3. [Atoms](#atoms)
+4. [Molecules](#molecules)
+5. [Quarks](#quarks)
+6. [Memory Management](#memory-management)
+7. [Binary Formats](#binary-formats)
+8. [The VM](#the-vm)
+9. [Building a Language](#building-a-language)
 
 ## Installation
 
 ### From Source
 
 ```bash
-git clone https://github.com/yourusername/the-guardian
-cd the-guardian
-make build
+git clone https://github.com/Taha95-dev/The-Guardian.git
+cd The-Guardian
+mkdir build && cd build
+cmake ..
+make -j$(nproc)
 sudo make install
 
-System-wide
+Package Managers
 
-After installation, The Guardian is available system-wide:
-bash
-
-guardianc --version
-
-Using in Your Project
-cmake
-
-find_library(GUARDIAN_CORE guardian_core REQUIRED)
-find_library(GUARDIAN_MEMORY guardian_memory REQUIRED)
-find_library(GUARDIAN_PARSER guardian_parser REQUIRED)
-find_library(GUARDIAN_FORMAT guardian_format REQUIRED)
-find_library(GUARDIAN_VM guardian_vm REQUIRED)
-
-target_link_libraries(your_language
-    ${GUARDIAN_CORE}
-    ${GUARDIAN_MEMORY}
-    ${GUARDIAN_PARSER}
-    ${GUARDIAN_FORMAT}
-    ${GUARDIAN_VM}
-)
-
+Coming soon!
 Core Concepts
-Atoms
 
-Atoms are immutable, type-safe data units:
+The Guardian is built on three core concepts:
+1. Quarks (Primitive Values)
+
+Quarks are the building blocks — int, float, bool, string, char.
 cpp
 
-IntAtom i(42);
-FloatAtom f(3.14);
-StringAtom s("Hello");
-BoolAtom b(true);
+Quark q1(42);        // integer
+Quark q2(3.14);      // float
+Quark q3(true);      // bool
+Quark q4("Hello");   // string
 
-Molecules
+2. Atoms (Heap Values)
 
-Molecules are composable data structures with LUT:
+Atoms are heap-allocated data structures — arrays, dicts, custom types.
+cpp
+
+auto arr = std::make_shared<ArrayAtom>();
+arr->push(42);
+arr->push(3.14);
+
+3. Molecules (Containers)
+
+Molecules are containers that hold quarks and atoms.
 cpp
 
 Molecule mol;
-mol.add_atom("age", std::make_unique<IntAtom>(13));
-mol.add_atom("name", std::make_unique<StringAtom>("Taha"));
+mol.add_string("name", "Guardian");
+mol.add_number("version", 1.0);
+mol.add_bool("active", true);
 
-Quarks
+Memory Safety
 
-Quarks are 0-overhead primitive values:
+The Guardian uses LUT (Lookup Table) to track every pointer allocation. No dangling pointers. No use-after-free. No GC.
 cpp
 
-Quark q(42);  // Stack-allocated, fast
+memory::MemoryManager mem;
+void* ptr = mem.allocate(1024);
+mem.register_pointer(ptr, 1024, "buffer");
+// ... use ptr ...
+mem.unregister_pointer(ptr);
+mem.deallocate(ptr);
 
 Building a Language
 
-See Building a Language for a complete tutorial.
+The Guardian makes it easy to build custom languages:
+
+    Lexer: Tokenize source code
+
+    Parser: Build AST
+
+    Compiler: Generate bytecode
+
+    VM: Execute bytecode
+
+See Examples for complete language implementations.
+
+The Guardian — Safe by Design, Not by Choice.

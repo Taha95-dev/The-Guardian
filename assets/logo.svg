@@ -1,37 +1,92 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
-  <!-- Shield background -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
   <defs>
+    <!-- Gradient for the shield -->
     <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#1a1a2e"/>
-      <stop offset="100%" style="stop-color:#16213e"/>
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
     </linearGradient>
-    <linearGradient id="gemGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#00d4ff"/>
-      <stop offset="100%" style="stop-color:#7b2ffc"/>
-    </linearGradient>
+    
+    <!-- Glow effect -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Drop shadow -->
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000" flood-opacity="0.3"/>
+    </filter>
   </defs>
-
-  <!-- Shield -->
-  <path d="M100 10 L190 50 L190 120 C190 160 150 185 100 195 C50 185 10 160 10 120 L10 50 Z"
-        fill="url(#shieldGrad)" stroke="#00d4ff" stroke-width="2"/>
-
-  <!-- Guardian symbol (eye with shield) -->
-  <circle cx="100" cy="90" r="35" fill="none" stroke="url(#gemGrad)" stroke-width="3"/>
-  <circle cx="100" cy="90" r="20" fill="url(#gemGrad)" opacity="0.3"/>
-  <circle cx="100" cy="90" r="8" fill="#00d4ff"/>
-
-  <!-- Shield accent lines -->
-  <line x1="60" y1="55" x2="60" y2="120" stroke="#00d4ff" stroke-width="1.5" opacity="0.5"/>
-  <line x1="140" y1="55" x2="140" y2="120" stroke="#00d4ff" stroke-width="1.5" opacity="0.5"/>
-
-  <!-- Bottom shield wave -->
-  <path d="M70 170 C85 185 115 185 130 170" stroke="#00d4ff" stroke-width="1.5" fill="none" opacity="0.5"/>
-
-  <!-- Text: THE GUARDIAN -->
-  <text x="100" y="230" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="22" font-weight="bold" fill="#00d4ff" letter-spacing="3">
-    THE GUARDIAN
+  
+  <!-- Background circle -->
+  <circle cx="200" cy="200" r="180" fill="#1a1a2e" stroke="#2a2a4e" stroke-width="2"/>
+  
+  <!-- Shield outline -->
+  <path d="M200 60 L320 110 L320 220 C320 290 260 330 200 350 C140 330 80 290 80 220 L80 110 Z" 
+        fill="url(#shieldGrad)" 
+        stroke="#2a2a4e" 
+        stroke-width="3"
+        filter="url(#shadow)"/>
+  
+  <!-- Shield inner glow -->
+  <path d="M200 80 L300 120 L300 220 C300 280 250 315 200 330 C150 315 100 280 100 220 L100 120 Z" 
+        fill="none" 
+        stroke="rgba(255,255,255,0.1)" 
+        stroke-width="2"/>
+  
+  <!-- Eye/Symbol in shield -->
+  <circle cx="200" cy="180" r="40" fill="#1a1a2e" stroke="#fff" stroke-width="2" opacity="0.9"/>
+  <circle cx="200" cy="180" r="30" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.6"/>
+  <circle cx="200" cy="180" r="15" fill="#fff" opacity="0.9"/>
+  <circle cx="200" cy="180" r="8" fill="#1a1a2e"/>
+  
+  <!-- Left wing -->
+  <path d="M100 140 C70 130 50 110 40 80 C50 100 70 110 90 115 C80 100 75 80 80 60 C85 80 95 95 110 105" 
+        fill="url(#shieldGrad)" 
+        opacity="0.8"/>
+  
+  <!-- Right wing -->
+  <path d="M300 140 C330 130 350 110 360 80 C350 100 330 110 310 115 C320 100 325 80 320 60 C315 80 305 95 290 105" 
+        fill="url(#shieldGrad)" 
+        opacity="0.8"/>
+  
+  <!-- Crown -->
+  <path d="M160 70 L170 50 L180 65 L190 45 L200 60 L210 45 L220 65 L230 50 L240 70 Z" 
+        fill="#f0c040" 
+        stroke="#d4a020" 
+        stroke-width="1.5"
+        filter="url(#glow)"/>
+  
+  <!-- Guard label -->
+  <text x="200" y="260" 
+        font-family="'Courier New', monospace" 
+        font-size="24" 
+        font-weight="bold" 
+        fill="#fff" 
+        text-anchor="middle" 
+        letter-spacing="4">
+    GUARDIAN
   </text>
-  <text x="100" y="250" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="10" fill="#8892b0" letter-spacing="4">
+  
+  <!-- Subtitle -->
+  <text x="200" y="285" 
+        font-family="'Arial', sans-serif" 
+        font-size="11" 
+        fill="#8888aa" 
+        text-anchor="middle" 
+        letter-spacing="2">
     LANGUAGE FRAMEWORK
   </text>
+  
+  <!-- Decorative dots -->
+  <circle cx="120" cy="310" r="3" fill="#667eea" opacity="0.5"/>
+  <circle cx="280" cy="310" r="3" fill="#667eea" opacity="0.5"/>
+  
+  <!-- Small stars -->
+  <circle cx="160" cy="320" r="2" fill="#8888aa" opacity="0.3"/>
+  <circle cx="200" cy="325" r="2" fill="#8888aa" opacity="0.3"/>
+  <circle cx="240" cy="320" r="2" fill="#8888aa" opacity="0.3"/>
 </svg>

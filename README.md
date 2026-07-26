@@ -28,11 +28,12 @@ git clone https://github.com/Taha95-dev/The-Guardian.git
 cd The-Guardian
 make build
 sudo make install
-
+```
 # Test
 guardianc --version
 
-Build a Language
+Build a language
+
 cpp
 
 #include <guardian/core/atom.hpp>
@@ -86,6 +87,10 @@ Built by Taha — 13-year-old developer building the future of code.
   <img src="assets/banner.svg" alt="The Guardian Banner" width="100%">
 </p>
 
+<p align="center">
+  <img src="assets/logo.svg" alt="The Guardian Logo" width="200">
+</p>
+
 
 ## Architecture
 
@@ -104,6 +109,3 @@ The Guardian is built as a layered, modular framework. See the [full architectur
 - [API Reference](docs/api/) — Full API docs
 - [Contributing Guide](CONTRIBUTING.md) — How to contribute
 - [Changelog](CHANGELOG.md) — Version history
-
----
-
