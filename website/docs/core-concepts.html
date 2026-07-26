@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Core Concepts — The Guardian</title>
+    <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+    <div class="container">
+        <header class="docs-header">
+            <a href="index.html" class="back-link">← Back to Docs</a>
+            <h1>🧬 Core Concepts</h1>
+            <p>Atoms, Molecules, Quarks — the building blocks of The Guardian</p>
+        </header>
+
+        <div class="docs-content">
+            <h2>The Three Pillars</h2>
+
+            <div class="concept-card">
+                <h3>🔷 Quarks</h3>
+                <p><strong>Primitive values</strong> — int, float, bool, string, char.</p>
+                <p>Quarks live on the stack. They are fast, automatic, and memory-safe.</p>
+                <pre><code>Quark q1(42);        // integer
+Quark q2(3.14);      // float
+Quark q3(true);      // bool
+Quark q4("Hello");   // string</code></pre>
+            </div>
+
+            <div class="concept-card">
+                <h3>🧱 Atoms</h3>
+                <p><strong>Heap-allocated data</strong> — arrays, dictionaries, custom types.</p>
+                <p>Atoms live on the heap. They are tracked by the LUT for safety.</p>
+                <pre><code>auto arr = std::make_shared<ArrayAtom>();
+arr->push(42);
+arr->push(3.14);</code></pre>
+            </div>
+
+            <div class="concept-card">
+                <h3>🧬 Molecules</h3>
+                <p><strong>Containers</strong> that hold quarks and atoms.</p>
+                <p>Molecules are the "objects" of The Guardian — nested, flexible, safe.</p>
+                <pre><code>Molecule mol;
+mol.add_string("name", "Guardian");
+mol.add_number("version", 1.0);
+mol.add_bool("active", true);</code></pre>
+            </div>
+
+            <h2>Memory Safety</h2>
+            <p>The Guardian uses LUT (Lookup Table) to track every pointer allocation:</p>
+            <pre><code>memory::MemoryManager mem;
+void* ptr = mem.allocate(1024);
+mem.register_pointer(ptr, 1024, "buffer");
+// ... use ptr ...
+mem.unregister_pointer(ptr);
+mem.deallocate(ptr);</code></pre>
+            <p>✅ No dangling pointers<br />
+            ✅ No use-after-free<br />
+            ✅ No double-free<br />
+            ✅ No GC overhead</p>
+
+            <h2>Safe by Design, Not by Choice</h2>
+            <p>The Guardian is built so that safety is automatic, not optional.</p>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 The Guardian. Built by a 13-year-old developer.</p>
+        </footer>
+    </div>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200" width="800" height="200">
+  <defs>
+    <linearGradient id="bannerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#764ba2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#667eea;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#fff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e0e0ff;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <rect width="800" height="200" rx="16" fill="#0a0a0f" stroke="#1a1a2e" stroke-width="2"/>
+  
+  <!-- Glow line top -->
+  <line x1="50" y1="25" x2="750" y2="25" stroke="url(#bannerGrad)" stroke-width="1" opacity="0.15"/>
+  
+  <!-- BIG LOGO ATOM (LEFT SIDE) -->
+  <g transform="translate(80, 100)">
+    <ellipse cx="0" cy="0" rx="55" ry="20" fill="none" stroke="url(#bannerGrad)" stroke-width="2" opacity="0.3"/>
+    <ellipse cx="0" cy="0" rx="55" ry="20" fill="none" stroke="url(#bannerGrad)" stroke-width="2" opacity="0.3" transform="rotate(60, 0, 0)"/>
+    <ellipse cx="0" cy="0" rx="55" ry="20" fill="none" stroke="url(#bannerGrad)" stroke-width="2" opacity="0.3" transform="rotate(-60, 0, 0)"/>
+    
+    <circle cx="-40" cy="-30" r="6" fill="#667eea" opacity="0.8"/>
+    <circle cx="40" cy="30" r="6" fill="#764ba2" opacity="0.8"/>
+    <circle cx="-30" cy="40" r="6" fill="#667eea" opacity="0.8"/>
+    <circle cx="30" cy="-40" r="6" fill="#764ba2" opacity="0.8"/>
+    
+    <circle cx="0" cy="0" r="16" fill="url(#bannerGrad)"/>
+    <circle cx="0" cy="0" r="8" fill="#0a0a0f"/>
+    <circle cx="0" cy="0" r="4" fill="#fff" opacity="0.3"/>
+  </g>
+  
+  <!-- TITLE -->
+  <text x="400" y="55" 
+        font-family="'Arial Black', 'Helvetica', sans-serif" 
+        font-size="36" 
+        font-weight="900" 
+        fill="url(#textGrad)" 
+        text-anchor="middle" 
+        letter-spacing="6">
+    THE GUARDIAN
+  </text>
+  
+  <!-- TAGLINE -->
+  <text x="400" y="85" 
+        font-family="'Arial', sans-serif" 
+        font-size="14" 
+        fill="#8888aa" 
+        text-anchor="middle" 
+        letter-spacing="4">
+    SAFE BY DESIGN · NOT BY CHOICE
+  </text>
+  
+  <!-- FEATURES -->
+  <g transform="translate(400, 110)">
+    <text x="-150" y="0" font-family="'Arial', sans-serif" font-size="11" fill="#667eea" text-anchor="middle" letter-spacing="1">⚡ 7,000+ LINES</text>
+    <text x="-50" y="0" font-family="'Arial', sans-serif" font-size="11" fill="#764ba2" text-anchor="middle" letter-spacing="1">🧠 0 TODOs</text>
+    <text x="50" y="0" font-family="'Arial', sans-serif" font-size="11" fill="#8888aa" text-anchor="middle" letter-spacing="1">🛡️ MEMORY SAFE</text>
+    <text x="150" y="0" font-family="'Arial', sans-serif" font-size="11" fill="#8888aa" text-anchor="middle" letter-spacing="1">🚀 NO GC</text>
+    
+    <text x="-100" y="20" font-family="'Arial', sans-serif" font-size="11" fill="#666" text-anchor="middle" letter-spacing="1">📦 CUSTOM BINARIES</text>
+    <text x="100" y="20" font-family="'Arial', sans-serif" font-size="11" fill="#666" text-anchor="middle" letter-spacing="1">🖥️ VM INCLUDED</text>
+  </g>
+  
+  <!-- BOTTOM -->
+  <rect x="0" y="165" width="800" height="35" fill="rgba(255,255,255,0.02)"/>
+  <line x1="50" y1="165" x2="750" y2="165" stroke="url(#bannerGrad)" stroke-width="1" opacity="0.15"/>
+  
+  <text x="400" y="187" 
+        font-family="'Arial', sans-serif" 
+        font-size="10" 
+        fill="#444" 
+        text-anchor="middle" 
+        letter-spacing="2">
+    BUILT BY A 13-YEAR-OLD ON 4GB RAM — LANGUAGE FRAMEWORK — v1.0
+  </text>
+</svg>

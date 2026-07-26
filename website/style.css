@@ -328,3 +328,221 @@ footer {
     .section-header h2 { font-size: 2rem; }
     .pricing-price .amount { font-size: 3rem; }
 }
+
+/* ── Docs Styles ── */
+
+.docs-header {
+    padding: 2rem 0 3rem;
+}
+
+.docs-header h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.docs-header p {
+    color: #8888aa;
+    font-size: 1.1rem;
+}
+
+.back-link {
+    color: #667eea;
+    text-decoration: none;
+    display: inline-block;
+    margin-bottom: 1rem;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+.docs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    padding: 1rem 0 3rem;
+}
+
+.docs-card {
+    background: #12121f;
+    padding: 1.8rem;
+    border-radius: 12px;
+    border: 1px solid #1e1e34;
+    transition: all 0.3s;
+}
+
+.docs-card:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+}
+
+.docs-card h3 {
+    color: #e0e0e0;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.docs-card p {
+    color: #8888aa;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+}
+
+.docs-card .btn {
+    font-size: 0.85rem;
+    padding: 0.5rem 1.5rem;
+}
+
+.docs-content {
+    padding: 1rem 0 3rem;
+    max-width: 800px;
+}
+
+.docs-content h2 {
+    color: #e0e0e0;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 2rem 0 1rem;
+    border-bottom: 1px solid #1e1e34;
+    padding-bottom: 0.5rem;
+}
+
+.docs-content h3 {
+    color: #667eea;
+    font-size: 1.3rem;
+    margin: 1.5rem 0 0.5rem;
+}
+
+.docs-content p, .docs-content li {
+    color: #aaa;
+    line-height: 1.8;
+}
+
+.docs-content ul {
+    padding-left: 1.5rem;
+}
+
+.docs-content ul li {
+    margin: 0.3rem 0;
+}
+
+.docs-content pre {
+    background: #0a0a0f;
+    padding: 1.2rem;
+    border-radius: 8px;
+    border: 1px solid #1e1e34;
+    overflow-x: auto;
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: #e0e0e0;
+    margin: 0.8rem 0;
+}
+
+.docs-content code {
+    font-family: monospace;
+    color: #667eea;
+}
+
+.docs-content pre code {
+    color: #e0e0e0;
+}
+
+.concept-card {
+    background: #12121f;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid #1e1e34;
+    margin: 1.5rem 0;
+}
+
+.concept-card h3 {
+    margin-top: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+    .docs-grid {
+        grid-template-columns: 1fr;
+    }
+    .docs-header h1 {
+        font-size: 2rem;
+    }
+}
+
+/* ── API Styles ── */
+
+.api-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #1e1e34;
+}
+
+.api-nav a {
+    color: #667eea;
+    text-decoration: none;
+    padding: 0.3rem 1rem;
+    border-radius: 20px;
+    border: 1px solid #1e1e34;
+    font-size: 0.85rem;
+    transition: all 0.3s;
+}
+
+.api-nav a:hover {
+    background: rgba(102, 126, 234, 0.1);
+    border-color: #667eea;
+}
+
+.api-class {
+    background: #12121f;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid #1e1e34;
+    margin: 1rem 0 2rem;
+}
+
+.api-class h4 {
+    color: #764ba2;
+    margin: 0 0 0.5rem 0;
+}
+
+.api-class table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.api-class table tr {
+    border-bottom: 1px solid #1a1a2e;
+}
+
+.api-class table td {
+    padding: 0.6rem 0.5rem;
+    vertical-align: top;
+}
+
+.api-class table td:first-child {
+    color: #667eea;
+    font-family: monospace;
+    width: 40%;
+}
+
+.api-class table td:last-child {
+    color: #aaa;
+}
+
+@media (max-width: 640px) {
+    .api-class table td:first-child {
+        width: 50%;
+        font-size: 0.75rem;
+    }
+    .api-class table td:last-child {
+        font-size: 0.8rem;
+    }
+}

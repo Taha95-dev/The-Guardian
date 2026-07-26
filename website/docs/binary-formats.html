@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Binary Formats — The Guardian</title>
+    <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+    <div class="container">
+        <header class="docs-header">
+            <a href="index.html" class="back-link">← Back to Docs</a>
+            <h1>💿 Binary Formats</h1>
+            <p>Custom binary serialization with GBIN</p>
+        </header>
+
+        <div class="docs-content">
+            <h2>GBIN Format</h2>
+            <p>Guardian Binary Format — simple, fast, extensible.</p>
+            <pre><code>format::GbinFormat fmt;
+
+// Write data
+fmt.push_byte(0x42);
+fmt.push_int(42);
+fmt.push_float(3.14);
+fmt.push_string("Hello, World!");
+
+// Serialize
+auto data = fmt.serialize();
+
+// Save to file
+fmt.write("data.gbin");</code></pre>
+
+            <h2>Reading Data</h2>
+            <pre><code>format::GbinFormat fmt;
+fmt.read("data.gbin");
+
+// Access data
+auto data = fmt.get_data();
+fmt.set_entry_point(0x1000);</code></pre>
+
+            <h2>Custom Formats</h2>
+            <p>Extend the Format class to create your own binary format:</p>
+            <pre><code>class MyFormat : public Format {
+public:
+    std::vector<uint8_t> serialize() override;
+    bool deserialize(const std::vector<uint8_t>& data) override;
+};</code></pre>
+
+            <h2>Format Registry</h2>
+            <pre><code>auto& registry = format::FormatRegistry::instance();
+registry.register_format("myformat", std::make_shared<MyFormat>());</code></pre>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 The Guardian. Built by a 13-year-old developer.</p>
+        </footer>
+    </div>
+</body>
+</html>

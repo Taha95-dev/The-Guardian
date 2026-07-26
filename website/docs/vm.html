@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VM & Bytecode — The Guardian</title>
+    <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+    <div class="container">
+        <header class="docs-header">
+            <a href="index.html" class="back-link">← Back to Docs</a>
+            <h1>🖥️ VM & Bytecode</h1>
+            <p>Bytecode execution engine with 40+ opcodes</p>
+        </header>
+
+        <div class="docs-content">
+            <h2>Opcodes</h2>
+            <p>The Guardian VM supports 40+ opcodes:</p>
+            <ul>
+                <li><strong>Stack:</strong> PUSH_INT, PUSH_FLOAT, PUSH_BOOL, PUSH_STRING, POP, DUP, SWAP</li>
+                <li><strong>Arithmetic:</strong> ADD, SUB, MUL, DIV, MOD</li>
+                <li><strong>Control Flow:</strong> JMP, JMP_IF, JMP_IF_NOT, CALL, RET</li>
+                <li><strong>Variables:</strong> STORE, LOAD</li>
+                <li><strong>Print:</strong> PRINT, PRINTLN, SPACE, NEWLINE</li>
+                <li><strong>Arrays:</strong> MAKE_ARRAY, ARRAY_GET, ARRAY_SET</li>
+                <li><strong>Dictionaries:</strong> MAKE_DICT, DICT_GET, DICT_SET</li>
+                <li><strong>Molecules:</strong> MAKE_MOLECULE, STORE_ATOM, GET_ATOM</li>
+            </ul>
+
+            <h2>Running Bytecode</h2>
+            <pre><code>vm::VM vm;
+vm.load(bytecode);
+vm.run();</code></pre>
+
+            <h2>Code Generation</h2>
+            <pre><code>vm::CodeGen codegen;
+codegen.pushInt(42);
+codegen.pushString("Hello");
+codegen.print();
+codegen.halt();
+auto bytecode = codegen.getBytecode();</code></pre>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 The Guardian. Built by a 13-year-old developer.</p>
+        </footer>
+    </div>
+</body>
+</html>

@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>API Reference — The Guardian</title>
+    <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+    <div class="container">
+        <header class="docs-header">
+            <a href="index.html" class="back-link">← Back to Docs</a>
+            <h1>📝 API Reference</h1>
+            <p>Complete C++17 API documentation for The Guardian</p>
+        </header>
+
+        <div class="docs-content">
+            <!-- Quick Navigation -->
+            <div class="api-nav">
+                <a href="#core">Core</a>
+                <a href="#memory">Memory</a>
+                <a href="#format">Format</a>
+                <a href="#vm">VM</a>
+                <a href="#parser">Parser</a>
+                <a href="#types">Types</a>
+            </div>
+
+            <!-- ── CORE ── -->
+            <h2 id="core">🧬 Core Library</h2>
+
+            <h3>Molecule</h3>
+            <p>Container for quarks and atoms. The main data structure in The Guardian.</p>
+
+            <div class="api-class">
+                <h4>Methods</h4>
+                <table>
+                    <tr>
+                        <td><code>void add_string(name, value)</code></td>
+                        <td>Add a string value</td>
+                    </tr>
+                    <tr>
+                        <td><code>void add_number(name, value)</code></td>
+                        <td>Add a numeric value (double)</td>
+                    </tr>
+                    <tr>
+                        <td><code>void add_bool(name, value)</code></td>
+                        <td>Add a boolean value</td>
+                    </tr>
+                    <tr>
+                        <td><code>void add_molecule(name, value)</code></td>
+                        <td>Add a nested molecule</td>
+                    </tr>
+                    <tr>
+                        <td><code>std::string get_string(name)</code></td>
+                        <td>Get a string value</td>
+                    </tr>
+                    <tr>
+                        <td><code>double get_number(name)</code></td>
+                        <td>Get a numeric value</td>
+                    </tr>
+                    <tr>
+                        <td><code>bool get_bool(name)</code></td>
+                        <td>Get a boolean value</td>
+                    </tr>
+                    <tr>
+                        <td><code>std::shared_ptr&lt;Molecule&gt; get_molecule(name)</code></td>
+                        <td>Get a nested molecule</td>
+                    </tr>
+                    <tr>
+                        <td><code>bool has_string(name)</code></td>
+                        <td>Check if string exists</td>
+                    </tr>
+                    <tr>
+                        <td><code>bool has_number(name)</code></td>
+                        <td>Check if number exists</td>
+                    </tr>
+                    <tr>
+                        <td><code>bool has_bool(name)</code></td>
+                        <td>Check if bool exists</td>
+                    </tr>
+                    <tr>
+                        <td><code>bool has_molecule(name)</code></td>
+                        <td>Check if molecule exists</td>
+                    </tr>
+                    <tr>
+                        <td><code>void remove(name)</code></td>
+                        <td>Remove a value by name</td>
+                    </tr>
+                    <tr>
+                        <td><code>void dump()</code></td>
+                        <td>Print all contents (debug)</td>
+                    </tr>
+                    <tr>
+                        <td><code>size_t size()</code></td>
+                        <td>Get total size in bytes</td>
+                    </tr>
+                </table>
+            </div>
+
+            <h3>Quark</h3>
+            <p>Primitive values — int, float, bool, string, char.</p>
+
+            <div class="api-class">
+                <h4>Constructors</h4>
+                <table>
+                    <tr>
+                        <td><code>Quark(int v)</code></td>
+                        <td>Integer quark</td>
+                    </tr>
+                    <tr>
+                        <td><code>Quark(double v)</code></td>
+                        <td>Float quark</td>
+                    </tr>
+                    <tr>
+                        <td><code>Quark(bool v)</code></td>
+                        <td>Boolean quark</td>
+                    </tr>
+                    <tr>
+                        <td><code>Quark(const std::string& v)</code></td>
+                        <td>String quark</td>
+                    </tr>
+                </table>
+
+                <h4>Methods</h4>
+                <table>
+                    <tr>
+                        <td><code>std::string to_string()</code></td>
+                        <td>Convert to string</td>
+                    </tr>
+                    <tr>
+                        <td><code>size_t size()</code></td>
+                        <td>Get size in bytes</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- ── MEMORY ── -->
+            <h2 id="memory">💾 Memory Library</h2>
+
+            <h3>MemoryManager</h3>
+            <p>LUT-based memory safety — no GC, no leaks, no UB.</p>
+
+            <div class="api-class">
+                <h4>Methods</h4>
+                <table>
+                    <tr>
+                        <td><code>void* allocate(size_t size)</code></td>
+                        <td>Allocate memory</td>
+                    </tr>
+                    <tr>
+                        <td><code>void deallocate(void* ptr)</code></td>
+                        <td>Free memory</td>
+                    </tr>
+                    <tr>
+                        <td><code>void register_pointer(ptr, size, name)</code></td>
+                        <td>Track a pointer</td>
+                    </tr>
+                    <tr>
+                        <td><code>void unregister_pointer(ptr)</code></td>
+                        <td>Stop tracking a pointer</td>
+                    </tr>
+                    <tr>
+                        <td><code>bool is_valid_pointer(ptr)</code></td>
+                        <td>Check if pointer is valid</td>
+                    </tr>
+                    <tr>
+                        <td><code>Stats get_stats()</code></td>
+                        <td>Get allocation stats</td>
+                    </tr>
+                    <tr>
+                        <td><code>void print_stats()</code></td>
+                        <td>Print allocation stats</td>
+                    </tr>
+                    <tr>
+                        <td><code>void reset()</code></td>
+                        <td>Reset everything</td>
+                    </tr>
+                </table>
+            </div>
+
+            <h3>MemoryPool</h3>
+            <p>Efficient fixed-size block allocator.</p>
+
+            <div class="api-class">
+                <h4>Methods</h4>
+                <table>
+                    <tr>
+                        <td><code>MemoryPool(size_t block_size = 4096)</code></td>
+                        <td>Constructor</td>
+                    </tr>
+                    <tr>
+                        <td><code>void* allocate(size_t size)</code></td>
+                        <td>Allocate from pool</td>
+                    </tr>
+                    <tr>
+                        <td><code>void deallocate(void* ptr)</code></td>
+                        <td>Free to pool</td>
+                    </tr>
+                    <tr>
+                        <td><code>void reset()</code></td>
+                        <td>Reset pool</td>
+                    </tr>
+                    <tr>
+                        <td><code>size_t used()</code></td>
+                        <td>Get used memory</td>
+                    </tr>
+                    <tr>
+                        <td><code>size_t total()</code></td>
+                        <td>Get total memory</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- ── FORMAT ── -->
+            <h2 id="format">💿 Format Library</h2>
+
+            <h3>GbinFormat</h3>
+            <p>Guardian Binary Format — fast, extensible serialization.</p>
+
+            <div class="api-class">
+                <h4>Methods</h4>
+                <table>
+                    <tr>
+                        <td><code>void set_version(uint16_t v)</code></td>
+                        <td>Set format version</td>
+                    </tr>
+                    <tr>
+                        <td><code>uint16_t get_version()</code></td>
+                        <td>Get format version</td>
+                    </tr>
+                    <tr>
+                        <td><code>void set_data(const vector&lt;uint8_t&gt;& data)</code></td>
+                        <td>Set binary data</td>
+                    </tr>
+                    <tr>
+                        <td><code>const vector&lt;uint8_t&gt;& get_data()</code></td>
+                        <td>Get binary data</td>
+                    </tr>
+                    <tr>
+                        <td><code>void push_byte(uint8_t byte)</code></td>
+                        <td>Push a byte</td>
+                    </tr>
+                    <tr>
+                        <td><code>void push_int(int value)</code></td>
+                        <td>Push an integer</td>
+                    </tr>
+                    <tr>
+                        <td><code>void push_float(float value)</code></td>
+                        <td>Push a float</td>
+                    </tr>
+                    <tr>
+                        <td><code>void push_string(const string& str)</code></td>
+                        <td>Push a string</td>
+                    </tr>
+                    <tr>
+                        <td><code>vector&lt;uint8_t&gt; serialize()</code></td>
+                        <td>Serialize to bytes</td>
+                    </tr>
+                    <tr>
+                        <td><code>bool deserialize(const vector&lt;uint8_t&gt;& data)</code></td>
+                        <td>Deserialize from bytes</td>
+                    </tr>
+                    <tr>
+                        <td><code>bool read(const string& path)</code></td>
+                        <td>Read from file</td>
+                    </tr>
+                    <tr>
+                        <td><code>bool write(const string& path)</code></td>
+                        <td>Write to file</td>
+                    </tr>
+                </table>
+            </div>
+
+            <h3>FormatRegistry</h3>
+            <p>Register and lookup custom formats.</p>
+
+            <div class="api-class">
+                <h4>Methods</h4>
+                <table>
+                    <tr>
+                        <td><code>void register_format(name, format)</code></td>
+                        <td>Register a format</td>
+                    </tr>
+                    <tr>
+                        <td><code>shared_ptr&lt;Format&gt; get_format(name)</code></td>
+                        <td>Get a format</td>
+                    </tr>
+                    <tr>
+                        <td><code>bool has_format(name)</code></td>
+                        <td>Check if format exists</td>
+                    </tr>
+                    <tr>
+                        <td><code>vector&lt;string&gt; list_formats()</code></td>
+                        <td>List all formats</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- ── VM ── -->
+            <h2 id="vm">🖥️ VM Library</h2>
+
+            <h3>VM</h3>
+            <p>Bytecode execution engine with 40+ opcodes.</p>
+
+            <div class="api-class">
+                <h4>Methods</h4>
+                <table>
+                    <tr>
+                        <td><code>void load(const vector&lt;uint8_t&gt;& bytecode)</code></td>
+                        <td>Load bytecode</td>
+                    </tr>
+                    <tr>
+                        <td><code>void run()</code></td>
+                        <td>Execute bytecode</td>
+                    </tr>
+                    <tr>
+                        <td><code>void reset()</code></td>
+                        <td>Reset VM state</td>
+                    </tr>
+                    <tr>
+                        <td><code>bool is_running()</code></td>
+                        <td>Check if running</td>
+                    </tr>
+                    <tr>
+                        <td><code>void push(const Value& val)</code></td>
+                        <td>Push to stack</td>
+                    </tr>
+                    <tr>
+                        <td><code>Value pop()</code></td>
+                        <td>Pop from stack</td>
+                    </tr>
+                    <tr>
+                        <td><code>Value peek()</code></td>
+                        <td>Peek at stack top</td>
+                    </tr>
+                </table>
+            </div>
+
+            <h3>CodeGen</h3>
+            <p>Generate bytecode programmatically.</p>
+
+            <div class="api-class">
+                <h4>Methods</h4>
+                <table>
+                    <tr>
+                        <td><code>void emit(opcode)</code></td>
+                        <td>Emit an opcode</td>
+                    </tr>
+                    <tr>
+                        <td><code>void emit(opcode, operand)</code></td>
+                        <td>Emit opcode with operand</td>
+                    </tr>
+                    <tr>
+                        <td><code>void pushInt(value)</code></td>
+                        <td>Push integer</td>
+                    </tr>
+                    <tr>
+                        <td><code>void pushString(value)</code></td>
+                        <td>Push string</td>
+                    </tr>
+                    <tr>
+                        <td><code>void print()</code></td>
+                        <td>Print top of stack</td>
+                    </tr>
+                    <tr>
+                        <td><code>void println()</code></td>
+                        <td>Print with newline</td>
+                    </tr>
+                    <tr>
+                        <td><code>void halt()</code></td>
+                        <td>Halt execution</td>
+                    </tr>
+                    <tr>
+                        <td><code>vector&lt;uint8_t&gt; getBytecode()</code></td>
+                        <td>Get generated bytecode</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- ── PARSER ── -->
+            <h2 id="parser">📝 Parser Library</h2>
+
+            <h3>Lexer</h3>
+            <p>Tokenize source code.</p>
+
+            <div class="api-class">
+                <h4>Methods</h4>
+                <table>
+                    <tr>
+                        <td><code>Lexer(const string& source)</code></td>
+                        <td>Constructor</td>
+                    </tr>
+                    <tr>
+                        <td><code>vector&lt;Token&gt; tokenize()</code></td>
+                        <td>Tokenize source</td>
+                    </tr>
+                </table>
+            </div>
+
+            <h3>Parser</h3>
+            <p>Parse tokens into AST.</p>
+
+            <div class="api-class">
+                <h4>Methods</h4>
+                <table>
+                    <tr>
+                        <td><code>Parser(const vector&lt;Token&gt;& tokens)</code></td>
+                        <td>Constructor</td>
+                    </tr>
+                    <tr>
+                        <td><code>unique_ptr&lt;ASTNode&gt; parse()</code></td>
+                        <td>Parse to AST</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- ── TYPES ── -->
+            <h2 id="types">🔷 Value Types</h2>
+
+            <h3>Value</h3>
+            <p>Universal value type — can be a quark or atom.</p>
+
+            <div class="api-class">
+                <h4>Constructors</h4>
+                <table>
+                    <tr>
+                        <td><code>Value()</code></td>
+                        <td>Null value</td>
+                    </tr>
+                    <tr>
+                        <td><code>Value(int v)</code></td>
+                        <td>Integer value</td>
+                    </tr>
+                    <tr>
+                        <td><code>Value(double v)</code></td>
+                        <td>Float value</td>
+                    </tr>
+                    <tr>
+                        <td><code>Value(bool v)</code></td>
+                        <td>Boolean value</td>
+                    </tr>
+                    <tr>
+                        <td><code>Value(const string& v)</code></td>
+                        <td>String value</td>
+                    </tr>
+                    <tr>
+                        <td><code>Value(const vector&lt;Value&gt;& arr)</code></td>
+                        <td>Array value</td>
+                    </tr>
+                    <tr>
+                        <td><code>Value(const unordered_map&lt;string, Value&gt;& dict)</code></td>
+                        <td>Dict value</td>
+                    </tr>
+                    <tr>
+                        <td><code>Value(shared_ptr&lt;Molecule&gt; m)</code></td>
+                        <td>Molecule value</td>
+                    </tr>
+                </table>
+
+                <h4>Methods</h4>
+                <table>
+                    <tr>
+                        <td><code>std::string to_string()</code></td>
+                        <td>Convert to string</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 The Guardian. Built by a 13-year-old developer.</p>
+        </footer>
+    </div>
+</body>
+</html>

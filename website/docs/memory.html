@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Memory Management — The Guardian</title>
+    <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+    <div class="container">
+        <header class="docs-header">
+            <a href="index.html" class="back-link">← Back to Docs</a>
+            <h1>📦 Memory Management</h1>
+            <p>LUT-based pointer safety — no GC, no leaks, no UB</p>
+        </header>
+
+        <div class="docs-content">
+            <h2>The Problem</h2>
+            <p>Memory bugs are the #1 cause of security vulnerabilities and crashes.</p>
+
+            <h2>The Guardian's Solution</h2>
+            <p><strong>LUT (Lookup Table)</strong> — Every pointer is tracked.</p>
+            <pre><code>class MemoryManager {
+    void* allocate(size_t size);
+    void deallocate(void* ptr);
+    void register_pointer(void* ptr, size_t size, const std::string& name = "");
+    void unregister_pointer(void* ptr);
+    bool is_valid_pointer(void* ptr) const;
+};</code></pre>
+
+            <h2>Usage Example</h2>
+            <pre><code>memory::MemoryManager mem;
+
+// 1. Allocate
+void* ptr = mem.allocate(1024);
+
+// 2. Register (track it)
+mem.register_pointer(ptr, 1024, "buffer");
+
+// 3. Validate (check if it's safe)
+if (mem.is_valid_pointer(ptr)) {
+    // Use ptr safely
+}
+
+// 4. Unregister (remove tracking)
+mem.unregister_pointer(ptr);
+
+// 5. Deallocate (free memory)
+mem.deallocate(ptr);</code></pre>
+
+            <h2>Memory Pool</h2>
+            <p>For performance-critical applications:</p>
+            <pre><code>memory::MemoryPool pool(4096);
+void* ptr = pool.allocate(128);
+pool.deallocate(ptr);
+pool.reset();</code></pre>
+
+            <h2>Why No GC?</h2>
+            <ul>
+                <li>✅ Zero pauses</li>
+                <li>✅ Predictable performance</li>
+                <li>✅ Deterministic cleanup</li>
+                <li>✅ Low memory overhead</li>
+            </ul>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 The Guardian. Built by a 13-year-old developer.</p>
+        </footer>
+    </div>
+</body>
+</html>

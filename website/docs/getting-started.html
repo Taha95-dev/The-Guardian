@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Getting Started — The Guardian</title>
+    <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+    <div class="container">
+        <header class="docs-header">
+            <a href="index.html" class="back-link">← Back to Docs</a>
+            <h1>🚀 Getting Started</h1>
+            <p>Install The Guardian and build your first language in minutes</p>
+        </header>
+
+        <div class="docs-content">
+            <h2>Installation</h2>
+
+            <h3>From Source (Recommended)</h3>
+            <pre><code>git clone https://github.com/Taha95-dev/The-Guardian.git
+cd The-Guardian
+mkdir build && cd build
+cmake ..
+make -j$(nproc)
+sudo make install</code></pre>
+
+            <h3>Verify Installation</h3>
+            <pre><code>guardianc --version</code></pre>
+
+            <h2>Your First Language</h2>
+
+            <h3>1. Create a Language File</h3>
+            <pre><code>// my_language.ax
+let name = "MyLanguage"
+let version = 1.0
+println("Hello from " + name + " v" + version)</code></pre>
+
+            <h3>2. Compile to Bytecode</h3>
+            <pre><code>axiomc my_language.ax my_language.axbin</code></pre>
+
+            <h3>3. Run on The Guardian VM</h3>
+            <pre><code>guardianc my_language.axbin</code></pre>
+
+            <h2>Next Steps</h2>
+            <ul>
+                <li>Read the <a href="core-concepts.html">Core Concepts</a> guide</li>
+                <li>Explore the <a href="examples.html">Examples</a></li>
+                <li>Check the <a href="api.html">API Reference</a></li>
+            </ul>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 The Guardian. Built by a 13-year-old developer.</p>
+        </footer>
+    </div>
+</body>
+</html>

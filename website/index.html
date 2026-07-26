@@ -20,10 +20,11 @@
                     The Guardian is a complete C++17 framework for building programming languages,
                     DSLs, and binary formats. Safe by design, with no garbage collection.
                 </p>
-                <div class="hero-buttons">
-                    <a href="https://buy.polar.sh/polar_cl_czZ7LW2XcJR1zNjUoiGbBYU4MNOI4ShcvcR6l00HLU9" class="btn btn-primary">Buy Now — $20 →</a>
-                    <a href="#" class="btn btn-secondary">View Docs</a>
-                </div>
+                <!-- Add this to the hero section -->
+    <div class="hero-buttons">
+        <button id="hero-buy" class="btn btn-primary">Buy Now — $20 →</button>
+        <a href="docs/index.html" class="btn btn-secondary">📚 Docs</a>
+    </div>
                 <div class="hero-stats-mini">
                     <span>⚡ 7,000+ lines</span>
                     <span>📦 70+ files</span>
@@ -32,7 +33,7 @@
                 </div>
             </div>
             <div class="hero-visual">
-                <img src="../assets/logo.svg" alt="The Guardian Logo" width="300" />
+                <img src="assets/logo.svg" alt="The Guardian Logo" width="300" />
             </div>
         </section>
 
@@ -140,9 +141,9 @@
                     <li>✅ Full source code access</li>
                     <li>✅ Lifetime updates</li>
                 </ul>
-                <a href="https://buy.polar.sh/polar_cl_czZ7LW2XcJR1zNjUoiGbBYU4MNOI4ShcvcR6l00HLU9" class="btn btn-primary btn-large">
+                <button id="polar-checkout" class="btn btn-primary btn-large">
                     🛒 Buy Now — $20
-                </a>
+                </button>
                 <p class="pricing-guarantee">⚡ 100% satisfaction guarantee · Built by a 13-year-old</p>
             </div>
         </section>
@@ -151,7 +152,7 @@
         <footer>
             <div class="footer-grid">
                 <div class="footer-brand">
-                    <img src="../assets/logo.svg" alt="The Guardian" width="40" />
+                    <img src="assets/logo.svg" alt="The Guardian" width="40" />
                     <span class="footer-name">The Guardian</span>
                     <p class="footer-desc">Safe by Design, Not by Choice</p>
                 </div>
@@ -180,5 +181,28 @@
             </div>
         </footer>
     </div>
+
+    <script>
+        // ── Polar Checkout ──
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkoutUrl = 'https://buy.polar.sh/polar_cl_czZ7LW2XcJR1zNjUoiGbBYU4MNOI4ShcvcR6l00HLU9';
+            
+            // Hero buy button
+            const heroBuy = document.getElementById('hero-buy');
+            if (heroBuy) {
+                heroBuy.addEventListener('click', function() {
+                    window.location.href = checkoutUrl;
+                });
+            }
+            
+            // Pricing buy button
+            const polarCheckout = document.getElementById('polar-checkout');
+            if (polarCheckout) {
+                polarCheckout.addEventListener('click', function() {
+                    window.location.href = checkoutUrl;
+                });
+            }
+        });
+    </script>
 </body>
 </html>

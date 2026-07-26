@@ -1,20 +1,53 @@
 # 🔷 The Guardian — Language Framework
 
 <p align="center">
-  <img src="assets/banner.svg" alt="The Guardian Banner" width="100%">
+  <a href="https://rad-alfajores-a2413f.netlify.app/">
+    <img src="assets/banner.svg" alt="The Guardian Banner" width="100%">
+  </a>
 </p>
 
-<br>
+<p align="center">
+  <a href="https://rad-alfajores-a2413f.netlify.app/">
+    <img src="assets/logo.svg" alt="The Guardian Logo" width="120">
+  </a>
+</p>
 
-**Build custom languages with memory safety, custom binary formats, and a VM.**
+<p align="center">
+  <strong>Build custom languages with memory safety, custom binary formats, and a VM.</strong><br>
+  <em>Safe by Design, Not by Choice.</em>
+</p>
 
-The Guardian is a **language development framework** that provides everything you need to build your own programming language:
+<p align="center">
+  <a href="https://rad-alfajores-a2413f.netlify.app/">
+    <img src="https://img.shields.io/badge/Website-Live-667eea?style=for-the-badge&logo=netlify" alt="Website">
+  </a>
+  <a href="https://buy.polar.sh/polar_cl_czZ7LW2XcJR1zNjUoiGbBYU4MNOI4ShcvcR6l00HLU9">
+    <img src="https://img.shields.io/badge/Buy%20Now-$20-764ba2?style=for-the-badge&logo=stripe" alt="Buy Now">
+  </a>
+  <a href="https://github.com/Taha95-dev/The-Guardian">
+    <img src="https://img.shields.io/badge/GitHub-Repo-181717?style=for-the-badge&logo=github" alt="GitHub">
+  </a>
+</p>
 
-- 🧬 **Core** — Atoms, Molecules, Quarks for type-safe data
-- 💾 **Memory** — Cache, LUT, Memory Manager for safety
-- 📝 **Parser** — Lexer/Parser base classes
-- 💿 **Format** — Custom binary formats (.gbin)
-- 🖥️ **VM** — Bytecode execution
+---
+
+## 🛒 Buy The Guardian
+
+**The Guardian is available for commercial use.**
+
+- 🎓 **Personal/Educational**: FREE
+- 💼 **Commercial**: [Buy now on Polar ($20 one-time)](https://buy.polar.sh/polar_cl_czZ7LW2XcJR1zNjUoiGbBYU4MNOI4ShcvcR6l00HLU9)
+- 🏢 **Enterprise**: Contact us for custom licensing
+
+[![Buy on Polar](https://img.shields.io/badge/Buy%20on-Polar-667eea?style=for-the-badge)](https://buy.polar.sh/polar_cl_czZ7LW2XcJR1zNjUoiGbBYU4MNOI4ShcvcR6l00HLU9)
+
+---
+
+## 🌐 Website
+
+Visit the official website: [the-guardian.netlify.app](https://rad-alfajores-a2413f.netlify.app/)
+
+---
 
 ## Why The Guardian?
 
@@ -32,6 +65,8 @@ The Guardian is a **language development framework** that provides everything yo
 | Built by a 13-year-old | ✅ | ❌ |
 | Price | $20 one-time | $500+ |
 
+---
+
 ## 💰 Pricing
 
 | License | Price | Type | Who |
@@ -40,86 +75,118 @@ The Guardian is a **language development framework** that provides everything yo
 | Commercial | **$20** | One-time | One commercial project |
 | Enterprise | **$99/year** | Subscription | Unlimited commercial projects |
 
-[👉 Buy Commercial License ($20)](https://kashiflyas.gumroad.com/l/ekhyi)
-
-## Quick Start
-
-```bash
-# Install
-git clone https://github.com/Taha95-dev/The-Guardian.git
-cd The-Guardian
-make build
-sudo make install
-```
-# Test
-guardianc --version
-
-Build a language
-
-cpp
-
-#include <guardian/core/atom.hpp>
-#include <guardian/core/molecule.hpp>
-#include <guardian/parser/parser.hpp>
-#include <guardian/format/gbin_format.hpp>
-#include <guardian/vm/vm.hpp>
-
-// Your language here!
-
-Documentation
-
-    User Guide
-
-    Architecture
-
-    API Reference
-
-    Tutorials
-
-License
-
-The Guardian is licensed under The Guardian License v1.0:
-
-    ✅ FREE for personal, educational, and open-source use
-
-    💼 Commercial use requires a license (contact via GitHub Issues)
-
-    🚫 No selling The Guardian as your own product
-
-See LICENSE.md for full details.
-Commercial Licensing
-License Type	Price	Use Cases
-Individual	$99/year	One commercial project
-Small Business	$499/year	Up to 5 commercial projects
-Enterprise	$2,499/year	Unlimited commercial projects
-OEM/Reselling	Contact me	Resell as part of your product
-
-Contact: Open an issue
-Built by Taha — 13-year-old developer building the future of code.
-
-
-## Documentation
-
-- [Security Model](docs/security_model.md) — Learn about memory safety and security
-- [Tutorial](docs/tutorial.md) — Build your first language with The Guardian
-- [User Guide](docs/user-guide/) — Complete documentation
-- [Architecture](docs/architecture/) — How The Guardian works
-- [API Reference](docs/api/) — Full API documentation
-
-## Architecture
-
-![The Guardian Architecture](assets/architecture.svg)
-
-The Guardian is built as a layered, modular framework. See the [full architecture documentation](docs/architecture.md) for details.
+[👉 Buy Commercial License ($20)](https://buy.polar.sh/polar_cl_czZ7LW2XcJR1zNjUoiGbBYU4MNOI4ShcvcR6l00HLU9)
 
 ---
 
-## Documentation
+## 🚀 Quick Start
 
-- [Architecture Overview](docs/architecture.md) — How The Guardian works
-- [Security Model](docs/security_model.md) — Learn about memory safety
-- [Tutorial](docs/tutorial.md) — Build your first language
-- [User Guide](docs/user-guide/) — Complete documentation
-- [API Reference](docs/api/) — Full API docs
-- [Contributing Guide](CONTRIBUTING.md) — How to contribute
-- [Changelog](CHANGELOG.md) — Version history
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/Taha95-dev/The-Guardian.git
+cd The-Guardian
+
+# Build and install
+mkdir build && cd build
+cmake ..
+make -j$(nproc)
+sudo make install
+
+# Verify installation
+guardianc --version
+```
+
+#include <guardian/core/molecule.hpp>
+#include <guardian/format/gbin_format.hpp>
+#include <guardian/vm/vm.hpp>
+
+using namespace guardian;
+
+int main() {
+    // Create a molecule
+    Molecule mol;
+    mol.add_string("greeting", "Hello from The Guardian!");
+    mol.add_number("version", 1.0);
+    mol.add_bool("active", true);
+    
+    // Serialize to binary
+    format::GbinFormat fmt;
+    fmt.push_string(mol.get_string("greeting"));
+    fmt.write("hello.gbin");
+    
+    return 0;
+}
+
+📚 Documentation
+
+    Website — Official website
+
+    Documentation — Complete docs
+
+    API Reference — Full API
+
+    Examples — Axiom demo language
+
+💻 Examples
+Axiom — Complete Demo Language
+
+Axiom is a small language built with The Guardian:
+javascript
+
+let x = 42
+let name = "Axiom"
+let active = true
+
+println(x)
+println(name)
+println(active)
+
+Output:
+text
+
+42
+Axiom
+true
+
+Check out examples/axiom/ for the full implementation.
+
+
+🔒 License
+
+    Personal/Educational: FREE (open source)
+
+    Commercial: $20 one-time
+
+    Enterprise: $99/year
+
+See LICENSE.md for full details.
+👨‍💻 Built by a 13-Year-Old
+
+The Guardian was built on:
+
+    Hardware: HP EliteBook 840 G2 with 4GB RAM
+
+    OS: Arch Linux
+
+    Editor: Neovim
+
+    Languages: C++17, Go
+
+7,000+ lines. 0 TODOs. Built by a 13-year-old.
+🤝 Contributing
+
+Contributions are welcome! Please read CONTRIBUTING.md for guidelines.
+📝 Changelog
+
+See CHANGELOG.md for version history.
+📧 Contact
+
+    Email: kashiftaha976@gmail.com
+
+    GitHub: Taha95-dev
+
+    Website: rad-alfajores-a2413f.netlify.app
+
+The Guardian — Safe by Design, Not by Choice.
