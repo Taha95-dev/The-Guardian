@@ -7,12 +7,6 @@
 </p>
 
 <p align="center">
-  <a href="https://rad-alfajores-a2413f.netlify.app/">
-    <img src="assets/logo.svg" alt="The Guardian Logo" width="120">
-  </a>
-</p>
-
-<p align="center">
   <strong>Build custom languages with memory safety, custom binary formats, and a VM.</strong><br>
   <em>Safe by Design, Not by Choice.</em>
 </p>
