@@ -1,5 +1,9 @@
 # 🔷 The Guardian — Language Framework
 
+<p align="center">
+  <img src="assets/logo.svg" alt="The Guardian Logo" width="200">
+</p>
+
 **Build custom languages with memory safety, custom binary formats, and a VM.**
 
 The Guardian is a **language development framework** that provides everything you need to build your own programming language:
@@ -85,10 +89,6 @@ Built by Taha — 13-year-old developer building the future of code.
 - [API Reference](docs/api/) — Full API documentation
 <p align="center">
   <img src="assets/banner.svg" alt="The Guardian Banner" width="100%">
-</p>
-
-<p align="center">
-  <img src="assets/logo.svg" alt="The Guardian Logo" width="200">
 </p>
 
 
