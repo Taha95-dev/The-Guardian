@@ -16,18 +16,25 @@
   <rect width="800" height="200" rx="16" fill="#0a0a0f" stroke="#1a1a2e" stroke-width="2"/>
   
   <!-- Glow line top -->
-  <line x1="50" y1="25" x2="750" y2="25" stroke="url(#bannerGrad)" stroke-width="1" opacity="0.2"/>
+  <line x1="50" y1="25" x2="750" y2="25" stroke="url(#bannerGrad)" stroke-width="1" opacity="0.15"/>
   
-  <!-- Small atom icon (top-left) -->
-  <g transform="translate(30, 30)">
-    <ellipse cx="20" cy="45" rx="20" ry="8" fill="none" stroke="url(#bannerGrad)" stroke-width="1.5" opacity="0.4"/>
-    <ellipse cx="20" cy="45" rx="20" ry="8" fill="none" stroke="url(#bannerGrad)" stroke-width="1.5" opacity="0.4" transform="rotate(60, 20, 45)"/>
-    <ellipse cx="20" cy="45" rx="20" ry="8" fill="none" stroke="url(#bannerGrad)" stroke-width="1.5" opacity="0.4" transform="rotate(-60, 20, 45)"/>
-    <circle cx="20" cy="45" r="6" fill="url(#bannerGrad)"/>
-    <circle cx="20" cy="45" r="3" fill="#0a0a0f"/>
-    <circle cx="20" cy="25" r="3" fill="#667eea" opacity="0.6"/>
-    <circle cx="40" cy="45" r="3" fill="#764ba2" opacity="0.6"/>
-    <circle cx="0" cy="45" r="3" fill="#667eea" opacity="0.6"/>
+  <!-- BIG ATOM (LEFT SIDE) -->
+  <g transform="translate(80, 100)">
+    <!-- Orbits -->
+    <ellipse cx="0" cy="0" rx="55" ry="20" fill="none" stroke="url(#bannerGrad)" stroke-width="2" opacity="0.3"/>
+    <ellipse cx="0" cy="0" rx="55" ry="20" fill="none" stroke="url(#bannerGrad)" stroke-width="2" opacity="0.3" transform="rotate(60, 0, 0)"/>
+    <ellipse cx="0" cy="0" rx="55" ry="20" fill="none" stroke="url(#bannerGrad)" stroke-width="2" opacity="0.3" transform="rotate(-60, 0, 0)"/>
+    
+    <!-- Electrons -->
+    <circle cx="-40" cy="-30" r="6" fill="#667eea" opacity="0.8"/>
+    <circle cx="40" cy="30" r="6" fill="#764ba2" opacity="0.8"/>
+    <circle cx="-30" cy="40" r="6" fill="#667eea" opacity="0.8"/>
+    <circle cx="30" cy="-40" r="6" fill="#764ba2" opacity="0.8"/>
+    
+    <!-- Nucleus -->
+    <circle cx="0" cy="0" r="16" fill="url(#bannerGrad)"/>
+    <circle cx="0" cy="0" r="8" fill="#0a0a0f"/>
+    <circle cx="0" cy="0" r="4" fill="#fff" opacity="0.3"/>
   </g>
   
   <!-- MAIN TITLE (CENTER) -->
