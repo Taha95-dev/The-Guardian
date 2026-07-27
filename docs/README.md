@@ -1,5 +1,20 @@
 # 📚 The Guardian Documentation
 
+## 📝 Axiom Parser
+
+Axiom now uses The Guardian's **complete parser API** with full support for:
+
+- ✅ Variables (`let x = 5`)
+- ✅ If/Else (`if (x > 5) { ... } else { ... }`)
+- ✅ While loops (`while (x < 10) { ... }`)
+- ✅ For loops (`for (i = 0; i < 10; i = i + 1) { ... }`)
+- ✅ Functions (`func add(a, b) { return a + b }`)
+- ✅ Print (`print("Hello")`, `println("World")`)
+- ✅ Expressions (`x + y * 3`)
+- ✅ Return statements (`return x + y`)
+
+The parser is built on The Guardian's `parser.hpp` API and is fully extensible.
+
 Welcome to The Guardian documentation — your complete guide to building languages with The Guardian.
 
 ## Quick Links
@@ -70,5 +85,7 @@ License
     Enterprise: $99/year
 
     Buy a license
+
+
 
 The Guardian — Safe by Design, Not by Choice.

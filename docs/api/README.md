@@ -1,113 +1,78 @@
-# 📖 API Reference
+# 📖 API Reference — Parser
 
-Complete C++17 API documentation for The Guardian.
+## Parser API
 
-## Core Library (`guardian/core/`)
+The Guardian's parser provides a complete foundation for building language parsers.
 
-### Molecule
-
-Container for quarks and atoms.
+### Token
 
 ```cpp
-class Molecule {
-    void add_string(const std::string& name, const std::string& value);
-    void add_number(const std::string& name, double value);
-    void add_bool(const std::string& name, bool value);
-    void add_molecule(const std::string& name, std::shared_ptr<Molecule> value);
-    
-    std::string get_string(const std::string& name) const;
-    double get_number(const std::string& name) const;
-    bool get_bool(const std::string& name) const;
-    std::shared_ptr<Molecule> get_molecule(const std::string& name) const;
-    
-    bool has_string(const std::string& name) const;
-    bool has_number(const std::string& name) const;
-    bool has_bool(const std::string& name) const;
-    bool has_molecule(const std::string& name) const;
-    
-    void remove(const std::string& name);
-    void dump() const;
-    size_t size() const;
-};
-
-Quark
-
-Primitive values.
-cpp
-
-struct Quark {
-    enum Type { INT, FLOAT, BOOL, STRING, NONE };
-    Type type;
-    
-    Quark(int v);
-    Quark(double v);
-    Quark(bool v);
-    Quark(const std::string& v);
-    
-    std::string to_string() const;
-    size_t size() const;
-};
-
-Memory Library (guardian/memory/)
-MemoryManager
-
-Memory safety with LUT tracking.
-cpp
-
-class MemoryManager {
-    void* allocate(size_t size);
-    void deallocate(void* ptr);
-    void register_pointer(void* ptr, size_t size, const std::string& name = "");
-    void unregister_pointer(void* ptr);
-    bool is_valid_pointer(void* ptr) const;
-    
-    struct Stats {
-        size_t total_allocated;
-        size_t total_freed;
-        size_t current_allocations;
-        size_t lut_size;
+struct Token {
+    enum class Type {
+        IDENTIFIER, NUMBER, STRING,
+        IF, ELSE, FOR, WHILE, RETURN, LET, FN,
+        TRUE, FALSE, NULL_TOKEN,
+        LPAREN, RPAREN, LBRACE, RBRACE,
+        SEMICOLON, COLON, COMMA, DOT, ASSIGN,
+        PLUS, MINUS, STAR, SLASH, MOD,
+        EQUAL, NOT_EQUAL, LESS, GREATER,
+        LESS_EQUAL, GREATER_EQUAL, AND, OR, NOT,
+        // ...
     };
-    Stats get_stats() const;
-    void reset();
+    Type type;
+    std::string value;
+    int line;
+    int column;
 };
 
-Format Library (guardian/format/)
-GbinFormat
-
-Binary serialization.
+AST Nodes
+Node	Purpose
+ProgramNode	Root of the AST
+BlockNode	Block of statements
+IfNode	If/Else statement
+ForNode	For loop
+WhileNode	While loop
+ReturnNode	Return statement
+LiteralNode	Literal value
+BinaryOpNode	Binary operation
+VariableNode	Variable declaration
+CallNode	Function call
+Parser Base Class
 cpp
 
-class GbinFormat : public Format {
-    void set_version(uint16_t version);
-    uint16_t get_version() const;
-    void set_data(const std::vector<uint8_t>& data);
-    const std::vector<uint8_t>& get_data() const;
+class Parser {
+public:
+    virtual std::unique_ptr<ASTNode> parse() = 0;
     
-    void push_byte(uint8_t byte);
-    void push_int(int value);
-    void push_float(float value);
-    void push_string(const std::string& str);
+protected:
+    // Extended parsing methods
+    std::unique_ptr<ASTNode> parseIf();
+    std::unique_ptr<ASTNode> parseFor();
+    std::unique_ptr<ASTNode> parseWhile();
+    std::unique_ptr<ASTNode> parseReturn();
     
-    std::vector<uint8_t> serialize();
-    bool deserialize(const std::vector<uint8_t>& data);
-    bool read(const std::string& path);
-    bool write(const std::string& path) const;
+    // Virtual methods (must implement)
+    virtual std::unique_ptr<ASTNode> parseExpression() = 0;
+    virtual std::unique_ptr<ASTNode> parseStatement() = 0;
+    virtual std::unique_ptr<ASTNode> parseBlock() = 0;
 };
 
-VM Library (guardian/vm/)
-VM
-
-Bytecode execution engine.
+Building a Parser
 cpp
 
-class VM {
-    void load(const std::vector<uint8_t>& bytecode);
-    void run();
-    void reset();
-    bool is_running() const;
-    
-    void push(const Value& val);
-    Value pop();
-    Value peek() const;
+class MyParser : public Parser {
+public:
+    std::unique_ptr<ASTNode> parseExpression() override {
+        // Parse expressions
+    }
+    std::unique_ptr<ASTNode> parseStatement() override {
+        // Parse statements
+    }
+    std::unique_ptr<ASTNode> parseBlock() override {
+        // Parse blocks
+    }
+    std::unique_ptr<ASTNode> parse() override {
+        // Parse program
+    }
 };
 

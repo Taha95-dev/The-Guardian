@@ -9,19 +9,15 @@ void print_version() {
     std::cout << "  - Core Library (atoms, molecules)\n";
     std::cout << "  - VM (bytecode execution)\n";
     std::cout << "  - Compiler (lexer, parser)\n";
-    std::cout << "  - Om Language\n";
     std::cout << "\n";
     std::cout << "Commands:\n";
     std::cout << "  guardianc --version  - Show version\n";
-    std::cout << "  omc -c file.om       - Compile Om to .gbin\n";
-    std::cout << "  omc -r file.om       - Compile and run Om\n";
-    std::cout << "  omc -e file.gbin     - Execute .gbin\n";
 }
 
 void print_help() {
     std::cout << R"(
 ╔═══════════════════════════════════════════╗
-║   🔷 THE GUARDIAN — Language Framework   ║
+║   🔷 THE GUARDIAN — Language Framework    ║
 ║           Building the future of code     ║
 ╚═══════════════════════════════════════════╝
 
@@ -35,9 +31,6 @@ The Guardian is a framework for building languages with:
   - Custom binary formats
   - Memory safety (atoms + molecules + LUT)
   - VM execution
-  - Om language
-
-For Om compiler, use: omc --help
 )";
 }
 

@@ -102,9 +102,7 @@ struct ASTNode {
     virtual ~ASTNode() = default;
 };
 
-// ============================================
-// AST NODE TYPES
-// ============================================
+// ── AST Node Types ──
 struct ProgramNode : ASTNode {
     std::vector<std::unique_ptr<ASTNode>> statements;
     ProgramNode() { type = Type::PROGRAM; }
@@ -139,6 +137,30 @@ struct WhileNode : ASTNode {
 struct ReturnNode : ASTNode {
     std::unique_ptr<ASTNode> value;
     ReturnNode() { type = Type::RETURN; }
+};
+
+struct LiteralNode : ASTNode {
+    std::string value;
+    LiteralNode() { type = Type::LITERAL; }
+};
+
+struct BinaryOpNode : ASTNode {
+    std::string op;
+    std::unique_ptr<ASTNode> left;
+    std::unique_ptr<ASTNode> right;
+    BinaryOpNode() { type = Type::BINARY_OP; }
+};
+
+struct VariableNode : ASTNode {
+    std::string name;
+    std::unique_ptr<ASTNode> value;
+    VariableNode() { type = Type::VARIABLE; }
+};
+
+struct CallNode : ASTNode {
+    std::string name;
+    std::vector<std::unique_ptr<ASTNode>> args;
+    CallNode() { type = Type::CALL; }
 };
 
 // ============================================
@@ -195,6 +217,8 @@ protected:
     virtual std::unique_ptr<ASTNode> parseExpression() = 0;
     virtual std::unique_ptr<ASTNode> parseStatement() = 0;
     virtual std::unique_ptr<ASTNode> parseBlock() = 0;
+    std::unique_ptr<ASTNode> parseBinary(int min_precedence);
+    std::unique_ptr<ASTNode> parsePrimary();
 };
 
 } // namespace guardian::parser
