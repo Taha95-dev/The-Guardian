@@ -1,0 +1,9 @@
+let x = 42
+let y = 3.14
+let name = "Axiom"
+let active = true
+
+println(x)
+println(y)
+println(name)
+println(active)
