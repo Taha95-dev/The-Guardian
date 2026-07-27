@@ -1,4 +1,5 @@
 #include "parser.hpp"
+#include <iostream>
 #include <cctype>
 #include <optional>
 
@@ -239,6 +240,22 @@ std::unique_ptr<ASTNode> Parser::parse() {
     return parseProgram();
 }
 
+std::unique_ptr<ASTNode> Parser::parseWhile() {
+    advance(); // consume 'while'
+    auto node = std::make_unique<WhileNode>();
+    if (!match(Token::Type::LPAREN)) { 
+        error("Expected '(' after while"); 
+        return nullptr; 
+    }
+    node->condition = parseExpression();
+    if (!match(Token::Type::RPAREN)) { 
+        error("Expected ')' after condition"); 
+        return nullptr; 
+    }
+    node->body = parseBlock();
+    return node;
+}
+
 std::unique_ptr<ASTNode> Parser::parseProgram() {
     auto program = std::make_unique<ProgramNode>();
     while (!isAtEnd()) {
@@ -255,8 +272,13 @@ std::unique_ptr<ASTNode> Parser::parseProgram() {
 std::unique_ptr<ASTNode> Parser::parseStatement() {
     Token tok = peek();
     
-    if (tok.type == Token::Type::COMMENT) { advance(); return parseStatement(); }
+    // Skip RBRACE (it's handled by parseBlock)
+    if (tok.type == Token::Type::RBRACE) {
+        advance();
+        return nullptr;
+    }
     
+    if (tok.type == Token::Type::COMMENT) { advance(); return parseStatement(); }
     if (tok.type == Token::Type::LET) return parseLet();
     if (tok.type == Token::Type::IF) return parseIf();
     if (tok.type == Token::Type::WHILE) return parseWhile();
@@ -282,7 +304,12 @@ std::unique_ptr<ASTNode> Parser::parseBlock() {
     }
     while (!isAtEnd() && peek().type != Token::Type::RBRACE) {
         auto stmt = parseStatement();
-        if (stmt) block->statements.push_back(std::move(stmt));
+        if (stmt) {
+            block->statements.push_back(std::move(stmt));
+        } else {
+            // If we can't parse a statement, try to recover
+            advance();
+        }
     }
     if (!match(Token::Type::RBRACE)) {
         error("Expected '}'");
@@ -301,6 +328,10 @@ std::unique_ptr<ASTNode> Parser::parseBinary(int min_precedence) {
     
     while (true) {
         Token op = peek();
+        // Skip if it's a closing parenthesis or semicolon
+        if (op.type == Token::Type::RPAREN || op.type == Token::Type::SEMICOLON) {
+            break;
+        }
         int prec = getPrecedence(op.type);
         if (prec < min_precedence) break;
         advance();
@@ -357,44 +388,58 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
 
 std::unique_ptr<ASTNode> Parser::parseLet() {
     advance(); // consume 'let'
+    std::cout << "  parseLet: after 'let', next token: " << peek().value << "\n";
+    
     Token name = peek();
     if (name.type != Token::Type::IDENTIFIER) {
         error("Expected identifier after 'let'");
         return nullptr;
     }
     advance();
+    std::cout << "  parseLet: name = " << name.value << "\n";
+    
     auto node = std::make_unique<LetNode>();
     node->name = name.value;
+    
     if (match(Token::Type::ASSIGN)) {
+        std::cout << "  parseLet: found '=', parsing expression\n";
         node->value = parseExpression();
     }
+    
+    std::cout << "  parseLet: checking for ';', next token: " << peek().value << "\n";
     if (!match(Token::Type::SEMICOLON)) {
         error("Expected ';' after let");
         return nullptr;
     }
+    std::cout << "  parseLet: found ';'\n";
+    
     return node;
 }
 
 std::unique_ptr<ASTNode> Parser::parseIf() {
     advance(); // consume 'if'
+    std::cout << "  parseIf: after 'if', next token: " << peek().value << "\n";
+    
     auto node = std::make_unique<IfNode>();
-    if (!match(Token::Type::LPAREN)) { error("Expected '(' after if"); return nullptr; }
+    if (!match(Token::Type::LPAREN)) { 
+        error("Expected '(' after if"); 
+        return nullptr; 
+    }
+    std::cout << "  parseIf: found '(', parsing condition\n";
+    
     node->condition = parseExpression();
-    if (!match(Token::Type::RPAREN)) { error("Expected ')' after condition"); return nullptr; }
+    std::cout << "  parseIf: condition parsed, next token: " << peek().value << "\n";
+    
+    if (!match(Token::Type::RPAREN)) { 
+        error("Expected ')' after condition"); 
+        return nullptr; 
+    }
+    std::cout << "  parseIf: found ')'\n";
+    
     node->then_branch = parseBlock();
     if (match(Token::Type::ELSE)) {
         node->else_branch = parseBlock();
     }
-    return node;
-}
-
-std::unique_ptr<ASTNode> Parser::parseWhile() {
-    advance(); // consume 'while'
-    auto node = std::make_unique<WhileNode>();
-    if (!match(Token::Type::LPAREN)) { error("Expected '(' after while"); return nullptr; }
-    node->condition = parseExpression();
-    if (!match(Token::Type::RPAREN)) { error("Expected ')' after condition"); return nullptr; }
-    node->body = parseBlock();
     return node;
 }
 

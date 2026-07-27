@@ -5,19 +5,23 @@
 #include <memory>
 #include <unordered_map>
 #include <optional>
-#include <iostream>
 
 namespace guardian::parser {
 
 // ── Token ──
 struct Token {
     enum class Type {
+        // Literals
         IDENTIFIER, NUMBER, STRING, CHAR,
+        // Keywords
         LET, FN, IF, ELSE, FOR, WHILE, RETURN, TRUE, FALSE, NULL_TOKEN,
+        // Operators
         PLUS, MINUS, STAR, SLASH, MOD, ASSIGN, EQUAL, NOT_EQUAL,
         LESS, GREATER, LESS_EQUAL, GREATER_EQUAL, AND, OR, NOT,
+        // Symbols
         LPAREN, RPAREN, LBRACE, RBRACE, LBRACKET, RBRACKET,
         SEMICOLON, COLON, COMMA, DOT, ARROW,
+        // Special
         COMMENT, END_OF_FILE
     };
     
@@ -34,9 +38,8 @@ struct Token {
 // ── AST Nodes ──
 struct ASTNode {
     enum class Type {
-        PROGRAM, BLOCK, LET, ASSIGNMENT, IF, FOR, WHILE, RETURN,
-        FUNCTION, CALL, LITERAL, BINARY_OP, UNARY_OP, IDENTIFIER,
-        PRINT, CUSTOM
+        PROGRAM, BLOCK, LET, IF, FOR, WHILE, RETURN, CALL,
+        LITERAL, BINARY_OP, UNARY_OP, IDENTIFIER, PRINT, CUSTOM
     };
     Type type;
     int line;
@@ -44,6 +47,7 @@ struct ASTNode {
     virtual ~ASTNode() = default;
 };
 
+// ── Concrete AST Nodes ──
 struct ProgramNode : ASTNode {
     std::vector<std::unique_ptr<ASTNode>> statements;
     ProgramNode() { type = Type::PROGRAM; }
@@ -134,8 +138,9 @@ private:
 class Parser {
 public:
     Parser(const std::vector<Token>& tokens);
-    virtual ~Parser() = default;
+    ~Parser() = default;
     
+    // ── Main parse function ──
     std::unique_ptr<ASTNode> parse();
     
 protected:
@@ -150,6 +155,7 @@ protected:
     void error(const std::string& msg);
     void synchronize();
     
+    // ── Parsing functions ──
     std::unique_ptr<ASTNode> parseProgram();
     std::unique_ptr<ASTNode> parseBlock();
     std::unique_ptr<ASTNode> parseStatement();
@@ -158,7 +164,7 @@ protected:
     std::unique_ptr<ASTNode> parsePrimary();
     std::unique_ptr<ASTNode> parseLet();
     std::unique_ptr<ASTNode> parseIf();
-    std::unique_ptr<ASTNode> parseWhile();
+    std::unique_ptr<ASTNode> parseWhile();  // ← ADD THIS
     std::unique_ptr<ASTNode> parseReturn();
     std::unique_ptr<ASTNode> parsePrint(bool newline);
     
