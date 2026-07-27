@@ -45,7 +45,6 @@ private:
     }
 
     void emit(uint8_t op) { bytecode.push_back(op); }
-    
     void emit(uint8_t op, int val) {
         bytecode.push_back(op);
         bytecode.push_back(val & 0xFF);
@@ -70,14 +69,13 @@ private:
             case TokenType::LET: parseLet(); break;
             case TokenType::PRINT: parsePrint(false); break;
             case TokenType::PRINTLN: parsePrint(true); break;
-            case TokenType::WHILE: parseWhile(); break;
             case TokenType::COMMENT: advance(); break;
             default: advance(); break;
         }
     }
 
     void parseLet() {
-        advance();
+        advance(); // let
         Token name = advance();
         if (name.type != TokenType::IDENTIFIER) return;
         if (!match(TokenType::EQUALS)) return;
@@ -98,7 +96,7 @@ private:
     }
 
     void parsePrint(bool newline) {
-        advance();
+        advance(); // print or println
         match(TokenType::LPAREN);
 
         Token value = peek();
@@ -126,51 +124,6 @@ private:
 
         match(TokenType::RPAREN);
         match(TokenType::SEMICOLON);
-    }
-
-        void parseWhile() {
-        advance(); // consume 'while'
-        std::cout << "  while loop\n";
-        
-        size_t loop_start = bytecode.size();
-        
-        // ── Parse condition ──
-        match(TokenType::LPAREN);
-        // ... condition code ...
-        match(TokenType::RPAREN);
-        
-        // ── JMP_IF (exit when condition is false) ──
-        size_t exit_pos = bytecode.size();
-        emit(0x51, 0);  // JMP_IF (placeholder)
-        
-        // ── Store body start position ──
-        size_t body_start = bytecode.size();  // ← This is where the body will start
-        
-        // ── Parse body ──
-        if (peek().type == TokenType::LBRACE) {
-            advance();
-            while (peek().type != TokenType::RBRACE && peek().type != TokenType::EOF_TOKEN) {
-                parseStatement();
-            }
-            match(TokenType::RBRACE);
-        } else {
-            parseStatement();
-        }
-        
-        // ── Jump back to condition ──
-        size_t body_end = bytecode.size();
-        int jump_back = loop_start - (body_end + 4);
-        emit(0x50, jump_back);
-        
-        // ── Patch JMP_IF offset ──
-        // The offset is from the end of JMP_IF to the body start
-        size_t jmp_if_end = exit_pos + 5;
-        int jump_forward = body_start - jmp_if_end;
-        size_t jmp_pos = exit_pos + 1;
-        bytecode[jmp_pos] = jump_forward & 0xFF;
-        bytecode[jmp_pos + 1] = (jump_forward >> 8) & 0xFF;
-        bytecode[jmp_pos + 2] = (jump_forward >> 16) & 0xFF;
-        bytecode[jmp_pos + 3] = (jump_forward >> 24) & 0xFF;
     }
 
     void pushValue(const Token& tok) {
