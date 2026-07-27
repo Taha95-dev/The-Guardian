@@ -4,65 +4,21 @@
 #include <string>
 #include <memory>
 #include <unordered_map>
+#include <optional>
+#include <iostream>
 
 namespace guardian::parser {
 
-// ============================================
-// TOKEN — Base token type
-// ============================================
+// ── Token ──
 struct Token {
     enum class Type {
-        // Literals
-        IDENTIFIER,
-        NUMBER,
-        STRING,
-        
-        // Keywords
-        KEYWORD,
-        IF,
-        ELSE,
-        FOR,
-        WHILE,
-        RETURN,
-        LET,
-        FN,
-        TRUE,
-        FALSE,
-        NULL_TOKEN,
-        STRUCT,
-        DICT,
-        ANY,
-        
-        // Symbols
-        LPAREN,
-        RPAREN,
-        LBRACE,
-        RBRACE,
-        LBRACKET,
-        RBRACKET,
-        SEMICOLON,
-        COLON,
-        COMMA,
-        DOT,
-        ASSIGN,
-        PLUS,
-        MINUS,
-        STAR,
-        SLASH,
-        MOD,
-        EQUAL,
-        NOT_EQUAL,
-        LESS,
-        GREATER,
-        LESS_EQUAL,
-        GREATER_EQUAL,
-        AND,
-        OR,
-        NOT,
-        ARROW,
-        
-        // Special
-        END_OF_FILE
+        IDENTIFIER, NUMBER, STRING, CHAR,
+        LET, FN, IF, ELSE, FOR, WHILE, RETURN, TRUE, FALSE, NULL_TOKEN,
+        PLUS, MINUS, STAR, SLASH, MOD, ASSIGN, EQUAL, NOT_EQUAL,
+        LESS, GREATER, LESS_EQUAL, GREATER_EQUAL, AND, OR, NOT,
+        LPAREN, RPAREN, LBRACE, RBRACE, LBRACKET, RBRACKET,
+        SEMICOLON, COLON, COMMA, DOT, ARROW,
+        COMMENT, END_OF_FILE
     };
     
     Type type;
@@ -71,38 +27,23 @@ struct Token {
     int column;
     
     Token() : type(Type::END_OF_FILE), line(0), column(0) {}
-    Token(Type t, const std::string& v, int l, int c) 
+    Token(Type t, const std::string& v = "", int l = 0, int c = 0) 
         : type(t), value(v), line(l), column(c) {}
 };
 
-// ============================================
-// AST NODE — Base abstract syntax tree node
-// ============================================
+// ── AST Nodes ──
 struct ASTNode {
     enum class Type {
-        PROGRAM,
-        FUNCTION,
-        VARIABLE,
-        EXPRESSION,
-        LITERAL,
-        BINARY_OP,
-        UNARY_OP,
-        CALL,
-        IF,
-        FOR,
-        WHILE,
-        RETURN,
-        BLOCK,
-        CUSTOM
+        PROGRAM, BLOCK, LET, ASSIGNMENT, IF, FOR, WHILE, RETURN,
+        FUNCTION, CALL, LITERAL, BINARY_OP, UNARY_OP, IDENTIFIER,
+        PRINT, CUSTOM
     };
-    
     Type type;
     int line;
     int column;
     virtual ~ASTNode() = default;
 };
 
-// ── AST Node Types ──
 struct ProgramNode : ASTNode {
     std::vector<std::unique_ptr<ASTNode>> statements;
     ProgramNode() { type = Type::PROGRAM; }
@@ -113,19 +54,17 @@ struct BlockNode : ASTNode {
     BlockNode() { type = Type::BLOCK; }
 };
 
+struct LetNode : ASTNode {
+    std::string name;
+    std::unique_ptr<ASTNode> value;
+    LetNode() { type = Type::LET; }
+};
+
 struct IfNode : ASTNode {
     std::unique_ptr<ASTNode> condition;
     std::unique_ptr<ASTNode> then_branch;
     std::unique_ptr<ASTNode> else_branch;
     IfNode() { type = Type::IF; }
-};
-
-struct ForNode : ASTNode {
-    std::unique_ptr<ASTNode> init;
-    std::unique_ptr<ASTNode> condition;
-    std::unique_ptr<ASTNode> increment;
-    std::unique_ptr<ASTNode> body;
-    ForNode() { type = Type::FOR; }
 };
 
 struct WhileNode : ASTNode {
@@ -140,8 +79,10 @@ struct ReturnNode : ASTNode {
 };
 
 struct LiteralNode : ASTNode {
+    enum LiteralType { LIT_INT, LIT_FLOAT, LIT_STRING, LIT_BOOL, LIT_CHAR };
+    LiteralType literal_type;
     std::string value;
-    LiteralNode() { type = Type::LITERAL; }
+    LiteralNode() { type = Type::LITERAL; literal_type = LIT_INT; }
 };
 
 struct BinaryOpNode : ASTNode {
@@ -151,74 +92,77 @@ struct BinaryOpNode : ASTNode {
     BinaryOpNode() { type = Type::BINARY_OP; }
 };
 
-struct VariableNode : ASTNode {
+struct IdentifierNode : ASTNode {
     std::string name;
+    IdentifierNode() { type = Type::IDENTIFIER; }
+};
+
+struct PrintNode : ASTNode {
     std::unique_ptr<ASTNode> value;
-    VariableNode() { type = Type::VARIABLE; }
+    bool newline;
+    PrintNode(bool nl = true) : newline(nl) { type = Type::PRINT; }
 };
 
-struct CallNode : ASTNode {
-    std::string name;
-    std::vector<std::unique_ptr<ASTNode>> args;
-    CallNode() { type = Type::CALL; }
-};
-
-// ============================================
-// LEXER — Base lexer
-// ============================================
+// ── Lexer ──
 class Lexer {
 public:
     Lexer(const std::string& source);
-    virtual ~Lexer() = default;
+    ~Lexer() = default;
     
-    virtual std::vector<Token> tokenize() = 0;
+    std::vector<Token> tokenize();
     
-protected:
+private:
     std::string source;
     size_t pos;
     int line;
     int column;
     
     char peek() const;
+    char peekNext() const;
     char advance();
     void skipWhitespace();
     bool isAtEnd() const;
+    void error(const std::string& msg);
+    Token scanIdentifier();
+    Token scanNumber();
+    Token scanString();
+    Token scanChar();
+    std::optional<Token> scanSymbol();
 };
 
-// ============================================
-// PARSER — Base parser
-// ============================================
+// ── Parser ──
 class Parser {
 public:
     Parser(const std::vector<Token>& tokens);
     virtual ~Parser() = default;
     
-    virtual std::unique_ptr<ASTNode> parse() = 0;
-    
-    // Extended parser methods
-    std::unique_ptr<ASTNode> parseIf();
-    std::unique_ptr<ASTNode> parseFor();
-    std::unique_ptr<ASTNode> parseWhile();
-    std::unique_ptr<ASTNode> parseReturn();
+    std::unique_ptr<ASTNode> parse();
     
 protected:
     std::vector<Token> tokens;
     size_t pos;
     int error_count;
-    int max_errors;
     
     Token peek() const;
     Token advance();
     bool match(Token::Type type);
     bool isAtEnd() const;
     void error(const std::string& msg);
+    void synchronize();
     
-    // Virtual methods for language-specific parsing
-    virtual std::unique_ptr<ASTNode> parseExpression() = 0;
-    virtual std::unique_ptr<ASTNode> parseStatement() = 0;
-    virtual std::unique_ptr<ASTNode> parseBlock() = 0;
-    std::unique_ptr<ASTNode> parseBinary(int min_precedence);
+    std::unique_ptr<ASTNode> parseProgram();
+    std::unique_ptr<ASTNode> parseBlock();
+    std::unique_ptr<ASTNode> parseStatement();
+    std::unique_ptr<ASTNode> parseExpression();
+    std::unique_ptr<ASTNode> parseBinary(int min_precedence = 0);
     std::unique_ptr<ASTNode> parsePrimary();
+    std::unique_ptr<ASTNode> parseLet();
+    std::unique_ptr<ASTNode> parseIf();
+    std::unique_ptr<ASTNode> parseWhile();
+    std::unique_ptr<ASTNode> parseReturn();
+    std::unique_ptr<ASTNode> parsePrint(bool newline);
+    
+    int getPrecedence(Token::Type type);
 };
 
 } // namespace guardian::parser

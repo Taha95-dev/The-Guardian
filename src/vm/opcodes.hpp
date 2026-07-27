@@ -15,7 +15,7 @@ enum class Opcode : uint8_t {
     // BASIC OPCODES (0x00-0x0F)
     // ============================================
     NOP = 0x00,
-    HALT = 0xFF,  // MOVED to 0xFF to avoid data conflicts
+    HALT = 0xFF,
     
     // ============================================
     // STACK OPERATIONS (0x10-0x1F)
@@ -43,7 +43,7 @@ enum class Opcode : uint8_t {
     DEC = 0x27,
     
     // ============================================
-    // COMPARISON (0x30-0x3F)
+    // COMPARISON (0x30-0x3F)  ← ADD THESE
     // ============================================
     EQ = 0x30,
     NEQ = 0x31,
@@ -88,8 +88,8 @@ enum class Opcode : uint8_t {
     // ============================================
     PRINT = 0x80,
     PRINTLN = 0x81,
-    SPACE = 0x82,     // Print a space
-    NEWLINE = 0x83,   // Print a newline
+    SPACE = 0x82,
+    NEWLINE = 0x83,
     
     // ============================================
     // ARRAYS (0x90-0x9F)
@@ -116,7 +116,7 @@ enum class Opcode : uint8_t {
     MAKE_MOLECULE = 0xB0,
     STORE_ATOM = 0xB1,
     GET_ATOM = 0xB2,
-    REMOVE_ATOM = 0xB3,  // ADDED
+    REMOVE_ATOM = 0xB3,
 };
 
 // ============================================

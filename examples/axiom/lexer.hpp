@@ -3,7 +3,7 @@
 #include <vector>
 #include <unordered_map>
 #include <iostream>
-#include <optional>  // ADD THIS
+#include <optional>
 #include <cctype>
 
 namespace axiom {
@@ -11,7 +11,7 @@ namespace axiom {
 // ── Token Types ──
 enum class TokenType {
     // Keywords
-    LET, PRINT, PRINTLN, IF, ELSE, WHILE, FUNC, RETURN,
+    LET, PRINT, PRINTLN, IF, ELSE, WHILE, FOR, FUNC, RETURN,
     // Types
     INT, FLOAT, STRING, BOOL, CHAR,
     // Values
@@ -44,6 +44,7 @@ struct Token {
             {TokenType::IF, "IF"},
             {TokenType::ELSE, "ELSE"},
             {TokenType::WHILE, "WHILE"},
+            {TokenType::FOR, "FOR"},
             {TokenType::FUNC, "FUNC"},
             {TokenType::RETURN, "RETURN"},
             {TokenType::INT, "INT"},
@@ -167,13 +168,13 @@ private:
             ident += advance();
         }
 
-        // Keywords
         if (ident == "let") return Token(TokenType::LET, ident, line, column);
         if (ident == "print") return Token(TokenType::PRINT, ident, line, column);
         if (ident == "println") return Token(TokenType::PRINTLN, ident, line, column);
         if (ident == "if") return Token(TokenType::IF, ident, line, column);
         if (ident == "else") return Token(TokenType::ELSE, ident, line, column);
         if (ident == "while") return Token(TokenType::WHILE, ident, line, column);
+        if (ident == "for") return Token(TokenType::FOR, ident, line, column);
         if (ident == "func") return Token(TokenType::FUNC, ident, line, column);
         if (ident == "return") return Token(TokenType::RETURN, ident, line, column);
         if (ident == "int") return Token(TokenType::INT, ident, line, column);

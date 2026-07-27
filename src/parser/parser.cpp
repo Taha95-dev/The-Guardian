@@ -1,12 +1,10 @@
 #include "parser.hpp"
 #include <cctype>
-#include <iostream>
+#include <optional>
 
 namespace guardian::parser {
 
-// ============================================
-// LEXER IMPLEMENTATION
-// ============================================
+// ── LEXER ──
 Lexer::Lexer(const std::string& source) 
     : source(source), pos(0), line(1), column(1) {}
 
@@ -15,15 +13,16 @@ char Lexer::peek() const {
     return source[pos];
 }
 
+char Lexer::peekNext() const {
+    if (pos + 1 >= source.length()) return '\0';
+    return source[pos + 1];
+}
+
 char Lexer::advance() {
     char c = peek();
-    if (c == '\n') {
-        line++;
-        column = 1;
-    } else {
-        column++;
-    }
     pos++;
+    if (c == '\n') { line++; column = 1; }
+    else { column++; }
     return c;
 }
 
@@ -37,11 +36,140 @@ bool Lexer::isAtEnd() const {
     return pos >= source.length();
 }
 
-// ============================================
-// PARSER IMPLEMENTATION
-// ============================================
+void Lexer::error(const std::string& msg) {
+    std::cerr << "Lexer error: " << msg << " at line " << line << "\n";
+}
+
+std::vector<Token> Lexer::tokenize() {
+    std::vector<Token> tokens;
+    
+    while (!isAtEnd()) {
+        char c = peek();
+        
+        if (std::isspace(c)) { skipWhitespace(); continue; }
+        if (c == '/' && peekNext() == '/') {
+            while (!isAtEnd() && peek() != '\n') advance();
+            tokens.push_back(Token(Token::Type::COMMENT, "//", line, column));
+            continue;
+        }
+        if (c == '"') { tokens.push_back(scanString()); continue; }
+        if (c == '\'') { tokens.push_back(scanChar()); continue; }
+        if (std::isdigit(c)) { tokens.push_back(scanNumber()); continue; }
+        if (std::isalpha(c) || c == '_') { tokens.push_back(scanIdentifier()); continue; }
+        if (auto tok = scanSymbol()) { tokens.push_back(*tok); continue; }
+        
+        error("Unexpected character: " + std::string(1, c));
+        advance();
+    }
+    
+    tokens.push_back(Token(Token::Type::END_OF_FILE));
+    return tokens;
+}
+
+Token Lexer::scanIdentifier() {
+    std::string value;
+    while (!isAtEnd() && (std::isalnum(peek()) || peek() == '_')) {
+        value += advance();
+    }
+    
+    if (value == "let") return Token(Token::Type::LET, value, line, column);
+    if (value == "fn") return Token(Token::Type::FN, value, line, column);
+    if (value == "if") return Token(Token::Type::IF, value, line, column);
+    if (value == "else") return Token(Token::Type::ELSE, value, line, column);
+    if (value == "for") return Token(Token::Type::FOR, value, line, column);
+    if (value == "while") return Token(Token::Type::WHILE, value, line, column);
+    if (value == "return") return Token(Token::Type::RETURN, value, line, column);
+    if (value == "true") return Token(Token::Type::TRUE, value, line, column);
+    if (value == "false") return Token(Token::Type::FALSE, value, line, column);
+    if (value == "null") return Token(Token::Type::NULL_TOKEN, value, line, column);
+    
+    return Token(Token::Type::IDENTIFIER, value, line, column);
+}
+
+Token Lexer::scanNumber() {
+    std::string value;
+    bool isFloat = false;
+    while (!isAtEnd() && (std::isdigit(peek()) || peek() == '.')) {
+        if (peek() == '.') isFloat = true;
+        value += advance();
+    }
+    return Token(Token::Type::NUMBER, value, line, column);
+}
+
+Token Lexer::scanString() {
+    advance(); // consume "
+    std::string value;
+    while (!isAtEnd() && peek() != '"') {
+        if (peek() == '\\') {
+            advance();
+            switch (peek()) {
+                case 'n': value += '\n'; break;
+                case 't': value += '\t'; break;
+                case '"': value += '"'; break;
+                default: value += peek(); break;
+            }
+            advance();
+        } else {
+            value += advance();
+        }
+    }
+    if (!isAtEnd()) advance();
+    return Token(Token::Type::STRING, value, line, column);
+}
+
+Token Lexer::scanChar() {
+    advance(); // consume '
+    std::string value;
+    if (!isAtEnd() && peek() != '\'') {
+        value += advance();
+    }
+    if (!isAtEnd() && peek() == '\'') advance();
+    return Token(Token::Type::CHAR, value, line, column);
+}
+
+std::optional<Token> Lexer::scanSymbol() {
+    char c = advance();
+    switch (c) {
+        case '+': return Token(Token::Type::PLUS, "+", line, column);
+        case '-': return Token(Token::Type::MINUS, "-", line, column);
+        case '*': return Token(Token::Type::STAR, "*", line, column);
+        case '/': return Token(Token::Type::SLASH, "/", line, column);
+        case '%': return Token(Token::Type::MOD, "%", line, column);
+        case '=':
+            if (peek() == '=') { advance(); return Token(Token::Type::EQUAL, "==", line, column); }
+            return Token(Token::Type::ASSIGN, "=", line, column);
+        case '!':
+            if (peek() == '=') { advance(); return Token(Token::Type::NOT_EQUAL, "!=", line, column); }
+            return Token(Token::Type::NOT, "!", line, column);
+        case '<':
+            if (peek() == '=') { advance(); return Token(Token::Type::LESS_EQUAL, "<=", line, column); }
+            return Token(Token::Type::LESS, "<", line, column);
+        case '>':
+            if (peek() == '=') { advance(); return Token(Token::Type::GREATER_EQUAL, ">=", line, column); }
+            return Token(Token::Type::GREATER, ">", line, column);
+        case '&':
+            if (peek() == '&') { advance(); return Token(Token::Type::AND, "&&", line, column); }
+            return std::nullopt;
+        case '|':
+            if (peek() == '|') { advance(); return Token(Token::Type::OR, "||", line, column); }
+            return std::nullopt;
+        case '(': return Token(Token::Type::LPAREN, "(", line, column);
+        case ')': return Token(Token::Type::RPAREN, ")", line, column);
+        case '{': return Token(Token::Type::LBRACE, "{", line, column);
+        case '}': return Token(Token::Type::RBRACE, "}", line, column);
+        case '[': return Token(Token::Type::LBRACKET, "[", line, column);
+        case ']': return Token(Token::Type::RBRACKET, "]", line, column);
+        case ';': return Token(Token::Type::SEMICOLON, ";", line, column);
+        case ':': return Token(Token::Type::COLON, ":", line, column);
+        case ',': return Token(Token::Type::COMMA, ",", line, column);
+        case '.': return Token(Token::Type::DOT, ".", line, column);
+        default: return std::nullopt;
+    }
+}
+
+// ── PARSER ──
 Parser::Parser(const std::vector<Token>& tokens) 
-    : tokens(tokens), pos(0), error_count(0), max_errors(10) {}
+    : tokens(tokens), pos(0), error_count(0) {}
 
 Token Parser::peek() const {
     if (isAtEnd()) return Token();
@@ -55,7 +183,7 @@ Token Parser::advance() {
 
 bool Parser::match(Token::Type type) {
     if (isAtEnd()) return false;
-    if (tokens[pos].type == type) {
+    if (peek().type == type) {
         pos++;
         return true;
     }
@@ -68,97 +196,27 @@ bool Parser::isAtEnd() const {
 
 void Parser::error(const std::string& msg) {
     error_count++;
-    std::cerr << "Error: " << msg << " at line " << peek().line << "\n";
+    std::cerr << "Parser error: " << msg << " at line " << peek().line << "\n";
 }
 
-// ============================================
-// EXTENDED PARSER METHODS
-// ============================================
-std::unique_ptr<ASTNode> Parser::parseIf() {
-    auto node = std::make_unique<IfNode>();
-    
-    if (!match(Token::Type::LPAREN)) {
-        error("Expected '(' after 'if'");
-        return nullptr;
-    }
-    node->condition = parseExpression();
-    if (!match(Token::Type::RPAREN)) {
-        error("Expected ')' after condition");
-        return nullptr;
-    }
-    
-    node->then_branch = parseBlock();
-    
-    if (match(Token::Type::ELSE)) {
-        node->else_branch = parseBlock();
-    }
-    
-    return node;
-}
-
-std::unique_ptr<ASTNode> Parser::parseFor() {
-    auto node = std::make_unique<ForNode>();
-    
-    if (!match(Token::Type::LPAREN)) {
-        error("Expected '(' after 'for'");
-        return nullptr;
-    }
-    
-    node->init = parseStatement();
-    node->condition = parseExpression();
-    if (!match(Token::Type::SEMICOLON)) {
-        error("Expected ';' after condition");
-        return nullptr;
-    }
-    node->increment = parseExpression();
-    if (!match(Token::Type::RPAREN)) {
-        error("Expected ')' after for loop header");
-        return nullptr;
-    }
-    
-    node->body = parseBlock();
-    
-    return node;
-}
-
-std::unique_ptr<ASTNode> Parser::parseWhile() {
-    auto node = std::make_unique<WhileNode>();
-    
-    if (!match(Token::Type::LPAREN)) {
-        error("Expected '(' after 'while'");
-        return nullptr;
-    }
-    node->condition = parseExpression();
-    if (!match(Token::Type::RPAREN)) {
-        error("Expected ')' after condition");
-        return nullptr;
-    }
-    
-    node->body = parseBlock();
-    
-    return node;
-}
-
-std::unique_ptr<ASTNode> Parser::parseReturn() {
-    auto node = std::make_unique<ReturnNode>();
-    
-    if (!match(Token::Type::SEMICOLON)) {
-        node->value = parseExpression();
-        if (!match(Token::Type::SEMICOLON)) {
-            error("Expected ';' after return value");
-            return nullptr;
+void Parser::synchronize() {
+    advance();
+    while (!isAtEnd()) {
+        if (peek().type == Token::Type::SEMICOLON) { advance(); return; }
+        switch (peek().type) {
+            case Token::Type::LET:
+            case Token::Type::FN:
+            case Token::Type::IF:
+            case Token::Type::FOR:
+            case Token::Type::WHILE:
+            case Token::Type::RETURN:
+                return;
+            default: advance(); break;
         }
     }
-    
-    return node;
 }
 
-// ============================================
-// THE THREE VIRTUAL FUNCTIONS — IMPLEMENTED
-// ============================================
-
-// ── Precedence Table ──
-static int getPrecedence(Token::Type type) {
+int Parser::getPrecedence(Token::Type type) {
     switch (type) {
         case Token::Type::OR: return 1;
         case Token::Type::AND: return 2;
@@ -177,204 +235,190 @@ static int getPrecedence(Token::Type type) {
     }
 }
 
-// ── parseExpression ──
+std::unique_ptr<ASTNode> Parser::parse() {
+    return parseProgram();
+}
+
+std::unique_ptr<ASTNode> Parser::parseProgram() {
+    auto program = std::make_unique<ProgramNode>();
+    while (!isAtEnd()) {
+        auto stmt = parseStatement();
+        if (stmt) {
+            program->statements.push_back(std::move(stmt));
+        } else {
+            synchronize();
+        }
+    }
+    return program;
+}
+
+std::unique_ptr<ASTNode> Parser::parseStatement() {
+    Token tok = peek();
+    
+    if (tok.type == Token::Type::COMMENT) { advance(); return parseStatement(); }
+    
+    if (tok.type == Token::Type::LET) return parseLet();
+    if (tok.type == Token::Type::IF) return parseIf();
+    if (tok.type == Token::Type::WHILE) return parseWhile();
+    if (tok.type == Token::Type::RETURN) return parseReturn();
+    
+    if (tok.value == "print" || tok.value == "println") {
+        return parsePrint(tok.value == "println");
+    }
+    
+    auto expr = parseExpression();
+    if (expr) return expr;
+    
+    error("Unexpected token: " + tok.value);
+    advance();
+    return nullptr;
+}
+
+std::unique_ptr<ASTNode> Parser::parseBlock() {
+    auto block = std::make_unique<BlockNode>();
+    if (!match(Token::Type::LBRACE)) {
+        error("Expected '{'");
+        return nullptr;
+    }
+    while (!isAtEnd() && peek().type != Token::Type::RBRACE) {
+        auto stmt = parseStatement();
+        if (stmt) block->statements.push_back(std::move(stmt));
+    }
+    if (!match(Token::Type::RBRACE)) {
+        error("Expected '}'");
+        return nullptr;
+    }
+    return block;
+}
+
 std::unique_ptr<ASTNode> Parser::parseExpression() {
     return parseBinary(0);
 }
 
-// ── parseBinary ──
 std::unique_ptr<ASTNode> Parser::parseBinary(int min_precedence) {
     auto left = parsePrimary();
     if (!left) return nullptr;
-
+    
     while (true) {
         Token op = peek();
         int prec = getPrecedence(op.type);
         if (prec < min_precedence) break;
-
         advance();
-
         auto right = parseBinary(prec + 1);
         if (!right) break;
-
         auto bin_op = std::make_unique<BinaryOpNode>();
+        bin_op->op = op.value;
         bin_op->left = std::move(left);
         bin_op->right = std::move(right);
-        bin_op->op = op.value;
         left = std::move(bin_op);
     }
-
     return left;
 }
 
-// ── parsePrimary ──
 std::unique_ptr<ASTNode> Parser::parsePrimary() {
     Token tok = peek();
-
-    // Literals
+    
     if (tok.type == Token::Type::NUMBER) {
         advance();
         auto lit = std::make_unique<LiteralNode>();
+        lit->literal_type = LiteralNode::LIT_INT;
         lit->value = tok.value;
         return lit;
     }
     if (tok.type == Token::Type::STRING) {
         advance();
         auto lit = std::make_unique<LiteralNode>();
+        lit->literal_type = LiteralNode::LIT_STRING;
         lit->value = tok.value;
         return lit;
     }
-    if (tok.type == Token::Type::TRUE) {
+    if (tok.type == Token::Type::TRUE || tok.type == Token::Type::FALSE) {
         advance();
         auto lit = std::make_unique<LiteralNode>();
-        lit->value = "true";
+        lit->literal_type = LiteralNode::LIT_BOOL;
+        lit->value = tok.value;
         return lit;
     }
-    if (tok.type == Token::Type::FALSE) {
+    if (tok.type == Token::Type::IDENTIFIER) {
         advance();
-        auto lit = std::make_unique<LiteralNode>();
-        lit->value = "false";
-        return lit;
+        auto ident = std::make_unique<IdentifierNode>();
+        ident->name = tok.value;
+        return ident;
     }
-
-    // Parenthesized expression
     if (tok.type == Token::Type::LPAREN) {
         advance();
         auto expr = parseExpression();
-        if (!match(Token::Type::RPAREN)) {
-            error("Expected ')'");
-            return nullptr;
-        }
+        if (!match(Token::Type::RPAREN)) error("Expected ')'");
         return expr;
     }
-
-    // Variable or function call
-    if (tok.type == Token::Type::IDENTIFIER) {
-        advance();
-        if (peek().type == Token::Type::LPAREN) {
-            auto call = std::make_unique<CallNode>();
-            call->name = tok.value;
-            match(Token::Type::LPAREN);
-            if (!match(Token::Type::RPAREN)) {
-                call->args.push_back(parseExpression());
-                while (match(Token::Type::COMMA)) {
-                    call->args.push_back(parseExpression());
-                }
-                if (!match(Token::Type::RPAREN)) {
-                    error("Expected ')' after arguments");
-                    return nullptr;
-                }
-            }
-            return call;
-        }
-        auto var = std::make_unique<VariableNode>();
-        var->name = tok.value;
-        return var;
-    }
-
-    error("Unexpected token in expression: " + tok.value);
+    
     return nullptr;
 }
 
-// ── parseStatement ──
-std::unique_ptr<ASTNode> Parser::parseStatement() {
-    Token tok = peek();
-
-    if (tok.type == Token::Type::KEYWORD) {
-        advance();
-        return parseStatement();
+std::unique_ptr<ASTNode> Parser::parseLet() {
+    advance(); // consume 'let'
+    Token name = peek();
+    if (name.type != Token::Type::IDENTIFIER) {
+        error("Expected identifier after 'let'");
+        return nullptr;
     }
-
-    if (tok.value == "let") {
-        advance();
-        Token name = peek();
-        if (name.type != Token::Type::IDENTIFIER) {
-            error("Expected identifier after 'let'");
-            return nullptr;
-        }
-        advance();
-        auto var = std::make_unique<VariableNode>();
-        var->name = name.value;
-        if (match(Token::Type::ASSIGN)) {
-            var->value = parseExpression();
-        }
-        if (!match(Token::Type::SEMICOLON)) {
-            error("Expected ';' after assignment");
-            return nullptr;
-        }
-        return var;
-    }
-
-    if (tok.value == "print" || tok.value == "println") {
-        bool newline = (tok.value == "println");
-        advance();
-        if (!match(Token::Type::LPAREN)) {
-            error("Expected '(' after print");
-            return nullptr;
-        }
-        auto print_node = std::make_unique<LiteralNode>();
-        print_node->type = ASTNode::Type::CUSTOM;
-        auto expr = parseExpression();
-        if (!match(Token::Type::RPAREN)) {
-            error("Expected ')' after print argument");
-            return nullptr;
-        }
-        if (!match(Token::Type::SEMICOLON)) {
-            error("Expected ';' after print");
-            return nullptr;
-        }
-        return expr;
-    }
-
-    if (tok.type == Token::Type::IF) {
-        return parseIf();
-    }
-
-    if (tok.type == Token::Type::FOR) {
-        return parseFor();
-    }
-
-    if (tok.type == Token::Type::WHILE) {
-        return parseWhile();
-    }
-
-    if (tok.type == Token::Type::RETURN) {
-        return parseReturn();
-    }
-
-    if (tok.type == Token::Type::IDENTIFIER) {
-        return parseExpression();
-    }
-
     advance();
-    error("Unknown statement: " + tok.value);
-    return nullptr;
+    auto node = std::make_unique<LetNode>();
+    node->name = name.value;
+    if (match(Token::Type::ASSIGN)) {
+        node->value = parseExpression();
+    }
+    if (!match(Token::Type::SEMICOLON)) {
+        error("Expected ';' after let");
+        return nullptr;
+    }
+    return node;
 }
 
-// ── parseBlock ──
-std::unique_ptr<ASTNode> Parser::parseBlock() {
-    auto block = std::make_unique<BlockNode>();
-
-    if (!match(Token::Type::LBRACE)) {
-        error("Expected '{'");
-        return nullptr;
+std::unique_ptr<ASTNode> Parser::parseIf() {
+    advance(); // consume 'if'
+    auto node = std::make_unique<IfNode>();
+    if (!match(Token::Type::LPAREN)) { error("Expected '(' after if"); return nullptr; }
+    node->condition = parseExpression();
+    if (!match(Token::Type::RPAREN)) { error("Expected ')' after condition"); return nullptr; }
+    node->then_branch = parseBlock();
+    if (match(Token::Type::ELSE)) {
+        node->else_branch = parseBlock();
     }
+    return node;
+}
 
-    while (!isAtEnd() && peek().type != Token::Type::RBRACE) {
-        auto stmt = parseStatement();
-        if (stmt) {
-            block->statements.push_back(std::move(stmt));
-        } else {
-            advance();
+std::unique_ptr<ASTNode> Parser::parseWhile() {
+    advance(); // consume 'while'
+    auto node = std::make_unique<WhileNode>();
+    if (!match(Token::Type::LPAREN)) { error("Expected '(' after while"); return nullptr; }
+    node->condition = parseExpression();
+    if (!match(Token::Type::RPAREN)) { error("Expected ')' after condition"); return nullptr; }
+    node->body = parseBlock();
+    return node;
+}
+
+std::unique_ptr<ASTNode> Parser::parseReturn() {
+    advance(); // consume 'return'
+    auto node = std::make_unique<ReturnNode>();
+    if (!match(Token::Type::SEMICOLON)) {
+        node->value = parseExpression();
+        if (!match(Token::Type::SEMICOLON)) {
+            error("Expected ';' after return value");
+            return nullptr;
         }
     }
+    return node;
+}
 
-    if (!match(Token::Type::RBRACE)) {
-        error("Expected '}'");
-        return nullptr;
-    }
-
-    return block;
+std::unique_ptr<ASTNode> Parser::parsePrint(bool newline) {
+    advance(); // consume 'print' or 'println'
+    auto node = std::make_unique<PrintNode>(newline);
+    if (!match(Token::Type::LPAREN)) { error("Expected '(' after print"); return nullptr; }
+    node->value = parseExpression();
+    if (!match(Token::Type::RPAREN)) { error("Expected ')' after print argument"); return nullptr; }
+    if (!match(Token::Type::SEMICOLON)) { error("Expected ';' after print"); return nullptr; }
+    return node;
 }
 
 } // namespace guardian::parser

@@ -24,6 +24,12 @@ enum class Opcode : uint8_t {
     SUB = 0x21,
     MUL = 0x22,
     DIV = 0x23,
+    EQ = 0x30,
+    NEQ = 0x31,
+    LT = 0x32,
+    GT = 0x33,
+    LTE = 0x34,
+    GTE = 0x35,
     MOD = 0x24,
     PRINT = 0x80,
     NEWLINE = 0x83,
@@ -175,6 +181,14 @@ private:
     int popInt();
     Value popValue();
     
+    // Comparison handlers
+    void handleEq();
+    void handleNeq();
+    void handleLt();
+    void handleGt();
+    void handleLte();
+    void handleGte();
+
     void dispatch(uint8_t opcode);
 };
 
