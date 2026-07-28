@@ -57,7 +57,7 @@
   <!-- FEATURES -->
   <g transform="translate(400, 110)">
     <text x="-150" y="0" font-family="'Arial', sans-serif" font-size="11" fill="#667eea" text-anchor="middle" letter-spacing="1">⚡ 7,000+ LINES</text>
-    <text x="-50" y="0" font-family="'Arial', sans-serif" font-size="11" fill="#764ba2" text-anchor="middle" letter-spacing="1">🧠 0 TODOs</text>
+    <text x="-50" y="0" font-family="'Arial', sans-serif" font-size="11" fill="#764ba2" text-anchor="middle" letter-spacing="1">🧠 0 Issues</text>
     <text x="50" y="0" font-family="'Arial', sans-serif" font-size="11" fill="#8888aa" text-anchor="middle" letter-spacing="1">🛡️ MEMORY SAFE</text>
     <text x="150" y="0" font-family="'Arial', sans-serif" font-size="11" fill="#8888aa" text-anchor="middle" letter-spacing="1">🚀 NO GC</text>
     

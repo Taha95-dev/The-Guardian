@@ -168,7 +168,7 @@ The Guardian was built on:
 
     Languages: C++17, Go
 
-7,000+ lines. 0 TODOs. Built by a 13-year-old.
+7,000+ lines. 0 Issues. Built by a 13-year-old.
 🤝 Contributing
 
 Contributions are welcome! Please read CONTRIBUTING.md for guidelines.

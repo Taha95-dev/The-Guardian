@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Building a Language — The Guardian</title>
+    <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+    <div class="container">
+        <header class="docs-header">
+            <a href="index.html" class="back-link">← Back to Docs</a>
+            <h1>🔧 Building a Language</h1>
+            <p>Step-by-step guide to building your first language with The Guardian</p>
+        </header>
+
+        <div class="docs-content">
+            <h2>Overview</h2>
+            <p>Building a language with The Guardian is simple. You'll create a lexer, parser, and compiler that generates bytecode for The Guardian's VM.</p>
+
+            <h2>Step 1: Create the Lexer</h2>
+            <p>The lexer tokenizes source code into tokens.</p>
+            <pre><code>#include &lt;guardian/parser/parser.hpp&gt;
+
+using namespace guardian::parser;
+
+class MyLexer : public Lexer {
+public:
+    MyLexer(const std::string& source) : Lexer(source) {}
+    
+    std::vector<Token> tokenize() {
+        // Custom tokenization logic
+        return Lexer::tokenize();
+    }
+};</code></pre>
+
+            <h2>Step 2: Create the Parser</h2>
+            <p>The parser builds an AST from tokens.</p>
+            <pre><code>class MyParser : public Parser {
+public:
+    MyParser(const std::vector<Token>& tokens) : Parser(tokens) {}
+    
+    std::unique_ptr<ASTNode> parse() override {
+        // Custom parsing logic
+        return Parser::parse();
+    }
+};</code></pre>
+
+            <h2>Step 3: Generate Bytecode</h2>
+            <p>Use The Guardian's CodeGen to generate bytecode.</p>
+            <pre><code>#include &lt;guardian/vm/codegen.hpp&gt;
+
+vm::CodeGen codegen;
+codegen.pushInt(42);
+codegen.print();
+codegen.halt();
+auto bytecode = codegen.getBytecode();</code></pre>
+
+            <h2>Step 4: Run on The Guardian VM</h2>
+            <pre><code>#include &lt;guardian/vm/vm.hpp&gt;
+
+vm::VM vm;
+vm.load(bytecode);
+vm.run();</code></pre>
+
+            <h2>Full Example: Axiom Language</h2>
+            <p>Check out the complete Axiom language implementation:</p>
+            <pre><code>git clone https://github.com/Taha95-dev/The-Guardian
+cd The-Guardian/examples/axiom
+cat compiler.cpp</code></pre>
+
+            <h2>Next Steps</h2>
+            <ul>
+                <li><a href="api.html">API Reference</a></li>
+                <li><a href="../examples/axiom/">Axiom Demo</a></li>
+                <li><a href="https://github.com/Taha95-dev/The-Guardian">GitHub Repo</a></li>
+            </ul>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 The Guardian. Built by a 13-year-old developer.</p>
+        </footer>
+    </div>
+</body>
+</html>
