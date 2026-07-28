@@ -546,3 +546,393 @@ footer {
         font-size: 0.8rem;
     }
 }
+
+/* ── Consulting Page Styles ── */
+
+/* Navigation */
+.consulting-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid #1a1a2e;
+    margin-bottom: 3rem;
+}
+
+.consulting-nav .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    text-decoration: none;
+    color: #e0e0e0;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.consulting-nav .nav-back {
+    color: #667eea;
+    text-decoration: none;
+}
+
+.consulting-nav .nav-back:hover {
+    text-decoration: underline;
+}
+
+/* Hero */
+.consulting-hero {
+    text-align: center;
+    padding: 2rem 0 4rem;
+}
+
+.consulting-hero h1 {
+    font-size: 3.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.consulting-hero .subtitle {
+    font-size: 1.3rem;
+    color: #8888aa;
+    margin: 0.5rem 0 1.5rem;
+}
+
+.hero-badges {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.hero-badges span {
+    background: #1a1a2e;
+    padding: 0.4rem 1.2rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    color: #8888aa;
+    border: 1px solid #2a2a4e;
+}
+
+/* Services */
+.services {
+    padding: 4rem 0;
+}
+
+.services h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 2rem;
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.service-card {
+    background: #12121f;
+    padding: 1.8rem;
+    border-radius: 12px;
+    border: 1px solid #1e1e34;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.service-card:hover {
+    transform: translateY(-4px);
+    border-color: #667eea;
+}
+
+.service-card.featured {
+    border-color: #667eea;
+    background: rgba(102, 126, 234, 0.05);
+}
+
+.service-badge {
+    position: absolute;
+    top: -12px;
+    right: 20px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+    padding: 0.2rem 1rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.service-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.service-card h3 {
+    font-size: 1.1rem;
+    color: #e0e0e0;
+    margin-bottom: 0.5rem;
+}
+
+.service-card p {
+    color: #8888aa;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.service-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+}
+
+.service-card ul li {
+    color: #aaa;
+    font-size: 0.85rem;
+    padding: 0.2rem 0;
+}
+
+.price {
+    display: inline-block;
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    padding: 0.3rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+/* Why Me */
+.why-me {
+    padding: 4rem 0;
+}
+
+.why-me h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 2rem;
+}
+
+.why-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+}
+
+.why-item {
+    background: #12121f;
+    padding: 1.8rem;
+    border-radius: 12px;
+    border: 1px solid #1e1e34;
+    text-align: center;
+}
+
+.why-number {
+    display: inline-block;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #667eea;
+    margin-bottom: 0.5rem;
+}
+
+.why-item h3 {
+    color: #e0e0e0;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.why-item p {
+    color: #8888aa;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* Portfolio */
+.portfolio {
+    padding: 4rem 0;
+}
+
+.portfolio h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 2rem;
+}
+
+.portfolio-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.portfolio-item {
+    background: #12121f;
+    padding: 1.8rem;
+    border-radius: 12px;
+    border: 1px solid #1e1e34;
+}
+
+.portfolio-item h3 {
+    color: #e0e0e0;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.portfolio-item p {
+    color: #8888aa;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+}
+
+.portfolio-item a {
+    color: #667eea;
+    text-decoration: none;
+}
+
+.portfolio-item a:hover {
+    text-decoration: underline;
+}
+
+/* Pricing */
+.pricing {
+    padding: 4rem 0;
+}
+
+.pricing h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 2rem;
+}
+
+.pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.pricing-tier {
+    background: #12121f;
+    padding: 2rem;
+    border-radius: 12px;
+    border: 1px solid #1e1e34;
+    text-align: center;
+    position: relative;
+}
+
+.pricing-tier.featured {
+    border-color: #667eea;
+    background: rgba(102, 126, 234, 0.05);
+}
+
+.pricing-badge {
+    position: absolute;
+    top: -12px;
+    right: 20px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+    padding: 0.2rem 1rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.pricing-tier h3 {
+    font-size: 1.3rem;
+    color: #e0e0e0;
+    margin-bottom: 0.3rem;
+}
+
+.pricing-tier .price {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #667eea;
+    background: none;
+    padding: 0;
+}
+
+.pricing-tier ul {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+}
+
+.pricing-tier ul li {
+    color: #aaa;
+    padding: 0.3rem 0;
+    font-size: 0.9rem;
+}
+
+/* Contact */
+.contact {
+    padding: 4rem 0;
+    text-align: center;
+}
+
+.contact h2 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+}
+
+.contact p {
+    color: #8888aa;
+    margin-bottom: 2rem;
+}
+
+.contact-details {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.contact-item a {
+    color: #667eea;
+    text-decoration: none;
+}
+
+.contact-item a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .services-grid,
+    .why-grid,
+    .portfolio-grid,
+    .pricing-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .contact-details {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+

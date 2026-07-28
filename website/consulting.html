@@ -8,88 +8,217 @@
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>💼 Consulting</h1>
-            <p class="subtitle">Custom language development. C++ expertise. 13 years old. 7,000+ lines.</p>
-        </header>
+        <!-- Navigation -->
+        <nav class="consulting-nav">
+            <a href="index.html" class="nav-logo">
+                <img src="assets/logo.svg" alt="The Guardian" width="40" />
+                <span>The Guardian</span>
+            </a>
+            <a href="index.html" class="nav-back">← Back to Home</a>
+        </nav>
 
-        <section class="consulting-services">
-            <h2>What I Can Do For You</h2>
+        <!-- Hero -->
+        <section class="consulting-hero">
+            <h1>💼 Consulting</h1>
+            <p class="subtitle">Custom language development. C++ expertise. Built by a 13-year-old.</p>
+            <div class="hero-badges">
+                <span>✅ 7,000+ lines</span>
+                <span>✅ 0 TODOs</span>
+                <span>✅ Language Framework</span>
+                <span>✅ 13 years old</span>
+            </div>
+        </section>
+
+        <!-- Services -->
+        <section class="services">
+            <h2>What I Can Build For You</h2>
             <div class="services-grid">
                 <div class="service-card">
-                    <h3>🚀 Custom Language Development</h3>
-                    <p>Need a DSL or custom language? I'll build it using The Guardian.</p>
+                    <div class="service-icon">🚀</div>
+                    <h3>Custom Language Development</h3>
+                    <p>Need a DSL or custom programming language? I'll build it from scratch using The Guardian framework.</p>
+                    <ul>
+                        <li>✅ Complete language design</li>
+                        <li>✅ VM integration</li>
+                        <li>✅ Memory safety (no GC)</li>
+                    </ul>
                     <span class="price">$50-100/hour</span>
                 </div>
-                <div class="service-card">
-                    <h3>🛡️ C++ Code Review</h3>
+
+                <div class="service-card featured">
+                    <div class="service-badge">Most Popular</div>
+                    <div class="service-icon">🛡️</div>
+                    <h3>C++ Code Review</h3>
                     <p>I'll review your C++17 code for memory safety, performance, and best practices.</p>
+                    <ul>
+                        <li>✅ Memory leak detection</li>
+                        <li>✅ Performance optimization</li>
+                        <li>✅ Modern C++ patterns</li>
+                    </ul>
                     <span class="price">$40-60/hour</span>
                 </div>
+
                 <div class="service-card">
-                    <h3>🔷 The Guardian Training</h3>
+                    <div class="service-icon">🔷</div>
+                    <h3>The Guardian Training</h3>
                     <p>I'll train your team on The Guardian — how to build languages with it.</p>
+                    <ul>
+                        <li>✅ Custom language workshops</li>
+                        <li>✅ Framework architecture</li>
+                        <li>✅ Hands-on coding</li>
+                    </ul>
                     <span class="price">$50/hour</span>
                 </div>
+
                 <div class="service-card">
-                    <h3>💻 Language Framework Consulting</h3>
+                    <div class="service-icon">💻</div>
+                    <h3>Language Framework Consulting</h3>
                     <p>Need help designing a language framework? I've built one from scratch.</p>
+                    <ul>
+                        <li>✅ Architecture design</li>
+                        <li>✅ Memory management</li>
+                        <li>✅ VM optimization</li>
+                    </ul>
                     <span class="price">$60-80/hour</span>
+                </div>
+
+                <div class="service-card">
+                    <div class="service-icon">🧠</div>
+                    <h3>Custom Compiler Development</h3>
+                    <p>I can build you a custom compiler from lexer to bytecode generation.</p>
+                    <ul>
+                        <li>✅ Lexer & Parser</li>
+                        <li>✅ AST generation</li>
+                        <li>✅ Bytecode compiler</li>
+                    </ul>
+                    <span class="price">$50-100/hour</span>
+                </div>
+
+                <div class="service-card">
+                    <div class="service-icon">📦</div>
+                    <h3>Binary Format Design</h3>
+                    <p>Need a custom binary format for your application? I'll design and implement it.</p>
+                    <ul>
+                        <li>✅ GBIN format</li>
+                        <li>✅ Serialization</li>
+                        <li>✅ Cross-platform support</li>
+                    </ul>
+                    <span class="price">$40-60/hour</span>
                 </div>
             </div>
         </section>
 
+        <!-- Why Me -->
         <section class="why-me">
             <h2>Why Me?</h2>
-            <ul>
-                <li>✅ 7,000+ lines of C++17</li>
-                <li>✅ Complete language framework (The Guardian)</li>
-                <li>✅ VM with 40+ opcodes</li>
-                <li>✅ Memory manager (no GC)</li>
-                <li>✅ 13 years old — I'm fast, focused, and hungry</li>
-                <li>✅ Built on 4GB RAM — I know efficiency</li>
-            </ul>
+            <div class="why-grid">
+                <div class="why-item">
+                    <span class="why-number">1</span>
+                    <h3>I Build, I Ship</h3>
+                    <p>7,000+ lines of C++17. Complete language framework. 0 TODOs. I finish what I start.</p>
+                </div>
+                <div class="why-item">
+                    <span class="why-number">2</span>
+                    <h3>I'm 13</h3>
+                    <p>I'm fast, focused, and hungry. I don't have a team. I don't have overhead. I just build.</p>
+                </div>
+                <div class="why-item">
+                    <span class="why-number">3</span>
+                    <h3>I Know Memory</h3>
+                    <p>I built a memory manager (no GC!). I know how to keep your code safe and fast.</p>
+                </div>
+                <div class="why-item">
+                    <span class="why-number">4</span>
+                    <h3>I Built The Guardian</h3>
+                    <p>I know the framework inside out. I can build any language you need.</p>
+                </div>
+            </div>
         </section>
 
+        <!-- Portfolio -->
+        <section class="portfolio">
+            <h2>Portfolio</h2>
+            <div class="portfolio-grid">
+                <div class="portfolio-item">
+                    <h3>🔷 The Guardian</h3>
+                    <p>Complete C++17 language framework with VM, memory manager, and binary format.</p>
+                    <a href="https://github.com/Taha95-dev/The-Guardian">View on GitHub →</a>
+                </div>
+                <div class="portfolio-item">
+                    <h3>🧪 Axiom</h3>
+                    <p>Demo language built with The Guardian. Shows the framework in action.</p>
+                    <a href="https://github.com/Taha95-dev/The-Guardian/tree/master/examples/axiom">View on GitHub →</a>
+                </div>
+                <div class="portfolio-item">
+                    <h3>⚡ Omarchy</h3>
+                    <p>CLI tool for The Guardian. One command to build, test, and deploy.</p>
+                    <a href="#">View on GitHub →</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing -->
         <section class="pricing">
             <h2>Pricing</h2>
-            <div class="pricing-table">
+            <div class="pricing-grid">
                 <div class="pricing-tier">
                     <h3>Individual</h3>
-                    <p>$50/hour</p>
+                    <p class="price">$50/hour</p>
                     <ul>
-                        <li>Code review</li>
-                        <li>Language consulting</li>
+                        <li>✅ Code review</li>
+                        <li>✅ Language consulting</li>
+                        <li>✅ 1-hour sessions</li>
                     </ul>
                 </div>
-                <div class="pricing-tier popular">
+                <div class="pricing-tier featured">
+                    <div class="pricing-badge">Best Value</div>
                     <h3>Startup</h3>
-                    <p>$75/hour</p>
+                    <p class="price">$75/hour</p>
                     <ul>
-                        <li>Language development</li>
-                        <li>Framework design</li>
+                        <li>✅ Full language development</li>
+                        <li>✅ Framework design</li>
+                        <li>✅ 5-hour sessions</li>
+                        <li>✅ Weekly updates</li>
                     </ul>
                 </div>
                 <div class="pricing-tier">
                     <h3>Enterprise</h3>
-                    <p>$100/hour</p>
+                    <p class="price">$100/hour</p>
                     <ul>
-                        <li>Full project delivery</li>
-                        <li>Training & support</li>
+                        <li>✅ Full project delivery</li>
+                        <li>✅ Training & support</li>
+                        <li>✅ 10-hour sessions</li>
+                        <li>✅ Dedicated consulting</li>
                     </ul>
                 </div>
             </div>
         </section>
 
+        <!-- Contact -->
         <section class="contact">
             <h2>Let's Work Together</h2>
-            <p>Email: kashiftaha976@gmail.com</p>
-            <p>GitHub: <a href="https://github.com/Taha95-dev/The-Guardian">Taha95-dev</a></p>
-            <a href="mailto:kashiftaha976@gmail.com" class="btn btn-primary">Hire Me</a>
+            <p>Ready to build something great? I'm available for consulting.</p>
+            <div class="contact-details">
+                <div class="contact-item">
+                    <span>📧</span>
+                    <a href="mailto:kashiftaha976@gmail.com">kashiftaha976@gmail.com</a>
+                </div>
+                <div class="contact-item">
+                    <span>🐙</span>
+                    <a href="https://github.com/Taha95-dev/The-Guardian">Taha95-dev</a>
+                </div>
+                <div class="contact-item">
+                    <span>🌐</span>
+                    <a href="https://rad-alfajores-a2413f.netlify.app/">The Guardian Website</a>
+                </div>
+            </div>
+            <a href="mailto:kashiftaha976@gmail.com" class="btn btn-primary btn-large">Hire Me →</a>
         </section>
 
+        <!-- Footer -->
         <footer>
             <p>&copy; 2026 The Guardian. Built by a 13-year-old developer.</p>
+            <p>💪 <strong>X1 Carbon Fund:</strong> $0 / $2,000</p>
         </footer>
     </div>
 </body>
