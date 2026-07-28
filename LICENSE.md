@@ -47,7 +47,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ## 6. How to Buy
 
-- **Commercial License**: [Buy on Gumroad](https://kashiflyas.gumroad.com/l/ekhyi)
+- **Commercial License**: [Buy on Polar](https://buy.polar.sh/polar_cl_czZ7LW2XcJR1zNjUoiGbBYU4MNOI4ShcvcR6l00HLU9)
 - **Enterprise License**: Contact me via GitHub Issues
 
 ---
