@@ -73,7 +73,6 @@ const analytics = {
     // Track page views
     pageView: function(page) {
         console.log(`📊 Page View: ${page}`);
-        // You can send this to a server later
         this.sendEvent('page_view', { page });
     },
     
@@ -83,10 +82,8 @@ const analytics = {
         this.sendEvent(name, properties);
     },
     
-    // Send to server (placeholder)
+    // Send to server (localStorage for now)
     sendEvent: function(name, properties) {
-        // TODO: Send to your analytics server
-        // For now, we'll just log to console
         const data = {
             event: name,
             properties: properties,
@@ -94,14 +91,13 @@ const analytics = {
             url: window.location.href,
             userAgent: navigator.userAgent
         };
-        console.log('📊 Analytics:', data);
         
-        // If you have a backend, you can send it here:
-        // fetch('/api/analytics', {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/json' },
-        //     body: JSON.stringify(data)
-        // });
+        // Store in localStorage for the analytics dashboard
+        const events = JSON.parse(localStorage.getItem('guardian_analytics') || '[]');
+        events.push(data);
+        localStorage.setItem('guardian_analytics', JSON.stringify(events));
+        
+        console.log('📊 Analytics:', data);
     }
 };
 
