@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Playground — The Guardian</title>
+    <link rel="stylesheet" href="../style.css" />
+    <link rel="stylesheet" href="playground.css" />
+    <!-- CodeMirror for Vim-style editor -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/display/fullscreen.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/keymap/vim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/comment/comment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/display/fullscreen.min.js"></script>
+</head>
+<body>
+    <div class="playground-container">
+        <!-- Navigation -->
+        <nav class="playground-nav">
+            <a href="../index.html" class="nav-logo">
+                <img src="../assets/logo.svg" alt="The Guardian" width="40" />
+                <span>The Guardian</span>
+            </a>
+            <span class="nav-title">⚡ Playground</span>
+            <a href="../index.html" class="nav-back">← Back to Home</a>
+        </nav>
+
+        <!-- Main Playground -->
+        <div class="playground-main">
+            <!-- Editor -->
+            <div class="editor-section">
+                <div class="editor-header">
+                    <span class="editor-title">📝 Axiom Code</span>
+                    <div class="editor-actions">
+                        <button id="run-btn" class="btn btn-primary">▶ Run</button>
+                        <button id="clear-btn" class="btn btn-secondary">✕ Clear</button>
+                        <button id="fullscreen-btn" class="btn btn-secondary">⛶ Fullscreen</button>
+                    </div>
+                </div>
+                <textarea id="axiom-editor">
+// Welcome to The Guardian Playground!
+// Write Axiom code and see the output.
+
+let name = "Axiom"
+let version = 1.0
+let active = true
+
+println("Hello from " + name + "!")
+println("Version: " + version)
+println("Active: " + active)
+                </textarea>
+                <div class="editor-footer">
+                    <span class="key-hint">Vim mode enabled</span>
+                    <span class="key-hint">Press <kbd>Esc</kbd> to switch modes</span>
+                </div>
+            </div>
+
+            <!-- Output -->
+            <div class="output-section">
+                <div class="output-header">
+                    <span class="output-title">📤 Output</span>
+                    <span id="status-badge" class="status-badge idle">Ready</span>
+                </div>
+                <div id="output-container">
+                    <pre id="output-content">// Output will appear here...
+// Click "Run" to execute your Axiom code.</pre>
+                </div>
+                <div class="output-footer">
+                    <span id="execution-time" class="execution-time">⏱️ Ready</span>
+                    <span id="exit-code" class="exit-code">Exit: 0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Examples -->
+        <section class="examples-section">
+            <h3>💡 Examples</h3>
+            <div class="examples-grid">
+                <button class="example-btn" data-example="hello">
+                    Hello World
+                </button>
+                <button class="example-btn" data-example="variables">
+                    Variables
+                </button>
+                <button class="example-btn" data-example="types">
+                    Types
+                </button>
+                <button class="example-btn" data-example="if">
+                    If/Else
+                </button>
+                <button class="example-btn" data-example="loop">
+                    While Loop
+                </button>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>&copy; 2026 The Guardian. Built by a 13-year-old developer.</p>
+            <p>💪 <strong>Axiom — The Demo Language</strong></p>
+        </footer>
+    </div>
+
+    <script src="playground.js"></script>
+</body>
+</html>
