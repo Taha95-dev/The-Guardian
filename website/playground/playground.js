@@ -1,4 +1,39 @@
+// ── Analytics ──
+
+// ── Track Playground Events ──
+document.addEventListener('DOMContentLoaded', function() {
+    // Track playground load
+    if (window.analytics) {
+        window.analytics.event('playground_load');
+    }
+    
+    // Track run
+    document.getElementById('run-btn').addEventListener('click', function() {
+        if (window.analytics) {
+            window.analytics.event('playground_run', {
+                codeLength: editor.getValue().length,
+                lines: editor.getValue().split('\n').length
+            });
+        }
+    });
+    
+    // Track examples
+    document.querySelectorAll('.example-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (window.analytics) {
+                window.analytics.event('playground_example', {
+                    example: this.dataset.example
+                });
+            }
+        });
+    });
+    
+    // Track success/error
+    // You can add this to the runCode function
+});
+
 // ── CodeMirror Editor ──
+
 const editor = CodeMirror.fromTextArea(document.getElementById('axiom-editor'), {
     mode: 'javascript',
     theme: 'material-darker',

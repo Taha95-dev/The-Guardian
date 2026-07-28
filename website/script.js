@@ -67,3 +67,100 @@ if (navbar) {
 console.log('🔷 The Guardian website loaded successfully!');
 console.log('📦 Built by a 13-year-old developer.');
 console.log('🛒 Click "Buy Now" to purchase The Guardian.');
+
+// ── Analytics ──
+const analytics = {
+    // Track page views
+    pageView: function(page) {
+        console.log(`📊 Page View: ${page}`);
+        // You can send this to a server later
+        this.sendEvent('page_view', { page });
+    },
+    
+    // Track events
+    event: function(name, properties = {}) {
+        console.log(`📊 Event: ${name}`, properties);
+        this.sendEvent(name, properties);
+    },
+    
+    // Send to server (placeholder)
+    sendEvent: function(name, properties) {
+        // TODO: Send to your analytics server
+        // For now, we'll just log to console
+        const data = {
+            event: name,
+            properties: properties,
+            timestamp: new Date().toISOString(),
+            url: window.location.href,
+            userAgent: navigator.userAgent
+        };
+        console.log('📊 Analytics:', data);
+        
+        // If you have a backend, you can send it here:
+        // fetch('/api/analytics', {
+        //     method: 'POST',
+        //     headers: { 'Content-Type': 'application/json' },
+        //     body: JSON.stringify(data)
+        // });
+    }
+};
+
+// ── Track Events ──
+
+// Page view
+analytics.pageView(window.location.pathname);
+
+// Track playground usage
+document.addEventListener('DOMContentLoaded', function() {
+    // Track when playground is loaded
+    if (window.location.pathname.includes('playground')) {
+        analytics.event('playground_loaded');
+    }
+    
+    // Track run button clicks
+    const runBtn = document.getElementById('run-btn');
+    if (runBtn) {
+        runBtn.addEventListener('click', function() {
+            analytics.event('playground_run', {
+                codeLength: editor ? editor.getValue().length : 0
+            });
+        });
+    }
+    
+    // Track example usage
+    document.querySelectorAll('.example-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            analytics.event('playground_example', {
+                example: this.dataset.example
+            });
+        });
+    });
+});
+
+// Track buy button clicks
+document.querySelectorAll('#hero-buy, #pricing-buy, #modal-buy').forEach(btn => {
+    if (btn) {
+        btn.addEventListener('click', function() {
+            analytics.event('buy_click', {
+                source: this.id || 'unknown'
+            });
+        });
+    }
+});
+
+// Track consulting page visits
+if (window.location.pathname.includes('consulting')) {
+    analytics.event('consulting_page_view');
+}
+
+// Track outbound links
+document.querySelectorAll('a[href^="http"]').forEach(link => {
+    link.addEventListener('click', function() {
+        analytics.event('outbound_link', {
+            url: this.href,
+            text: this.textContent
+        });
+    });
+});
+
+console.log('📊 Analytics initialized!');

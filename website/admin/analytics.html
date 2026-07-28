@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Analytics — The Guardian</title>
+    <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Analytics Dashboard</h1>
+            <p>Track how people use The Guardian</p>
+        </header>
+
+        <section class="analytics-grid">
+            <div class="analytics-card">
+                <h3>👀 Page Views</h3>
+                <div class="analytics-number" id="page-views">0</div>
+            </div>
+            <div class="analytics-card">
+                <h3>▶️ Playground Runs</h3>
+                <div class="analytics-number" id="playground-runs">0</div>
+            </div>
+            <div class="analytics-card">
+                <h3>🛒 Buy Clicks</h3>
+                <div class="analytics-number" id="buy-clicks">0</div>
+            </div>
+            <div class="analytics-card">
+                <h3>💼 Consulting Views</h3>
+                <div class="analytics-number" id="consulting-views">0</div>
+            </div>
+        </section>
+
+        <section class="analytics-events">
+            <h2>📋 Recent Events</h2>
+            <div id="events-list">
+                <p>No events tracked yet. (Data is stored in localStorage)</p>
+            </div>
+        </section>
+
+        <footer>
+            <p>&copy; 2026 The Guardian. Built by a 13-year-old developer.</p>
+        </footer>
+    </div>
+
+    <script>
+        // ── Analytics Dashboard ──
+        function loadAnalytics() {
+            // Load events from localStorage
+            const events = JSON.parse(localStorage.getItem('guardian_analytics') || '[]');
+            
+            // Update counts
+            const counts = {
+                page_views: events.filter(e => e.event === 'page_view').length,
+                playground_runs: events.filter(e => e.event === 'playground_run').length,
+                buy_clicks: events.filter(e => e.event === 'buy_click').length,
+                consulting_views: events.filter(e => e.event === 'consulting_page_view').length
+            };
+            
+            document.getElementById('page-views').textContent = counts.page_views;
+            document.getElementById('playground-runs').textContent = counts.playground_runs;
+            document.getElementById('buy-clicks').textContent = counts.buy_clicks;
+            document.getElementById('consulting-views').textContent = counts.consulting_views;
+            
+            // Show recent events
+            const eventsList = document.getElementById('events-list');
+            if (events.length === 0) {
+                eventsList.innerHTML = '<p>No events tracked yet.</p>';
+            } else {
+                const recent = events.slice(-10).reverse();
+                eventsList.innerHTML = recent.map(e => `
+                    <div class="event-item">
+                        <span class="event-time">${new Date(e.timestamp).toLocaleString()}</span>
+                        <span class="event-name">${e.event}</span>
+                        <span class="event-details">${JSON.stringify(e.properties || {})}</span>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        // ── Load on page load ──
+        document.addEventListener('DOMContentLoaded', loadAnalytics);
+        
+        // ── Refresh every 10 seconds ──
+        setInterval(loadAnalytics, 10000);
+    </script>
+</body>
+</html>
