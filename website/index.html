@@ -20,12 +20,11 @@
                     The Guardian is a complete C++17 framework for building programming languages,
                     DSLs, and binary formats. Safe by design, with no garbage collection.
                 </p>
-    <div class="hero-buttons">
-        <button id="hero-buy" class="btn btn-primary">Buy Now — $20 →</button>
-        <a href="docs/index.html" class="btn btn-secondary">📚 Docs</a>
-        <a href="playground/" class="btn btn-secondary">⚡ Playground</a>
-        <a href="consulting.html" class="btn btn-secondary">💼 Consulting</a>
-    </div>
+                <div class="hero-buttons">
+                    <button id="hero-buy" class="btn btn-primary">Buy Now — $20 →</button>
+                    <a href="playground/" class="btn btn-secondary">⚡ Playground</a>
+                    <a href="consulting.html" class="btn btn-secondary">💼 Consulting</a>
+                </div>
                 <div class="hero-stats-mini">
                     <span>⚡ 7,000+ lines</span>
                     <span>📦 70+ files</span>
@@ -101,7 +100,7 @@
                 </div>
                 <div class="stat-item highlight">
                     <span class="stat-number">0</span>
-                    <span class="stat-label">TODOs</span>
+                    <span class="stat-label">Issues</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-number">4GB</span>
@@ -142,7 +141,7 @@
                     <li>✅ Full source code access</li>
                     <li>✅ Lifetime updates</li>
                 </ul>
-                <button id="polar-checkout" class="btn btn-primary btn-large">
+                <button id="pricing-buy" class="btn btn-primary btn-large">
                     🛒 Buy Now — $20
                 </button>
                 <p class="pricing-guarantee">⚡ 100% satisfaction guarantee · Built by a 13-year-old</p>
@@ -161,7 +160,7 @@
                     <h4>Product</h4>
                     <a href="#features">Features</a>
                     <a href="#pricing">Pricing</a>
-                    <a href="#">Documentation</a>
+                    <a href="docs/index.html">Documentation</a>
                     <a href="#">Changelog</a>
                 </div>
                 <div class="footer-links-group">
@@ -174,7 +173,7 @@
                     <h4>Company</h4>
                     <a href="#">About</a>
                     <a href="#">Blog</a>
-                    <a href="#">Contact</a>
+                    <a href="consulting.html">💼 Consulting</a>
                 </div>
             </div>
             <div class="footer-bottom">
@@ -183,27 +182,59 @@
         </footer>
     </div>
 
-    <script>
-        // ── Polar Checkout ──
-        document.addEventListener('DOMContentLoaded', function() {
-            const checkoutUrl = 'https://buy.polar.sh/polar_cl_czZ7LW2XcJR1zNjUoiGbBYU4MNOI4ShcvcR6l00HLU9';
-            
-            // Hero buy button
-            const heroBuy = document.getElementById('hero-buy');
-            if (heroBuy) {
-                heroBuy.addEventListener('click', function() {
-                    window.location.href = checkoutUrl;
-                });
-            }
-            
-            // Pricing buy button
-            const polarCheckout = document.getElementById('polar-checkout');
-            if (polarCheckout) {
-                polarCheckout.addEventListener('click', function() {
-                    window.location.href = checkoutUrl;
-                });
-            }
-        });
-    </script>
+    <!-- ─── CHECKOUT MODAL ─── -->
+    <div id="checkout-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <div class="modal-header">
+                <img src="assets/logo.svg" alt="The Guardian" width="60" />
+                <h2>🔷 The Guardian</h2>
+                <p class="modal-subtitle">One-time payment · Lifetime access</p>
+            </div>
+            <div class="modal-body">
+                <div class="modal-price">
+                    <span class="modal-currency">$</span>
+                    <span class="modal-amount">20</span>
+                    <span class="modal-period">USD</span>
+                </div>
+                <p class="modal-note">One-time payment · Lifetime updates</p>
+                <div class="modal-features">
+                    <div class="modal-feature">
+                        <span>✅</span>
+                        <span>Complete C++17 framework</span>
+                    </div>
+                    <div class="modal-feature">
+                        <span>✅</span>
+                        <span>VM with 40+ opcodes</span>
+                    </div>
+                    <div class="modal-feature">
+                        <span>✅</span>
+                        <span>Memory manager (no GC)</span>
+                    </div>
+                    <div class="modal-feature">
+                        <span>✅</span>
+                        <span>GBIN binary format</span>
+                    </div>
+                    <div class="modal-feature">
+                        <span>✅</span>
+                        <span>Lifetime updates</span>
+                    </div>
+                    <div class="modal-feature">
+                        <span>✅</span>
+                        <span>Built by a 13-year-old</span>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button id="modal-buy" class="btn btn-primary btn-large">
+                        🛒 Buy Now — $20
+                    </button>
+                    <p class="modal-guarantee">⚡ 100% satisfaction guarantee</p>
+                    <p class="modal-powered">🔒 Secure payment powered by Polar</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>

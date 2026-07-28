@@ -1,6 +1,44 @@
+// ── Checkout Modal ──
+const modal = document.getElementById('checkout-modal');
+const modalClose = document.querySelector('.modal-close');
+
+// Open modal on buy button clicks
+function openModal(e) {
+    e.preventDefault();
+    modal.classList.add('active');
+}
+
+document.querySelectorAll('#hero-buy, #pricing-buy').forEach(btn => {
+    btn.addEventListener('click', openModal);
+});
+
+// Close modal
+modalClose.addEventListener('click', function() {
+    modal.classList.remove('active');
+});
+
+// Close on outside click
+modal.addEventListener('click', function(e) {
+    if (e.target === modal) {
+        modal.classList.remove('active');
+    }
+});
+
+// Close on Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && modal.classList.contains('active')) {
+        modal.classList.remove('active');
+    }
+});
+
+// Proceed to Polar checkout
+document.getElementById('modal-buy').addEventListener('click', function() {
+    window.location.href = 'https://buy.polar.sh/polar_cl_czZ7LW2XcJR1zNjUoiGbBYU4MNOI4ShcvcR6l00HLU9';
+});
+
 // ── Smooth Scroll ──
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
+    anchor.addEventListener('click', function(e) {
         e.preventDefault();
         const target = document.querySelector(this.getAttribute('href'));
         if (target) {
@@ -11,75 +49,21 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 
 // ── Navbar Shrink on Scroll ──
 const navbar = document.querySelector('.navbar');
-let lastScroll = 0;
-
-window.addEventListener('scroll', () => {
-    const currentScroll = window.pageYOffset;
-    if (currentScroll > 50) {
-        navbar.style.padding = '0.4rem 0';
-        navbar.style.background = 'rgba(10, 10, 15, 0.95)';
-    } else {
-        navbar.style.padding = '0.8rem 0';
-        navbar.style.background = 'rgba(10, 10, 15, 0.85)';
-    }
-    lastScroll = currentScroll;
-});
-
-// ── Counter Animation ──
-const counters = document.querySelectorAll('.stat-number[data-count]');
-
-const animateCounter = (el) => {
-    const target = parseInt(el.getAttribute('data-count'));
-    const duration = 2000;
-    const startTime = performance.now();
-
-    const updateCounter = (currentTime) => {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const current = Math.floor(progress * target);
-        el.textContent = current;
-
-        if (progress < 1) {
-            requestAnimationFrame(updateCounter);
+if (navbar) {
+    let lastScroll = 0;
+    window.addEventListener('scroll', () => {
+        const currentScroll = window.pageYOffset;
+        if (currentScroll > 50) {
+            navbar.style.padding = '0.4rem 0';
+            navbar.style.background = 'rgba(10, 10, 15, 0.95)';
         } else {
-            el.textContent = target;
+            navbar.style.padding = '0.8rem 0';
+            navbar.style.background = 'rgba(10, 10, 15, 0.85)';
         }
-    };
-
-    requestAnimationFrame(updateCounter);
-};
-
-// ── Intersection Observer for counters ──
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            const el = entry.target;
-            if (el.getAttribute('data-count') && !el.classList.contains('animated')) {
-                el.classList.add('animated');
-                animateCounter(el);
-            }
-        }
+        lastScroll = currentScroll;
     });
-}, { threshold: 0.3 });
-
-counters.forEach(counter => observer.observe(counter));
-
-// ── Feature Cards Hover Effect ──
-document.querySelectorAll('.feature-card').forEach(card => {
-    card.addEventListener('mousemove', (e) => {
-        const rect = card.getBoundingClientRect();
-        const x = (e.clientX - rect.left) / rect.width;
-        const y = (e.clientY - rect.top) / rect.height;
-        card.style.setProperty('--x', x);
-        card.style.setProperty('--y', y);
-    });
-});
-
-// ── Buy Button Alert (temporary) ──
-document.querySelector('.buy-button')?.addEventListener('click', (e) => {
-    e.preventDefault();
-    alert('🚀 The Guardian is coming soon!\n\nJoin the waitlist or check back later.');
-});
+}
 
 console.log('🔷 The Guardian website loaded successfully!');
 console.log('📦 Built by a 13-year-old developer.');
+console.log('🛒 Click "Buy Now" to purchase The Guardian.');

@@ -936,3 +936,170 @@ footer {
     }
 }
 
+
+/* ─── CHECKOUT MODAL ─── */
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: #12121f;
+    border: 1px solid #2a2a4e;
+    border-radius: 16px;
+    max-width: 480px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 2rem;
+    position: relative;
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    font-size: 1.8rem;
+    color: #666;
+    cursor: pointer;
+    transition: color 0.3s;
+    line-height: 1;
+}
+
+.modal-close:hover {
+    color: #e0e0e0;
+}
+
+.modal-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.modal-header img {
+    margin-bottom: 0.5rem;
+}
+
+.modal-header h2 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+}
+
+.modal-subtitle {
+    color: #8888aa;
+    font-size: 0.95rem;
+    margin: 0.2rem 0 0;
+}
+
+.modal-price {
+    text-align: center;
+    margin: 1rem 0 0.2rem;
+}
+
+.modal-currency {
+    font-size: 1.5rem;
+    vertical-align: top;
+    color: #667eea;
+}
+
+.modal-amount {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: #667eea;
+}
+
+.modal-period {
+    font-size: 1rem;
+    color: #666;
+}
+
+.modal-note {
+    text-align: center;
+    color: #666;
+    font-size: 0.85rem;
+    margin: 0 0 1rem;
+}
+
+.modal-features {
+    margin: 1rem 0;
+    text-align: left;
+}
+
+.modal-feature {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.4rem 0;
+    color: #ccc;
+    font-size: 0.92rem;
+}
+
+.modal-feature span:first-child {
+    font-size: 1rem;
+    min-width: 1.5rem;
+}
+
+.modal-actions {
+    text-align: center;
+    margin-top: 1.5rem;
+}
+
+.modal-actions .btn {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.1rem;
+}
+
+.modal-guarantee {
+    color: #555;
+    font-size: 0.85rem;
+    margin-top: 0.8rem;
+}
+
+.modal-powered {
+    color: #444;
+    font-size: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .modal-content {
+        padding: 1.5rem;
+    }
+    .modal-amount {
+        font-size: 2.8rem;
+    }
+    .modal-feature {
+        font-size: 0.85rem;
+    }
+}
