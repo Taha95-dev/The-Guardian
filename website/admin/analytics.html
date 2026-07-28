@@ -34,11 +34,17 @@
             </div>
         </section>
 
-        <!-- Chart -->
+        <!-- Combined Chart -->
         <section class="analytics-chart">
-            <h2>📈 Activity Over Time</h2>
+            <h2>📈 All Activity Over Time</h2>
             <div class="chart-container">
                 <canvas id="activity-chart"></canvas>
+            </div>
+            <div class="chart-legend">
+                <span class="legend-item page-views">● Page Views</span>
+                <span class="legend-item playground">● Playground Runs</span>
+                <span class="legend-item buys">● Buy Clicks</span>
+                <span class="legend-item consulting">● Consulting Views</span>
             </div>
         </section>
 
@@ -46,9 +52,13 @@
         <section class="analytics-events">
             <h2>📋 Recent Events</h2>
             <div id="events-list">
-                <p>No events tracked yet. (Data is stored in localStorage)</p>
+                <p>No events tracked yet.</p>
             </div>
         </section>
+
+        <div class="analytics-actions">
+            <button id="clear-data" class="btn btn-secondary">🗑️ Clear Data</button>
+        </div>
 
         <footer>
             <p>&copy; 2026 The Guardian. Built by a 13-year-old developer.</p>
@@ -57,6 +67,8 @@
 
     <script>
         // ── Load Data ──
+        let chart = null;
+
         function loadAnalytics() {
             const events = JSON.parse(localStorage.getItem('guardian_analytics') || '[]');
             
@@ -73,33 +85,38 @@
             document.getElementById('buy-clicks').textContent = counts.buy_clicks;
             document.getElementById('consulting-views').textContent = counts.consulting_views;
             
-            // Update chart
+            // Update combined chart
             updateChart(events);
             
             // Update events list
             updateEventsList(events);
         }
         
-        // ── Chart ──
-        let chart = null;
-        
+        // ── Combined Chart ──
         function updateChart(events) {
             // Group events by date
             const dateMap = {};
             events.forEach(e => {
                 const date = new Date(e.timestamp).toLocaleDateString();
                 if (!dateMap[date]) {
-                    dateMap[date] = { page_views: 0, playground: 0, buys: 0 };
+                    dateMap[date] = { 
+                        page_views: 0, 
+                        playground: 0, 
+                        buys: 0, 
+                        consulting: 0 
+                    };
                 }
                 if (e.event === 'page_view') dateMap[date].page_views++;
                 if (e.event === 'playground_run') dateMap[date].playground++;
                 if (e.event === 'buy_click') dateMap[date].buys++;
+                if (e.event === 'consulting_page_view') dateMap[date].consulting++;
             });
             
             const labels = Object.keys(dateMap);
             const pageViews = labels.map(d => dateMap[d].page_views);
             const playground = labels.map(d => dateMap[d].playground);
             const buys = labels.map(d => dateMap[d].buys);
+            const consulting = labels.map(d => dateMap[d].consulting);
             
             const ctx = document.getElementById('activity-chart').getContext('2d');
             
@@ -108,65 +125,106 @@
             }
             
             chart = new Chart(ctx, {
-                type: 'bar',
+                type: 'line',
                 data: {
                     labels: labels,
                     datasets: [
                         {
-                            label: 'Page Views',
+                            label: '👀 Page Views',
                             data: pageViews,
-                            backgroundColor: 'rgba(102, 126, 234, 0.6)',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
                             borderColor: '#667eea',
-                            borderWidth: 2,
+                            borderWidth: 3,
+                            pointBackgroundColor: '#667eea',
+                            pointRadius: 4,
+                            tension: 0.3,
+                            fill: true,
                         },
                         {
-                            label: 'Playground Runs',
+                            label: '▶️ Playground Runs',
                             data: playground,
-                            backgroundColor: 'rgba(118, 75, 162, 0.6)',
+                            backgroundColor: 'rgba(118, 75, 162, 0.1)',
                             borderColor: '#764ba2',
-                            borderWidth: 2,
+                            borderWidth: 3,
+                            pointBackgroundColor: '#764ba2',
+                            pointRadius: 4,
+                            tension: 0.3,
+                            fill: true,
                         },
                         {
-                            label: 'Buy Clicks',
+                            label: '🛒 Buy Clicks',
                             data: buys,
-                            backgroundColor: 'rgba(39, 201, 63, 0.6)',
+                            backgroundColor: 'rgba(39, 201, 63, 0.1)',
                             borderColor: '#27c93f',
-                            borderWidth: 2,
+                            borderWidth: 3,
+                            pointBackgroundColor: '#27c93f',
+                            pointRadius: 4,
+                            tension: 0.3,
+                            fill: true,
+                        },
+                        {
+                            label: '💼 Consulting Views',
+                            data: consulting,
+                            backgroundColor: 'rgba(240, 192, 64, 0.1)',
+                            borderColor: '#f0c040',
+                            borderWidth: 3,
+                            pointBackgroundColor: '#f0c040',
+                            pointRadius: 4,
+                            tension: 0.3,
+                            fill: true,
                         }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
                     plugins: {
                         legend: {
-                            position: 'top',
-                            labels: {
-                                color: '#e0e0e0',
-                            }
+                            display: false,
+                        },
+                        tooltip: {
+                            backgroundColor: '#12121f',
+                            borderColor: '#2a2a4e',
+                            borderWidth: 1,
+                            titleColor: '#e0e0e0',
+                            bodyColor: '#e0e0e0',
+                            cornerRadius: 8,
+                            padding: 10,
                         }
                     },
                     scales: {
                         x: {
                             ticks: {
-                                color: '#8888aa',
+                                color: '#444466',
+                                font: { size: 11 },
                             },
                             grid: {
-                                color: 'rgba(255,255,255,0.05)',
+                                color: 'rgba(255,255,255,0.03)',
                             }
                         },
                         y: {
                             ticks: {
-                                color: '#8888aa',
+                                color: '#444466',
+                                font: { size: 11 },
                                 stepSize: 1,
                             },
                             grid: {
-                                color: 'rgba(255,255,255,0.05)',
+                                color: 'rgba(255,255,255,0.03)',
                             },
                             beginAtZero: true,
                         }
                     }
-                }
+                },
+                plugins: [{
+                    id: 'customLegend',
+                    beforeDraw: function() {
+                        // Custom legend handled in HTML
+                    }
+                }]
             });
         }
         
@@ -177,23 +235,32 @@
                 eventsList.innerHTML = '<p>No events tracked yet.</p>';
             } else {
                 const recent = events.slice(-10).reverse();
-                eventsList.innerHTML = recent.map(e => `
-                    <div class="event-item">
-                        <span class="event-time">${new Date(e.timestamp).toLocaleString()}</span>
-                        <span class="event-name">${e.event}</span>
-                        <span class="event-details">${JSON.stringify(e.properties || {})}</span>
-                    </div>
-                `).join('');
+                eventsList.innerHTML = recent.map(e => {
+                    let emoji = '📄';
+                    if (e.event === 'page_view') emoji = '👀';
+                    else if (e.event === 'playground_run') emoji = '▶️';
+                    else if (e.event === 'buy_click') emoji = '🛒';
+                    else if (e.event === 'consulting_page_view') emoji = '💼';
+                    
+                    return `
+                        <div class="event-item">
+                            <span class="event-time">${new Date(e.timestamp).toLocaleString()}</span>
+                            <span class="event-emoji">${emoji}</span>
+                            <span class="event-name">${e.event}</span>
+                            <span class="event-details">${e.properties ? JSON.stringify(e.properties) : ''}</span>
+                        </div>
+                    `;
+                }).join('');
             }
         }
         
         // ── Clear Data ──
-        function clearData() {
+        document.getElementById('clear-data').addEventListener('click', function() {
             if (confirm('Clear all analytics data?')) {
                 localStorage.removeItem('guardian_analytics');
                 loadAnalytics();
             }
-        }
+        });
         
         // ── Load on page load ──
         document.addEventListener('DOMContentLoaded', loadAnalytics);

@@ -1128,7 +1128,7 @@ footer {
 
 .analytics-card h3 {
     color: #8888aa;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 600;
     margin: 0 0 0.5rem;
 }
@@ -1149,7 +1149,7 @@ footer {
 
 .analytics-chart h2 {
     color: #e0e0e0;
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     font-weight: 600;
     margin: 0 0 1.5rem;
 }
@@ -1158,6 +1158,24 @@ footer {
     position: relative;
     height: 300px;
 }
+
+.chart-legend {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    font-size: 0.85rem;
+    color: #8888aa;
+}
+
+.legend-item.page-views { color: #667eea; }
+.legend-item.playground { color: #764ba2; }
+.legend-item.buys { color: #27c93f; }
+.legend-item.consulting { color: #f0c040; }
 
 .analytics-events {
     background: #12121f;
@@ -1169,17 +1187,23 @@ footer {
 
 .analytics-events h2 {
     color: #e0e0e0;
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     font-weight: 600;
     margin: 0 0 1rem;
 }
 
+.analytics-actions {
+    text-align: center;
+    margin: 2rem 0;
+}
+
 .event-item {
     display: flex;
+    align-items: center;
     gap: 1rem;
     padding: 0.6rem 0;
     border-bottom: 1px solid #1a1a2e;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
 }
 
 .event-item:last-child {
@@ -1188,8 +1212,13 @@ footer {
 
 .event-time {
     color: #444466;
-    font-size: 0.8rem;
-    min-width: 160px;
+    font-size: 0.75rem;
+    min-width: 150px;
+}
+
+.event-emoji {
+    font-size: 1.1rem;
+    min-width: 2rem;
 }
 
 .event-name {
@@ -1201,7 +1230,8 @@ footer {
 .event-details {
     color: #8888aa;
     font-family: monospace;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
+    word-break: break-all;
 }
 
 /* ─── RESPONSIVE ─── */
@@ -1211,8 +1241,13 @@ footer {
         grid-template-columns: 1fr 1fr;
     }
     
+    .chart-legend {
+        gap: 1rem;
+    }
+    
     .event-item {
         flex-wrap: wrap;
+        gap: 0.3rem;
     }
     
     .event-time {
@@ -1220,7 +1255,7 @@ footer {
     }
     
     .event-name {
-        min-width: 100px;
+        min-width: 80px;
     }
 }
 
@@ -1231,5 +1266,11 @@ footer {
     
     .chart-container {
         height: 200px;
+    }
+    
+    .chart-legend {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
     }
 }
