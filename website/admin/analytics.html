@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Analytics — The Guardian</title>
     <link rel="stylesheet" href="../style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="container">
@@ -13,6 +14,7 @@
             <p>Track how people use The Guardian</p>
         </header>
 
+        <!-- Stats Grid -->
         <section class="analytics-grid">
             <div class="analytics-card">
                 <h3>👀 Page Views</h3>
@@ -32,6 +34,15 @@
             </div>
         </section>
 
+        <!-- Chart -->
+        <section class="analytics-chart">
+            <h2>📈 Activity Over Time</h2>
+            <div class="chart-container">
+                <canvas id="activity-chart"></canvas>
+            </div>
+        </section>
+
+        <!-- Events List -->
         <section class="analytics-events">
             <h2>📋 Recent Events</h2>
             <div id="events-list">
@@ -45,9 +56,8 @@
     </div>
 
     <script>
-        // ── Analytics Dashboard ──
+        // ── Load Data ──
         function loadAnalytics() {
-            // Load events from localStorage
             const events = JSON.parse(localStorage.getItem('guardian_analytics') || '[]');
             
             // Update counts
@@ -63,7 +73,105 @@
             document.getElementById('buy-clicks').textContent = counts.buy_clicks;
             document.getElementById('consulting-views').textContent = counts.consulting_views;
             
-            // Show recent events
+            // Update chart
+            updateChart(events);
+            
+            // Update events list
+            updateEventsList(events);
+        }
+        
+        // ── Chart ──
+        let chart = null;
+        
+        function updateChart(events) {
+            // Group events by date
+            const dateMap = {};
+            events.forEach(e => {
+                const date = new Date(e.timestamp).toLocaleDateString();
+                if (!dateMap[date]) {
+                    dateMap[date] = { page_views: 0, playground: 0, buys: 0 };
+                }
+                if (e.event === 'page_view') dateMap[date].page_views++;
+                if (e.event === 'playground_run') dateMap[date].playground++;
+                if (e.event === 'buy_click') dateMap[date].buys++;
+            });
+            
+            const labels = Object.keys(dateMap);
+            const pageViews = labels.map(d => dateMap[d].page_views);
+            const playground = labels.map(d => dateMap[d].playground);
+            const buys = labels.map(d => dateMap[d].buys);
+            
+            const ctx = document.getElementById('activity-chart').getContext('2d');
+            
+            if (chart) {
+                chart.destroy();
+            }
+            
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Page Views',
+                            data: pageViews,
+                            backgroundColor: 'rgba(102, 126, 234, 0.6)',
+                            borderColor: '#667eea',
+                            borderWidth: 2,
+                        },
+                        {
+                            label: 'Playground Runs',
+                            data: playground,
+                            backgroundColor: 'rgba(118, 75, 162, 0.6)',
+                            borderColor: '#764ba2',
+                            borderWidth: 2,
+                        },
+                        {
+                            label: 'Buy Clicks',
+                            data: buys,
+                            backgroundColor: 'rgba(39, 201, 63, 0.6)',
+                            borderColor: '#27c93f',
+                            borderWidth: 2,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: '#e0e0e0',
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: '#8888aa',
+                            },
+                            grid: {
+                                color: 'rgba(255,255,255,0.05)',
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#8888aa',
+                                stepSize: 1,
+                            },
+                            grid: {
+                                color: 'rgba(255,255,255,0.05)',
+                            },
+                            beginAtZero: true,
+                        }
+                    }
+                }
+            });
+        }
+        
+        // ── Events List ──
+        function updateEventsList(events) {
             const eventsList = document.getElementById('events-list');
             if (events.length === 0) {
                 eventsList.innerHTML = '<p>No events tracked yet.</p>';
@@ -79,11 +187,21 @@
             }
         }
         
+        // ── Clear Data ──
+        function clearData() {
+            if (confirm('Clear all analytics data?')) {
+                localStorage.removeItem('guardian_analytics');
+                loadAnalytics();
+            }
+        }
+        
         // ── Load on page load ──
         document.addEventListener('DOMContentLoaded', loadAnalytics);
         
         // ── Refresh every 10 seconds ──
         setInterval(loadAnalytics, 10000);
+        
+        console.log('📊 Analytics dashboard loaded!');
     </script>
 </body>
 </html>

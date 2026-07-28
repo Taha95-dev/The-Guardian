@@ -1103,3 +1103,133 @@ footer {
         font-size: 0.85rem;
     }
 }
+
+/* ─── ANALYTICS DASHBOARD ─── */
+
+.analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.analytics-card {
+    background: #12121f;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid #1e1e34;
+    text-align: center;
+    transition: border-color 0.3s;
+}
+
+.analytics-card:hover {
+    border-color: #667eea;
+}
+
+.analytics-card h3 {
+    color: #8888aa;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem;
+}
+
+.analytics-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #667eea;
+}
+
+.analytics-chart {
+    background: #12121f;
+    padding: 2rem;
+    border-radius: 12px;
+    border: 1px solid #1e1e34;
+    margin: 2rem 0;
+}
+
+.analytics-chart h2 {
+    color: #e0e0e0;
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin: 0 0 1.5rem;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+}
+
+.analytics-events {
+    background: #12121f;
+    padding: 2rem;
+    border-radius: 12px;
+    border: 1px solid #1e1e34;
+    margin: 2rem 0;
+}
+
+.analytics-events h2 {
+    color: #e0e0e0;
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin: 0 0 1rem;
+}
+
+.event-item {
+    display: flex;
+    gap: 1rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid #1a1a2e;
+    font-size: 0.9rem;
+}
+
+.event-item:last-child {
+    border-bottom: none;
+}
+
+.event-time {
+    color: #444466;
+    font-size: 0.8rem;
+    min-width: 160px;
+}
+
+.event-name {
+    color: #667eea;
+    font-weight: 600;
+    min-width: 140px;
+}
+
+.event-details {
+    color: #8888aa;
+    font-family: monospace;
+    font-size: 0.8rem;
+}
+
+/* ─── RESPONSIVE ─── */
+
+@media (max-width: 768px) {
+    .analytics-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .event-item {
+        flex-wrap: wrap;
+    }
+    
+    .event-time {
+        min-width: 100px;
+    }
+    
+    .event-name {
+        min-width: 100px;
+    }
+}
+
+@media (max-width: 480px) {
+    .analytics-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .chart-container {
+        height: 200px;
+    }
+}
