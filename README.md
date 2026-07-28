@@ -43,6 +43,23 @@ Visit the official website: [the-guardian.netlify.app](https://rad-alfajores-a24
 
 ---
 
+## ⚡ Playground
+
+**Try Axiom live in your browser!**
+
+The Guardian comes with an interactive playground where you can write and run Axiom code instantly.
+
+[🚀 Try the Playground](https://rad-alfajores-a2413f.netlify.app/playground/)
+
+- ✅ Vim-style editor
+- ✅ Syntax highlighting
+- ✅ Run code instantly
+- ✅ See output in real-time
+- ✅ Example snippets included
+- ✅ No installation required
+
+**The best way to experience The Guardian before you buy.**
+
 ## Why The Guardian?
 
 | Feature | The Guardian | Other Frameworks |
