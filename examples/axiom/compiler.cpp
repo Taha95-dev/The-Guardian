@@ -1,6 +1,7 @@
 #include "lexer.hpp"
 #include <guardian/format/gbin_format.hpp>
 #include <guardian/vm/vm.hpp>
+#include <guardian/io/file.hpp>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -69,6 +70,7 @@ private:
             case TokenType::LET: parseLet(); break;
             case TokenType::PRINT: parsePrint(false); break;
             case TokenType::PRINTLN: parsePrint(true); break;
+            case TokenType::READ: parseRead(); break;
             case TokenType::COMMENT: advance(); break;
             default: advance(); break;
         }
@@ -126,6 +128,28 @@ private:
         match(TokenType::SEMICOLON);
     }
 
+    void parseRead() {
+        advance(); // read
+        match(TokenType::LPAREN);
+
+        Token filename = peek();
+        if (filename.type == TokenType::STRING_LITERAL) {
+            advance();
+            guardian::io::File file(filename.value);
+            if (file.is_open()) {
+                std::string content = file.read_all();
+                emitString(content);
+                std::cout << "  read file: " << filename.value << " (" << content.size() << " bytes)\n";
+            } else {
+                emitString("");
+                std::cerr << "  Warning: Could not read file: " << filename.value << "\n";
+            }
+        }
+
+        match(TokenType::RPAREN);
+        match(TokenType::SEMICOLON);
+    }
+
     void pushValue(const Token& tok) {
         if (tok.type == TokenType::NUMBER) {
             if (tok.value.find('.') != std::string::npos) {
@@ -150,15 +174,13 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::ifstream file(argv[1]);
-    if (!file.is_open()) {
-        std::cerr << "Error: Could not open file\n";
+    guardian::io::File input_file(argv[1]);
+    if (!input_file.is_open()) {
+        std::cerr << "Error: Could not open file: " << argv[1] << "\n";
         return 1;
     }
 
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    std::string source = buffer.str();
+    std::string source = input_file.read_all();
 
     std::cout << "🔷 Axiom Compiler\n";
     std::cout << "━━━━━━━━━━━━━━━━━\n";

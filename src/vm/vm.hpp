@@ -4,42 +4,11 @@
 #include <memory>
 #include <cstdint>
 #include <unordered_map>
+#include "../memory/lazy.hpp"
+#include "opcodes.hpp"
 #include "../core/molecule.hpp"
 
 namespace guardian::vm {
-
-// ── Opcodes ──
-enum class Opcode : uint8_t {
-    HALT = 0xFF,
-    NOP = 0x00,
-    PUSH_INT = 0x10,
-    PUSH_FLOAT = 0x11,
-    PUSH_BOOL = 0x12,
-    PUSH_STRING = 0x13,
-    PUSH_NULL = 0x14,
-    POP = 0x15,
-    DUP = 0x16,
-    SWAP = 0x17,
-    ADD = 0x20,
-    SUB = 0x21,
-    MUL = 0x22,
-    DIV = 0x23,
-    EQ = 0x30,
-    NEQ = 0x31,
-    LT = 0x32,
-    GT = 0x33,
-    LTE = 0x34,
-    GTE = 0x35,
-    MOD = 0x24,
-    PRINT = 0x80,
-    NEWLINE = 0x83,
-    SPACE = 0x82,
-    STORE = 0x60,
-    LOAD = 0x61,
-    JMP = 0x50,
-    JMP_IF = 0x51,
-    JMP_IF_NOT = 0x52,
-};
 
 // ── Value ──
 struct Value {
@@ -143,7 +112,7 @@ public:
 private:
     std::vector<uint8_t> bytecode;
     size_t pc;
-    std::vector<Value> stack;
+    memory::LazyStack<Value> stack;
     bool running;
     std::shared_ptr<guardian::Molecule> main_molecule;
     
@@ -172,7 +141,15 @@ private:
     void handleJmp();
     void handleJmpIf();
     void handleJmpIfNot();
-    
+    void handleBitAnd();
+    void handleBitOr(); 
+    void handleBitXor();
+    void handleBitNot();
+    void handleBitShl();
+    void handleBitShr();
+ 
+
+
     // ── Helpers ──
     uint32_t readUint32();
     std::string readString();

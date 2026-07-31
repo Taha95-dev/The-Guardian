@@ -22,6 +22,7 @@
                 <a href="#format">Format</a>
                 <a href="#vm">VM</a>
                 <a href="#parser">Parser</a>
+                <a href="#io">File I/O</a>
                 <a href="#types">Types</a>
             </div>
 
@@ -413,6 +414,116 @@
                     </tr>
                 </table>
             </div>
+
+            <!-- ── FILE I/O ── -->
+            <h2 id="io">📁 File I/O Library</h2>
+
+            <h3>File</h3>
+            <p>Complete file I/O operations for reading and writing files.</p>
+
+            <div class="api-class">
+                <h4>Constructors</h4>
+                <table>
+                    <tr>
+                        <td><code>File()</code></td>
+                        <td>Create an empty file object</td>
+                    </tr>
+                    <tr>
+                        <td><code>File(const string& path)</code></td>
+                        <td>Create and open a file</td>
+                    </tr>
+                </table>
+
+                <h4>Methods</h4>
+                <table>
+                    <tr>
+                        <td><code>bool open(const string& path)</code></td>
+                        <td>Open a file</td>
+                    </tr>
+                    <tr>
+                        <td><code>void close()</code></td>
+                        <td>Close the file</td>
+                    </tr>
+                    <tr>
+                        <td><code>bool is_open()</code></td>
+                        <td>Check if file is open</td>
+                    </tr>
+                    <tr>
+                        <td><code>string read_all()</code></td>
+                        <td>Read entire file as string</td>
+                    </tr>
+                    <tr>
+                        <td><code>vector&lt;string&gt; read_lines()</code></td>
+                        <td>Read file line by line</td>
+                    </tr>
+                    <tr>
+                        <td><code>string read_line()</code></td>
+                        <td>Read a single line</td>
+                    </tr>
+                    <tr>
+                        <td><code>bool write(const string& content)</code></td>
+                        <td>Write content to file</td>
+                    </tr>
+                    <tr>
+                        <td><code>bool write_line(const string& line)</code></td>
+                        <td>Write a line to file</td>
+                    </tr>
+                    <tr>
+                        <td><code>bool append(const string& content)</code></td>
+                        <td>Append content to file</td>
+                    </tr>
+                    <tr>
+                        <td><code>size_t size()</code></td>
+                        <td>Get file size in bytes</td>
+                    </tr>
+                    <tr>
+                        <td><code>bool exists()</code></td>
+                        <td>Check if file exists</td>
+                    </tr>
+                    <tr>
+                        <td><code>string path()</code></td>
+                        <td>Get file path</td>
+                    </tr>
+                </table>
+
+                <h4>Static Methods</h4>
+                <table>
+                    <tr>
+                        <td><code>bool exists(const string& path)</code></td>
+                        <td>Check if file exists</td>
+                    </tr>
+                    <tr>
+                        <td><code>bool remove(const string& path)</code></td>
+                        <td>Delete a file</td>
+                    </tr>
+                    <tr>
+                        <td><code>bool rename(const string& old, const string& new)</code></td>
+                        <td>Rename/move a file</td>
+                    </tr>
+                </table>
+            </div>
+
+            <h3>File Example</h3>
+            <pre><code>#include &lt;guardian/io/file.hpp&gt;
+
+using namespace guardian::io;
+
+// Read a file
+File file("data.txt");
+if (file.is_open()) {
+    std::string content = file.read_all();
+    std::cout << content;
+}
+
+// Write a file
+File output("output.txt");
+output.write("Hello, Guardian!");
+
+// Read lines
+auto lines = file.read_lines();
+for (const auto& line : lines) {
+    std::cout << line << "\n";
+}</code></pre>
 
             <!-- ── TYPES ── -->
             <h2 id="types">🔷 Value Types</h2>

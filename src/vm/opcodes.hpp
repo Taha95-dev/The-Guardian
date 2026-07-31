@@ -117,6 +117,16 @@ enum class Opcode : uint8_t {
     STORE_ATOM = 0xB1,
     GET_ATOM = 0xB2,
     REMOVE_ATOM = 0xB3,
+
+    // ============================================
+    // BIT OPERATIONS (0xC0-0xCF)
+    // ============================================
+    BIT_AND = 0xC0,
+    BIT_OR = 0xC1,
+    BIT_XOR = 0xC2,
+    BIT_NOT = 0xC3,
+    BIT_SHL = 0xC4,  // Shift left
+    BIT_SHR = 0xC5,  // Shift right
 };
 
 // ============================================

@@ -90,6 +90,12 @@ The Guardian comes with an interactive playground where you can write and run Ax
 
 ---
 
+## 🧠 Lazy Allocation
+
+The Guardian uses **lazy allocation** to be memory-efficient. Memory is only allocated when needed.
+
+[Learn more about lazy allocation](lazy-allocation.md)
+
 ## 🚀 Quick Start
 
 ### Installation

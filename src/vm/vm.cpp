@@ -14,7 +14,7 @@ void VM::load(const std::vector<uint8_t>& code, size_t entry) {
     bytecode = code;
     pc = 0;
     running = true;
-    stack.clear();
+    stack.reset();  // LazyStack reset
 }
 
 void VM::run() {
@@ -26,7 +26,7 @@ void VM::run() {
 
 void VM::reset() {
     pc = 0;
-    stack.clear();
+    stack.reset();  // LazyStack reset
     running = false;
     main_molecule = std::make_shared<guardian::Molecule>();
 }
@@ -37,19 +37,17 @@ bool VM::isRunning() const {
 
 // ── Stack ──
 void VM::push(const Value& val) {
-    stack.push_back(val);
+    stack.push(val);
 }
 
 Value VM::pop() {
     if (stack.empty()) return Value();
-    Value val = stack.back();
-    stack.pop_back();
-    return val;
+    return stack.pop();
 }
 
 Value VM::peek() const {
     if (stack.empty()) return Value();
-    return stack.back();
+    return stack.get_top();  // Add this method to LazyStack
 }
 
 // ── Helpers ──
@@ -117,19 +115,26 @@ void VM::dispatch(uint8_t opcode) {
         case Opcode::DIV:       handleDiv(); break;
         case Opcode::MOD:       handleMod(); break;
         case Opcode::PRINT:     handlePrint(); break;
-        case Opcode::NEWLINE:   handleNewline(); break;
+        case Opcode::PRINTLN:   handlePrintln(); break;
         case Opcode::SPACE:     handleSpace(); break;
+        case Opcode::NEWLINE:   handleNewline(); break;
         case Opcode::STORE:     handleStore(); break;
         case Opcode::LOAD:      handleLoad(); break;
         case Opcode::JMP:       handleJmp(); break;
         case Opcode::JMP_IF:    handleJmpIf(); break;
         case Opcode::JMP_IF_NOT: handleJmpIfNot(); break;
-        case Opcode::EQ:    handleEq(); break;
-        case Opcode::NEQ:   handleNeq(); break;
-        case Opcode::LT:    handleLt(); break;
-        case Opcode::GT:    handleGt(); break;
-        case Opcode::LTE:   handleLte(); break;
-        case Opcode::GTE:   handleGte(); break;
+        case Opcode::BIT_AND:   handleBitAnd(); break;
+        case Opcode::BIT_OR:    handleBitOr(); break;
+        case Opcode::BIT_XOR:   handleBitXor(); break;
+        case Opcode::BIT_NOT:   handleBitNot(); break;
+        case Opcode::BIT_SHL:   handleBitShl(); break;
+        case Opcode::BIT_SHR:   handleBitShr(); break;
+        case Opcode::EQ:        handleEq(); break;
+        case Opcode::NEQ:       handleNeq(); break;
+        case Opcode::LT:        handleLt(); break;
+        case Opcode::GT:        handleGt(); break;
+        case Opcode::LTE:       handleLte(); break;
+        case Opcode::GTE:       handleGte(); break;
         default:
             std::cerr << "ERROR: Unknown opcode 0x" << std::hex << (int)opcode << std::dec << "\n";
             running = false;
@@ -154,127 +159,6 @@ void VM::handlePushFloat() {
     }
 }
 
-// ── Comparison Handlers ──
-void VM::handleEq() {
-    if (stack.size() < 2) return;
-    Value b = pop();
-    Value a = pop();
-    
-    bool result = false;
-    if (a.is_quark && b.is_quark) {
-        if (a.quark_data.type == Value::QuarkData::INT && 
-            b.quark_data.type == Value::QuarkData::INT) {
-            result = (a.quark_data.int_val == b.quark_data.int_val);
-        } else if (a.quark_data.type == Value::QuarkData::FLOAT || 
-                   b.quark_data.type == Value::QuarkData::FLOAT) {
-            result = (a.quark_data.float_val == b.quark_data.float_val);
-        } else if (a.quark_data.type == Value::QuarkData::STRING && 
-                   b.quark_data.type == Value::QuarkData::STRING) {
-            result = (a.quark_data.string_val == b.quark_data.string_val);
-        } else if (a.quark_data.type == Value::QuarkData::BOOL && 
-                   b.quark_data.type == Value::QuarkData::BOOL) {
-            result = (a.quark_data.bool_val == b.quark_data.bool_val);
-        }
-    }
-    push(Value(result));
-}
-
-void VM::handleNeq() {
-    if (stack.size() < 2) return;
-    Value b = pop();
-    Value a = pop();
-    
-    bool result = true;
-    if (a.is_quark && b.is_quark) {
-        if (a.quark_data.type == Value::QuarkData::INT && 
-            b.quark_data.type == Value::QuarkData::INT) {
-            result = (a.quark_data.int_val != b.quark_data.int_val);
-        } else if (a.quark_data.type == Value::QuarkData::FLOAT || 
-                   b.quark_data.type == Value::QuarkData::FLOAT) {
-            result = (a.quark_data.float_val != b.quark_data.float_val);
-        } else if (a.quark_data.type == Value::QuarkData::STRING && 
-                   b.quark_data.type == Value::QuarkData::STRING) {
-            result = (a.quark_data.string_val != b.quark_data.string_val);
-        } else if (a.quark_data.type == Value::QuarkData::BOOL && 
-                   b.quark_data.type == Value::QuarkData::BOOL) {
-            result = (a.quark_data.bool_val != b.quark_data.bool_val);
-        }
-    }
-    push(Value(result));
-}
-
-void VM::handleLt() {
-    if (stack.size() < 2) return;
-    Value b = pop();
-    Value a = pop();
-    
-    bool result = false;
-    if (a.is_quark && b.is_quark) {
-        if (a.quark_data.type == Value::QuarkData::INT && 
-            b.quark_data.type == Value::QuarkData::INT) {
-            result = (a.quark_data.int_val < b.quark_data.int_val);
-        } else if (a.quark_data.type == Value::QuarkData::FLOAT || 
-                   b.quark_data.type == Value::QuarkData::FLOAT) {
-            result = (a.quark_data.float_val < b.quark_data.float_val);
-        }
-    }
-    push(Value(result));
-}
-
-void VM::handleGt() {
-    if (stack.size() < 2) return;
-    Value b = pop();
-    Value a = pop();
-    
-    bool result = false;
-    if (a.is_quark && b.is_quark) {
-        if (a.quark_data.type == Value::QuarkData::INT && 
-            b.quark_data.type == Value::QuarkData::INT) {
-            result = (a.quark_data.int_val > b.quark_data.int_val);
-        } else if (a.quark_data.type == Value::QuarkData::FLOAT || 
-                   b.quark_data.type == Value::QuarkData::FLOAT) {
-            result = (a.quark_data.float_val > b.quark_data.float_val);
-        }
-    }
-    push(Value(result));
-}
-
-void VM::handleLte() {
-    if (stack.size() < 2) return;
-    Value b = pop();
-    Value a = pop();
-    
-    bool result = false;
-    if (a.is_quark && b.is_quark) {
-        if (a.quark_data.type == Value::QuarkData::INT && 
-            b.quark_data.type == Value::QuarkData::INT) {
-            result = (a.quark_data.int_val <= b.quark_data.int_val);
-        } else if (a.quark_data.type == Value::QuarkData::FLOAT || 
-                   b.quark_data.type == Value::QuarkData::FLOAT) {
-            result = (a.quark_data.float_val <= b.quark_data.float_val);
-        }
-    }
-    push(Value(result));
-}
-
-void VM::handleGte() {
-    if (stack.size() < 2) return;
-    Value b = pop();
-    Value a = pop();
-    
-    bool result = false;
-    if (a.is_quark && b.is_quark) {
-        if (a.quark_data.type == Value::QuarkData::INT && 
-            b.quark_data.type == Value::QuarkData::INT) {
-            result = (a.quark_data.int_val >= b.quark_data.int_val);
-        } else if (a.quark_data.type == Value::QuarkData::FLOAT || 
-                   b.quark_data.type == Value::QuarkData::FLOAT) {
-            result = (a.quark_data.float_val >= b.quark_data.float_val);
-        }
-    }
-    push(Value(result));
-}
-
 void VM::handlePushBool() {
     if (pc < bytecode.size()) {
         push(Value(bytecode[pc++] != 0));
@@ -291,11 +175,11 @@ void VM::handlePushNull() {
 }
 
 void VM::handlePop() {
-    if (!stack.empty()) stack.pop_back();
+    if (!stack.empty()) pop();
 }
 
 void VM::handleDup() {
-    if (!stack.empty()) push(stack.back());
+    if (!stack.empty()) push(stack.get_top());
 }
 
 void VM::handleSwap() {
@@ -307,6 +191,7 @@ void VM::handleSwap() {
     }
 }
 
+// ── Arithmetic ──
 void VM::handleAdd() {
     if (stack.size() < 2) return;
     Value b = pop();
@@ -354,6 +239,7 @@ void VM::handleMod() {
     if (b != 0) push(Value(a % b));
 }
 
+// ── Print ──
 void VM::handlePrint() {
     if (stack.empty()) return;
     Value val = pop();
@@ -377,10 +263,10 @@ void VM::handleNewline() {
     std::cout.flush();
 }
 
+// ── Variables ──
 void VM::handleStore() {
     uint32_t idx = readUint32();
     Value val = pop();
-    // Store in molecule (simplified)
     main_molecule->add_string("var_" + std::to_string(idx), val.to_string());
 }
 
@@ -394,6 +280,7 @@ void VM::handleLoad() {
     }
 }
 
+// ── Control Flow ──
 void VM::handleJmp() {
     int32_t offset = static_cast<int32_t>(readUint32());
     pc = static_cast<size_t>(static_cast<int>(pc) + offset - 4);
@@ -415,6 +302,147 @@ void VM::handleJmpIfNot() {
     } else {
         pc += 4;
     }
+}
+
+// ── Bit Operations ──
+void VM::handleBitAnd() {
+    if (stack.size() < 2) return;
+    int b = popInt();
+    int a = popInt();
+    push(Value(a & b));
+}
+
+void VM::handleBitOr() {
+    if (stack.size() < 2) return;
+    int b = popInt();
+    int a = popInt();
+    push(Value(a | b));
+}
+
+void VM::handleBitXor() {
+    if (stack.size() < 2) return;
+    int b = popInt();
+    int a = popInt();
+    push(Value(a ^ b));
+}
+
+void VM::handleBitNot() {
+    if (stack.size() < 1) return;
+    int a = popInt();
+    push(Value(~a));
+}
+
+void VM::handleBitShl() {
+    if (stack.size() < 2) return;
+    int b = popInt();
+    int a = popInt();
+    push(Value(a << b));
+}
+
+void VM::handleBitShr() {
+    if (stack.size() < 2) return;
+    int b = popInt();
+    int a = popInt();
+    push(Value(a >> b));
+}
+
+// ── Comparisons ──
+void VM::handleEq() {
+    if (stack.size() < 2) return;
+    Value b = pop();
+    Value a = pop();
+    bool result = false;
+    if (a.is_quark && b.is_quark) {
+        if (a.quark_data.type == Value::QuarkData::INT && b.quark_data.type == Value::QuarkData::INT) {
+            result = (a.quark_data.int_val == b.quark_data.int_val);
+        } else if (a.quark_data.type == Value::QuarkData::FLOAT || b.quark_data.type == Value::QuarkData::FLOAT) {
+            result = (a.quark_data.float_val == b.quark_data.float_val);
+        } else if (a.quark_data.type == Value::QuarkData::STRING && b.quark_data.type == Value::QuarkData::STRING) {
+            result = (a.quark_data.string_val == b.quark_data.string_val);
+        } else if (a.quark_data.type == Value::QuarkData::BOOL && b.quark_data.type == Value::QuarkData::BOOL) {
+            result = (a.quark_data.bool_val == b.quark_data.bool_val);
+        }
+    }
+    push(Value(result));
+}
+
+void VM::handleNeq() {
+    if (stack.size() < 2) return;
+    Value b = pop();
+    Value a = pop();
+    bool result = true;
+    if (a.is_quark && b.is_quark) {
+        if (a.quark_data.type == Value::QuarkData::INT && b.quark_data.type == Value::QuarkData::INT) {
+            result = (a.quark_data.int_val != b.quark_data.int_val);
+        } else if (a.quark_data.type == Value::QuarkData::FLOAT || b.quark_data.type == Value::QuarkData::FLOAT) {
+            result = (a.quark_data.float_val != b.quark_data.float_val);
+        } else if (a.quark_data.type == Value::QuarkData::STRING && b.quark_data.type == Value::QuarkData::STRING) {
+            result = (a.quark_data.string_val != b.quark_data.string_val);
+        } else if (a.quark_data.type == Value::QuarkData::BOOL && b.quark_data.type == Value::QuarkData::BOOL) {
+            result = (a.quark_data.bool_val != b.quark_data.bool_val);
+        }
+    }
+    push(Value(result));
+}
+
+void VM::handleLt() {
+    if (stack.size() < 2) return;
+    Value b = pop();
+    Value a = pop();
+    bool result = false;
+    if (a.is_quark && b.is_quark) {
+        if (a.quark_data.type == Value::QuarkData::INT && b.quark_data.type == Value::QuarkData::INT) {
+            result = (a.quark_data.int_val < b.quark_data.int_val);
+        } else if (a.quark_data.type == Value::QuarkData::FLOAT || b.quark_data.type == Value::QuarkData::FLOAT) {
+            result = (a.quark_data.float_val < b.quark_data.float_val);
+        }
+    }
+    push(Value(result));
+}
+
+void VM::handleGt() {
+    if (stack.size() < 2) return;
+    Value b = pop();
+    Value a = pop();
+    bool result = false;
+    if (a.is_quark && b.is_quark) {
+        if (a.quark_data.type == Value::QuarkData::INT && b.quark_data.type == Value::QuarkData::INT) {
+            result = (a.quark_data.int_val > b.quark_data.int_val);
+        } else if (a.quark_data.type == Value::QuarkData::FLOAT || b.quark_data.type == Value::QuarkData::FLOAT) {
+            result = (a.quark_data.float_val > b.quark_data.float_val);
+        }
+    }
+    push(Value(result));
+}
+
+void VM::handleLte() {
+    if (stack.size() < 2) return;
+    Value b = pop();
+    Value a = pop();
+    bool result = false;
+    if (a.is_quark && b.is_quark) {
+        if (a.quark_data.type == Value::QuarkData::INT && b.quark_data.type == Value::QuarkData::INT) {
+            result = (a.quark_data.int_val <= b.quark_data.int_val);
+        } else if (a.quark_data.type == Value::QuarkData::FLOAT || b.quark_data.type == Value::QuarkData::FLOAT) {
+            result = (a.quark_data.float_val <= b.quark_data.float_val);
+        }
+    }
+    push(Value(result));
+}
+
+void VM::handleGte() {
+    if (stack.size() < 2) return;
+    Value b = pop();
+    Value a = pop();
+    bool result = false;
+    if (a.is_quark && b.is_quark) {
+        if (a.quark_data.type == Value::QuarkData::INT && b.quark_data.type == Value::QuarkData::INT) {
+            result = (a.quark_data.int_val >= b.quark_data.int_val);
+        } else if (a.quark_data.type == Value::QuarkData::FLOAT || b.quark_data.type == Value::QuarkData::FLOAT) {
+            result = (a.quark_data.float_val >= b.quark_data.float_val);
+        }
+    }
+    push(Value(result));
 }
 
 } // namespace guardian::vm

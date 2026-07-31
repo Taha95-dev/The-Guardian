@@ -11,7 +11,7 @@ namespace axiom {
 // ── Token Types ──
 enum class TokenType {
     // Keywords
-    LET, PRINT, PRINTLN, IF, ELSE, WHILE, FOR, FUNC, RETURN,
+    LET, PRINT, PRINTLN, IF, ELSE, WHILE, FOR, FUNC, RETURN, READ,
     // Types
     INT, FLOAT, STRING, BOOL, CHAR,
     // Values
@@ -47,6 +47,7 @@ struct Token {
             {TokenType::FOR, "FOR"},
             {TokenType::FUNC, "FUNC"},
             {TokenType::RETURN, "RETURN"},
+            {TokenType::READ, "READ"},
             {TokenType::INT, "INT"},
             {TokenType::FLOAT, "FLOAT"},
             {TokenType::STRING, "STRING"},
@@ -177,6 +178,7 @@ private:
         if (ident == "for") return Token(TokenType::FOR, ident, line, column);
         if (ident == "func") return Token(TokenType::FUNC, ident, line, column);
         if (ident == "return") return Token(TokenType::RETURN, ident, line, column);
+        if (ident == "read") return Token(TokenType::READ, ident, line, column);
         if (ident == "int") return Token(TokenType::INT, ident, line, column);
         if (ident == "float") return Token(TokenType::FLOAT, ident, line, column);
         if (ident == "string") return Token(TokenType::STRING, ident, line, column);

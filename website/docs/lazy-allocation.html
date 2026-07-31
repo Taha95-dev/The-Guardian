@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lazy Allocation — The Guardian</title>
+    <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+    <div class="container">
+        <header class="docs-header">
+            <a href="index.html" class="back-link">← Back to Docs</a>
+            <h1>🧠 Lazy Allocation</h1>
+            <p>Memory efficiency, only when needed</p>
+        </header>
+
+        <div class="docs-content">
+            <h2>Why Lazy Allocation?</h2>
+            <p>The Guardian uses <strong>lazy allocation</strong> to be memory-efficient. Memory is only allocated when it's actually used.</p>
+
+            <h3>Without Lazy Allocation</h3>
+            <ul>
+                <li>❌ Stack allocated at VM creation</li>
+                <li>❌ Memory wasted for empty VMs</li>
+                <li>❌ Slower startup</li>
+            </ul>
+
+            <h3>With Lazy Allocation</h3>
+            <ul>
+                <li>✅ Stack allocated only on first use</li>
+                <li>✅ Memory used only when needed</li>
+                <li>✅ Faster startup</li>
+            </ul>
+
+            <h2>Example</h2>
+            <pre><code>#include &lt;guardian/memory/lazy.hpp&gt;
+
+using namespace guardian::memory;
+
+LazyStack&lt;int&gt; stack;
+
+// Before: No memory allocated
+std::cout &lt;&lt; stack.size(); // 0
+
+// After first push: Memory is allocated
+stack.push(1); // 🔷 LazyStack allocated
+stack.push(2);
+stack.push(3);
+
+std::cout &lt;&lt; stack.size(); // 3</code></pre>
+
+            <h2>Performance Benefits</h2>
+            <table>
+                <tr>
+                    <th>Operation</th>
+                    <th>Without Lazy</th>
+                    <th>With Lazy</th>
+                </tr>
+                <tr>
+                    <td>Empty VM</td>
+                    <td>~24 bytes</td>
+                    <td><strong>0 bytes</strong></td>
+                </tr>
+                <tr>
+                    <td>Startup</td>
+                    <td>Allocates stack</td>
+                    <td><strong>No allocation</strong></td>
+                </tr>
+            </table>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 The Guardian. Built by a 13-year-old developer.</p>
+        </footer>
+    </div>
+</body>
+</html>

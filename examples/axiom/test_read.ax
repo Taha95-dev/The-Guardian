@@ -1,0 +1,2 @@
+let content = read("data.txt")
+println(content)

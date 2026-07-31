@@ -20,6 +20,7 @@ option(BUILD_EXAMPLES "Build examples" OFF)
 set(CORE_SOURCES
     src/core/atom.cpp
     src/core/molecule.cpp
+    src/io/file.cpp
     src/license/license.cpp
 )
 
