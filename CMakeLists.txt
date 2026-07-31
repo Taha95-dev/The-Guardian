@@ -112,6 +112,12 @@ target_link_libraries(guardian_vm
 target_compile_features(guardian_vm PUBLIC cxx_std_17)
 
 # ============================================
+# LAZY ALLOCATION HEADERS (Added)
+# ============================================
+# The lazy.hpp is in src/memory, and we need to make it available
+# It's already included via target_include_directories
+
+# ============================================
 # MAIN EXECUTABLE
 # ============================================
 set(MAIN_SOURCES
@@ -154,8 +160,21 @@ if(BUILD_TESTS)
     
     target_compile_features(test_runner PUBLIC cxx_std_17)
     
+    # Add lazy allocation test (NEW)
+    add_executable(test_lazy_allocator
+        tests/test_lazy_allocator.cpp
+    )
+    
+    target_link_libraries(test_lazy_allocator
+        guardian_core
+        guardian_vm
+    )
+    
+    target_compile_features(test_lazy_allocator PUBLIC cxx_std_17)
+    
     # Add tests
     add_test(NAME test_runner COMMAND test_runner)
+    add_test(NAME test_lazy_allocator COMMAND test_lazy_allocator)
 endif()
 
 # ============================================
@@ -171,10 +190,21 @@ install(TARGETS guardianc
     RUNTIME DESTINATION bin
 )
 
+# Install headers
 install(FILES
     src/vm/codegen.hpp
     src/vm/opcodes.hpp
     DESTINATION include/guardian/vm
+)
+
+install(FILES
+    src/memory/lazy.hpp
+    DESTINATION include/guardian/memory
+)
+
+install(FILES
+    src/io/file.hpp
+    DESTINATION include/guardian/io
 )
 
 install(DIRECTORY include/guardian

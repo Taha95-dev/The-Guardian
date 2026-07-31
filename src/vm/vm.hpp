@@ -22,7 +22,7 @@ struct Value {
             double float_val;
             bool bool_val;
         };
-        std::string string_val;  // Outside union!
+        std::string string_val;
         
         QuarkData() : type(NONE), int_val(0) {}
         QuarkData(int v) : type(INT), int_val(v) {}
@@ -50,6 +50,7 @@ struct Value {
     Value(double v) : is_quark(true), is_atom(false), quark_data(v) {}
     Value(bool v) : is_quark(true), is_atom(false), quark_data(v) {}
     Value(const std::string& v) : is_quark(true), is_atom(false), quark_data(v) {}
+    Value(const char* v) : is_quark(true), is_atom(false), quark_data(std::string(v)) {}
     Value(const std::vector<Value>& arr) : is_quark(false), is_atom(true), atom_data(std::make_shared<AtomData>(arr)) {}
     Value(const std::unordered_map<std::string, Value>& d) : is_quark(false), is_atom(true), atom_data(std::make_shared<AtomData>(d)) {}
     Value(std::shared_ptr<guardian::Molecule> m) : is_quark(false), is_atom(true), atom_data(std::make_shared<AtomData>(m)) {}
@@ -147,8 +148,6 @@ private:
     void handleBitNot();
     void handleBitShl();
     void handleBitShr();
- 
-
 
     // ── Helpers ──
     uint32_t readUint32();
